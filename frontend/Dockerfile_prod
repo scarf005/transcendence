@@ -1,0 +1,12 @@
+FROM node:lts-alpine3.15
+
+RUN apk add nginx
+
+COPY nginx.conf /etc/nginx/http.d/app.conf
+
+COPY app /app
+WORKDIR /app
+
+RUN npm install && npm run build
+
+ENTRYPOINT [ "nginx",  "-g", "daemon off;" ]
