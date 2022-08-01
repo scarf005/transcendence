@@ -8,7 +8,7 @@ on:
 
 env:
   PROJECT_ID: 1
-  triage: 🗃Triage
+  triage: Triage
   todo: Todo
   in_progress: In progress
   done: Done
