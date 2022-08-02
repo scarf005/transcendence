@@ -1,0 +1,3 @@
+extends: "@scarf005/eslint-config-transcendence"
+overrides:
+  - files: ["src/**.*.ts"]

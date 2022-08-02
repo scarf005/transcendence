@@ -39,5 +39,10 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  }
+  },
+  "devDependencies": {
+    "@scarf005/eslint-config-transcendence": "^1.0.2",
+    "@scarf005/prettier-config-transcendence": "^1.0.1"
+  },
+  "prettier": "@scarf005/prettier-config-transcendence"
 }
