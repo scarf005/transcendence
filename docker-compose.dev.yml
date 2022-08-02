@@ -4,7 +4,7 @@ services:
   frontend:
     build:
       context: frontend
-      dockerfile: Dockerfile_dev
+      dockerfile: Dockerfile.dev
     volumes:
       - "./frontend/app:/app"
     expose:
@@ -25,7 +25,7 @@ services:
   backend:
     build:
       context: backend
-      dockerfile: Dockerfile_dev
+      dockerfile: Dockerfile.dev
     volumes:
       - "./backend/app:/app"
     expose:
