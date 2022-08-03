@@ -10,11 +10,18 @@
     "@types/node": "^16.11.45",
     "@types/react": "^18.0.15",
     "@types/react-dom": "^18.0.6",
+    "@typescript-eslint/eslint-plugin": ">=5.31.0",
+    "@typescript-eslint/parser": ">=5.31.0",
+    "eslint": ">=8.20.0",
+    "eslint-plugin-prettier": ">=4.2.1",
+    "eslint-plugin-react": ">=7.30.1",
+    "prettier": "^2.7.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-scripts": "5.0.1",
-    "typescript": "^4.7.4",
-    "web-vitals": "^2.1.4"
+    "typescript": ">=4.7.4",
+    "web-vitals": "^2.1.4",
+    "yaml": "^2.1.1"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -39,5 +46,10 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  }
+  },
+  "devDependencies": {
+    "@scarf005/eslint-config-transcendence": "1.0.4",
+    "@scarf005/prettier-config-transcendence": ">=0.0.0"
+  },
+  "prettier": "@scarf005/prettier-config-transcendence"
 }
