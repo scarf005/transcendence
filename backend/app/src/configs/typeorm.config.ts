@@ -6,7 +6,7 @@ export const typeORMConfig: TypeOrmModuleOptions = {
   host: 'database',
   port: 5432,
   username: 'transcendence',
-  password: 'transcendence',
+  password: process.env.DB_PASSWORD,
   database: 'transcendence',
   entities: [User],
   synchronize: true,
