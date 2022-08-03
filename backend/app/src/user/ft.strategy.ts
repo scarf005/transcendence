@@ -6,9 +6,9 @@ import { Strategy } from 'passport-42'
 export class FtStrategy extends PassportStrategy(Strategy, 'ft') {
   constructor() {
     super({
-      clientID: '',
-      clientSecret: '',
-      callbackURL: '',
+      clientID: process.env.FT_CLIENT_ID,
+      clientSecret: process.env.FT_CLIENT_SECRET,
+      callbackURL: 'http://localhost:3000/api/auth/ft/callback',
       scope: ['public'],
     })
   }
