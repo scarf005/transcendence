@@ -4,7 +4,7 @@ services:
   frontend:
     build:
       context: frontend
-      dockerfile: Dockerfile_prod
+      dockerfile: Dockerfile.prod
     expose:
       - 3000
     networks:
@@ -25,7 +25,7 @@ services:
   backend:
     build:
       context: backend
-      dockerfile: Dockerfile_prod
+      dockerfile: Dockerfile.prod
     expose:
       - 3000
     networks:
@@ -33,7 +33,9 @@ services:
     restart: always
 
   database:
-    image: "postgres:alpine3.15"
+    build:
+      context: db
+      dockerfile: Dockerfile
     expose:
       - 5432
     volumes:
