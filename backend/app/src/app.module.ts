@@ -1,9 +1,14 @@
 import { Module } from '@nestjs/common'
 import { AppController } from './app.controller'
 import { AppService } from './app.service'
+import { PongModule } from './pong/pong.module';
 
 @Module({
-  imports: [TypeOrmModule.forRoot(typeORMConfig), UserModule],
+  imports: [
+    TypeOrmModule.forRoot(typeORMConfig),
+    UserModule,
+    PongModule
+  ],
   controllers: [AppController],
   providers: [AppService],
 })
