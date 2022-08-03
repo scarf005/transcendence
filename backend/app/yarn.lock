@@ -745,9 +745,9 @@
     node-fetch "^2.6.1"
 
 "@scarf005/eslint-config-transcendence@^1.0.2":
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/@scarf005/eslint-config-transcendence/-/eslint-config-transcendence-1.0.2.tgz#779752684aeb762a46d2949cef96faa289508394"
-  integrity sha512-AH3grMmtl6ipzwLAvYgTk0uUh9O2funshCf0ENf+7DpE7Pamn9QH759liPz3j2o3O5w5ubCETYlb2xtmsjrOlw==
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/@scarf005/eslint-config-transcendence/-/eslint-config-transcendence-1.0.4.tgz#93b8efbc735745c6448d46f28caa182a2d11e92f"
+  integrity sha512-yTtbWVEDmSsB7jnKneYLGZFwiIkQwWbrDjOTKCTsIT+C4eiMpByGG85cdRqLxNS+tcSOF09Z8Gow7oJcFw5S9g==
 
 "@scarf005/prettier-config-transcendence@^1.0.1":
   version "1.0.1"
