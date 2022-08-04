@@ -1,56 +1,68 @@
-import { ConnectedSocket, MessageBody, SubscribeMessage, WebSocketGateway, OnGatewayDisconnect } from '@nestjs/websockets';
-import { Socket } from 'socket.io';
-import { PongMatchType, PongMode } from './constants';
-import { MatchService } from './match.service';
-import { PongService } from './pong.service';
+import {
+  ConnectedSocket,
+  MessageBody,
+  SubscribeMessage,
+  WebSocketGateway,
+  OnGatewayDisconnect,
+} from '@nestjs/websockets'
+import { Socket } from 'socket.io'
+import { PongMatchType, PongMode } from './constants'
+import { MatchService } from './match.service'
+import { PongService } from './pong.service'
 
 export type MatchMessage = {
   uid: number
-  mode: PongMode,
+  mode: PongMode
   matchType: PongMatchType
 }
 
 type MatchData = {
-  uid: number,
-  socket: Socket,
+  uid: number
+  socket: Socket
 }
 
 type PongKeyEvent = {
-  key: 'up' | 'down';
-  isDown: boolean;
+  key: 'up' | 'down'
+  isDown: boolean
 }
 
-@WebSocketGateway(3001, { namespace: 'api/pong/match', cors: [ '*' ] })
+@WebSocketGateway({ namespace: 'api/pong/match', cors: ['*'] })
 export class MatchGateWay implements OnGatewayDisconnect {
-  
   constructor(
     private matchService: MatchService,
-    private pongService: PongService
+    private pongService: PongService,
   ) {}
 
   @SubscribeMessage('match')
-  handleMessage(@MessageBody() message: MatchMessage, @ConnectedSocket() client: Socket) {
+  handleMessage(
+    @MessageBody() message: MatchMessage,
+    @ConnectedSocket() client: Socket,
+  ) {
     console.log(`connected: ${message.uid}`)
-    let match: {left: MatchData, right: MatchData} | null = null
+    let match: { left: MatchData; right: MatchData } | null = null
     if (message.matchType === 'quick') {
-      match = this.matchService.matchQuick({uid: message.uid, socket: client})
+      match = this.matchService.matchQuick({ uid: message.uid, socket: client })
     } else {
-      match = this.matchService.matchRanked({uid: message.uid, socket: client})
+      match = this.matchService.matchRanked({
+        uid: message.uid,
+        socket: client,
+      })
     }
-    if (match) { 
+    if (match) {
       this.pongService.startGame(message.mode, match)
     }
   }
 
   @SubscribeMessage('movePaddle')
-  handleMovePaddle(@MessageBody() message: PongKeyEvent, @ConnectedSocket() client: Socket) {
+  handleMovePaddle(
+    @MessageBody() message: PongKeyEvent,
+    @ConnectedSocket() client: Socket,
+  ) {
     const { game, isLeftSide } = this.pongService.getGameBySocketId(client.id)
-    
+
     let direction: 'up' | 'down' | 'stop'
-    if (!message.isDown)
-      direction = 'stop'
-    else
-      direction = message.key
+    if (!message.isDown) direction = 'stop'
+    else direction = message.key
 
     game.changePaddleVelocity(isLeftSide ? 'left' : 'right', direction)
   }
