@@ -1,4 +1,4 @@
 export const jwtConstants = {
-  secret: 'secret',
-  expires_in: '600s',
+  secret: process.env.JWT_SECRET,
+  expires_in: '1d',
 }
