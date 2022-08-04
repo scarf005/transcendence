@@ -1,24 +1,14 @@
-import React from 'react'
-import logo from './logo.svg'
-import './App.css'
+import { Grid, Typography } from '@mui/material'
+import { Profile } from './components/Profile'
+import { mockUser } from './mock/mockUser'
 
-function App() {
+export function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Gredsfngs <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div>
+      <Typography>Hello World!</Typography>
+      <Grid>
+        <Profile user={mockUser} />
+      </Grid>
     </div>
   )
 }
