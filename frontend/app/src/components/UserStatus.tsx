@@ -1,4 +1,4 @@
-import { Badge, BadgeProps, Tooltip } from '@mui/material'
+import { Avatar, Badge, BadgeProps, Tooltip } from '@mui/material'
 import { UserStatusType } from '../data/User.dto'
 import VideogameAssetIcon from '@mui/icons-material/VideogameAsset'
 
@@ -18,21 +18,23 @@ const getData = (
       }
   }
 }
-
 interface UserStatusProps {
   status: UserStatusType
+  avatar?: JSX.Element
 }
-export const UserStatus = ({ status }: UserStatusProps) => {
+export const UserStatus = ({ status, avatar }: UserStatusProps) => {
   const { color, badgeContent, tooltip } = getData(status)
 
   return (
-    <Tooltip title={tooltip}>
+    <Tooltip title={tooltip} placement="right-end">
       <Badge
         color={color}
         badgeContent={badgeContent}
         overlap="circular"
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-      />
+      >
+        {avatar}
+      </Badge>
     </Tooltip>
   )
 }
