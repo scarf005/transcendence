@@ -1,8 +1,7 @@
 import React from 'react'
-// import './App.css'
 import Login from './Login'
 
-function App() {
+export function App() {
   return (
     <>
       <Login />

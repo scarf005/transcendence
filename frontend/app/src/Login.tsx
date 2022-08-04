@@ -5,6 +5,8 @@ import styled from 'styled-components'
 import Nav from './Nav'
 import FriendView from './FriendView'
 import UserSet from './UserSet'
+import { Profile } from './components/Profile'
+import { mockUser } from './mock/mockUser'
 
 const Loged = () => {
   const [state, setState] = useState(false)
@@ -27,6 +29,10 @@ const Loged = () => {
             <Route path="/friend" element={<FriendView />}>
               ddd
             </Route>
+            <Route
+              path="/Profile"
+              element={<Profile user={mockUser} />}
+            ></Route>
           </Routes>
         </>
       ) : (
