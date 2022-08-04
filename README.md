@@ -1,12 +1,12 @@
 # transcendence
 즐~~~~~거운 웹서비스
 
-<br>fronend, backend 디렉토리에서 npm install
-
 <br>.env.sample 참고해서 같은 위치에 .env파일 작성해주세요
 
 개발모드:
-`docker-compose -f docker-compose-dev.yml up --build`
+`./dc.sh dev up --build`
 
 프로덕션 모드:
-`docker-compose -f docker-compose-prod.yml up --build`
+`./dc.sh prod up --build`
+
+dc.sh에서 npm install이 되어있지 않을 때 자동으로 install하는 로직이 들어있지만, 잘 작동하지 않는 경우 install.sh를 실행해주세요

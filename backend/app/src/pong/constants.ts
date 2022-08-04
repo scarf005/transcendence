@@ -15,7 +15,6 @@ export const MEDIUM_SPEED = 150
 export const HARD_SPEED = 200
 export const PADDLE_SPEED = 300
 
-
 export const MAX_SHOOT_RIGHT_UP_DEGREE = 70
 
 // 60 UPS

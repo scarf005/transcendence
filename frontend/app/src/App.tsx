@@ -1,15 +1,11 @@
-import { Grid, Typography } from '@mui/material'
-import { Profile } from './components/Profile'
-import { mockUser } from './mock/mockUser'
+import React from 'react'
+import Login from './Login'
 
 export function App() {
   return (
-    <div>
-      <Typography>Hello World!</Typography>
-      <Grid>
-        <Profile user={mockUser} />
-      </Grid>
-    </div>
+    <>
+      <Login />
+    </>
   )
 }
 

@@ -40,7 +40,7 @@ services:
       - 3000
 
     depends_on:
-      - db
+      - database
 
     networks:
       - internal
