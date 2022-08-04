@@ -1,4 +1,4 @@
-import { Avatar, Badge, BadgeProps, Tooltip } from '@mui/material'
+import { Badge, BadgeProps, Tooltip } from '@mui/material'
 import { UserStatusType } from '../data/User.dto'
 import VideogameAssetIcon from '@mui/icons-material/VideogameAsset'
 
