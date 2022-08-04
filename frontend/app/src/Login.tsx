@@ -45,8 +45,8 @@ const Div = styled.div`
 
 const Login = () => {
   const [searchParams, setSearchParams] = useSearchParams()
-  const code = searchParams.get('code')
-  // const code = "123"
+  //   const code = searchParams.get('code')
+  const code = '123'
   const redirectUrl =
     'https://api.intra.42.fr/oauth/authorize?client_id=49de17de65492eaafa8ad61d5baa32ca118adc3e998c0c011956860f154a2f3d&redirect_uri=http%3A%2F%2Flocalhost%3A3000&response_type=code'
   return (
