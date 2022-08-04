@@ -41,6 +41,7 @@ services:
 
     depends_on:
       - database
+
     networks:
       - internal
 
