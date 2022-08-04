@@ -313,6 +313,7 @@ export class PongService {
   ): number {
     const game = new Pong(difficulty)
 
+    game.start()
     const gameId = this.nextId
 
     const runningGame = {

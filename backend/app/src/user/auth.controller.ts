@@ -1,4 +1,4 @@
-import { Controller, Get, UseGuards, Req } from '@nestjs/common'
+import { Controller, Get, UseGuards, Query, Req } from '@nestjs/common'
 import { AuthGuard } from '@nestjs/passport'
 import { UserService } from 'src/user/user.service'
 
@@ -10,6 +10,15 @@ export class AuthController {
   @UseGuards(AuthGuard('ft'))
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   async auth() {}
+
+  @Get('create')
+  async createUser(@Query() query: any) {
+    const user = await this.userService.create(
+      Math.floor(Math.random() * 10000).toString(),
+      query.username,
+    )
+    return this.userService.issueToken(user)
+  }
 
   @Get('ft/callback')
   @UseGuards(AuthGuard('ft'))
