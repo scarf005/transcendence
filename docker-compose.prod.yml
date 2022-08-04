@@ -31,9 +31,16 @@ services:
     networks:
       - internal
     restart: always
+    environment:
+      DB_PASSWORD: ${DB_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      FT_CLIENT_ID: ${FT_CLIENT_ID}
+      FT_CLIENT_SECRET: ${FT_CLIENT_SECRET}
 
   database:
-    image: "postgres:alpine3.15"
+    build:
+      context: db
+      dockerfile: Dockerfile
     expose:
       - 5432
     volumes:
@@ -41,6 +48,10 @@ services:
     networks:
       - internal
     restart: always
+
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_PASSWORD: ${DB_PASSWORD}
 
 volumes:
   database:
