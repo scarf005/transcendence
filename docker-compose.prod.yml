@@ -31,6 +31,11 @@ services:
     networks:
       - internal
     restart: always
+    environment:
+      DB_PASSWORD: ${DB_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      FT_CLIENT_ID: ${FT_CLIENT_ID}
+      FT_CLIENT_SECRET: ${FT_CLIENT_SECRET}
 
   database:
     build:
@@ -43,6 +48,10 @@ services:
     networks:
       - internal
     restart: always
+
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_PASSWORD: ${DB_PASSWORD}
 
 volumes:
   database:
