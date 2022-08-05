@@ -7,7 +7,7 @@ import FriendView from './FriendView'
 import UserSet from './UserSet'
 import axios from 'axios'
 import { Profile } from './components/Profile'
-import { mockUser } from './mock/mockUser'
+app/src/Login.tsximport { mockUser } from './mock/mockUser'
 
 const Loged = () => {
   const [state, setState] = useState(false)
