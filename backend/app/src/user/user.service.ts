@@ -44,7 +44,7 @@ export class UserService {
   }
 
   async issueToken(user: User) {
-    const id = user.intra_id
+    const id = user.id
     user.access_token = this.jwtService.sign({ id })
     return user
   }

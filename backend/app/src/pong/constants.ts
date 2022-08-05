@@ -1,5 +1,5 @@
 export type PongMode = 'easy' | 'medium' | 'hard'
-export type PongMatchType = 'quick' | 'ranked'
+export type PongMatchType = 'quick' | 'ranked' | 'private'
 
 export const PADDLE_WIDTH = 10
 export const PADDLE_HEIGHT = 60
