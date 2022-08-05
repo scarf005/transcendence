@@ -14,22 +14,16 @@ import * as jwt from 'jsonwebtoken'
 import { jwtConstants } from 'src/configs/jwttoken.config'
 
 export type MatchMessage = {
-  mode: PongMode
+  mode?: PongMode
   matchType: PongMatchType
+  matchTarget?: number
 }
 
-type MatchData = {
-  uid: number
-  socket: Socket
-}
+type UserSocket = Socket & { uid: number }
 
 type PongKeyEvent = {
   key: 'up' | 'down'
   isDown: boolean
-}
-
-interface UserSocket extends Socket {
-  uid: number
 }
 
 @WebSocketGateway({ namespace: 'api/pong/match', cors: ['*'] })
@@ -44,18 +38,25 @@ export class MatchGateWay implements OnGatewayDisconnect, OnGatewayConnection {
     @MessageBody() message: MatchMessage,
     @ConnectedSocket() client: UserSocket,
   ) {
-    console.log(`connected: ${client.uid}`)
-    let match: { left: MatchData; right: MatchData } | null = null
+    let match: { left: UserSocket; right: UserSocket; mode?: PongMode } | null =
+      null
     if (message.matchType === 'quick') {
-      match = this.matchService.matchQuick({ uid: client.uid, socket: client })
-    } else {
-      match = this.matchService.matchRanked({
-        uid: client.uid,
-        socket: client,
-      })
+      match = this.matchService.matchQuick(client, message.mode)
+    } else if (message.matchType === 'ranked') {
+      message.mode = 'medium'
+      match = this.matchService.matchRanked(client)
+    } else if (message.matchType === 'private') {
+      match = this.matchService.matchPrivate(
+        client,
+        message.mode,
+        message.matchTarget,
+      )
+      if (match) {
+        message.mode = match.mode
+      }
     }
     if (match) {
-      this.pongService.startGame(message.mode, match)
+      this.pongService.createGame(match.left, match.right, message.mode)
     }
   }
 
@@ -64,20 +65,36 @@ export class MatchGateWay implements OnGatewayDisconnect, OnGatewayConnection {
     @MessageBody() message: PongKeyEvent,
     @ConnectedSocket() client: UserSocket,
   ) {
-    const { game, isLeftSide } = this.pongService.getGameBySocketId(client.id)
+    const { manager, side } = this.pongService.getGameByUser(client.uid)
+
+    if (!manager) {
+      return
+    }
 
     let direction: 'up' | 'down' | 'stop'
-    if (!message.isDown) direction = 'stop'
-    else direction = message.key
+    if (!message.isDown) {
+      direction = 'stop'
+    } else {
+      direction = message.key
+    }
+    manager.game.changePaddleVelocity(side, direction)
+  }
 
-    game.changePaddleVelocity(isLeftSide ? 'left' : 'right', direction)
+  @SubscribeMessage('spectator')
+  handleSpectator(
+    @MessageBody() message: { gameId: number },
+    @ConnectedSocket() client: UserSocket,
+  ) {
+    const manager = this.pongService.getGameByGameId(Number(message.gameId))
+    manager?.addSpectator(client)
   }
 
   handleDisconnect(client: UserSocket) {
     this.matchService.removeFromQueue(client)
-    const game = this.pongService.getGameBySocketId(client.id)
-    if (game && game.game.getWinner() === null) {
-      game.game.forceSetWinner(game.isLeftSide ? 'right' : 'left')
+    const gameInfo = this.pongService.getGameByUser(client.uid)
+    if (gameInfo) {
+      const { manager, side } = gameInfo
+      manager.game.forceSetWinner(side === 'left' ? 'right' : 'left')
     }
   }
 

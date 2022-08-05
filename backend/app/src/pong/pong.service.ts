@@ -3,11 +3,6 @@ import { Socket } from 'socket.io'
 
 import * as CONSTANTS from './constants'
 
-type MatchData = {
-  uid: number
-  socket: Socket
-}
-
 class Rect {
   x: number
   y: number
@@ -266,82 +261,146 @@ class Pong {
   }
 }
 
-type RunningPongGame = {
-  game: Pong
-  leftTimer: NodeJS.Timer
-  rightTimer: NodeJS.Timer
-  gameTimer: NodeJS.Timer
+type UserSocket = Socket & {
+  uid: number
 }
 
-type PongUser = {
+class PongManager {
+  private leftTimer: NodeJS.Timer
+  private rightTimer: NodeJS.Timer
+  private gameTimer: NodeJS.Timer
+  private spectators: { timer: NodeJS.Timer; socket: UserSocket }[] = []
+  private gameEndCallback
+
   game: Pong
-  isLeftSide: boolean
+  leftUser: UserSocket
+  rightUser: UserSocket
+  gameId: number
+
+  constructor(
+    leftUser: UserSocket,
+    rightUser: UserSocket,
+    gameId: number,
+    game: Pong,
+    gameEndCallback: (gameId: number) => void,
+  ) {
+    this.leftUser = leftUser
+    this.rightUser = rightUser
+    this.gameId = gameId
+    this.game = game
+    this.gameEndCallback = gameEndCallback
+  }
+
+  startGame() {
+    this.leftUser.emit('gameStart', {
+      left: this.leftUser.uid,
+      right: this.rightUser.uid,
+      gameId: this.gameId,
+    })
+    this.rightUser.emit('gameStart', {
+      left: this.leftUser.uid,
+      right: this.rightUser.uid,
+      gameId: this.gameId,
+    })
+    this.game.start()
+    this.leftTimer = setInterval(() => {
+      this.leftUser.emit('render', this.game)
+    }, CONSTANTS.UPDATE_INTERVAL)
+    this.rightTimer = setInterval(() => {
+      this.rightUser.emit('render', this.game)
+    }, CONSTANTS.UPDATE_INTERVAL)
+    this.gameTimer = setInterval(() => {
+      this.updateGame(Date.now())
+    }, CONSTANTS.UPDATE_INTERVAL)
+  }
+
+  stopGame(winner: { side: 'left' | 'right'; uid: number }) {
+    clearInterval(this.leftTimer)
+    clearInterval(this.rightTimer)
+    clearInterval(this.gameTimer)
+
+    this.leftUser.emit('render', this.game)
+    this.rightUser.emit('render', this.game)
+    this.leftUser.emit('gameEnd', winner)
+    this.rightUser.emit('gameEnd', winner)
+    this.spectators.forEach((elem) => {
+      elem.socket.emit('gameEnd', winner)
+      elem.socket.disconnect()
+    })
+    this.leftUser.disconnect()
+    this.rightUser.disconnect()
+
+    this.gameEndCallback(this.gameId)
+  }
+
+  updateGame(timestamp: number) {
+    this.game.update(timestamp)
+    const winnerSide = this.game.getWinner()
+    if (winnerSide) {
+      this.stopGame({
+        side: winnerSide,
+        uid: winnerSide === 'left' ? this.leftUser.uid : this.rightUser.uid,
+      })
+    }
+  }
+
+  addSpectator(socket: UserSocket) {
+    socket.emit('gameStart', {
+      left: this.leftUser.uid,
+      right: this.rightUser.uid,
+      gameId: this.gameId,
+    })
+    this.spectators.push({
+      socket,
+      timer: setInterval(() => {
+        socket.emit('render', this.game)
+      }, CONSTANTS.UPDATE_INTERVAL),
+    })
+  }
 }
 
 @Injectable()
 export class PongService {
   private nextId = 0
-  private readonly games: Map<number, RunningPongGame> = new Map()
-  private readonly gamesByUser: Map<string, PongUser> = new Map()
+  private readonly gamesByGameId: Map<number, PongManager> = new Map()
+  private readonly gamesByUser: Map<
+    number,
+    { manager: PongManager; side: 'left' | 'right' }
+  > = new Map()
 
-  abortGame(game: RunningPongGame) {
-    clearInterval(game.leftTimer)
-    clearInterval(game.rightTimer)
-    clearInterval(game.gameTimer)
-  }
-
-  updateGame(
-    game: RunningPongGame,
-    user: { left: MatchData; right: MatchData },
+  createGame(
+    leftUser: UserSocket,
+    rightUser: UserSocket,
+    difficulty: 'easy' | 'medium' | 'hard',
   ) {
-    game.game.update(Date.now())
-    const winner = game.game.getWinner()
-    if (winner) {
-      this.abortGame(game)
-      user.left.socket.emit('render', game.game)
-      user.right.socket.emit('render', game.game)
-      user.left.socket.emit('gameEnd', { winner })
-      user.right.socket.emit('gameEnd', { winner })
-      user.left.socket.disconnect()
-      user.right.socket.disconnect()
+    const gameId = this.nextId++
+    const gameManager = new PongManager(
+      leftUser,
+      rightUser,
+      gameId,
+      new Pong(difficulty),
+      this.deleteGame.bind(this),
+    )
+    this.gamesByGameId.set(gameId, gameManager)
+    this.gamesByUser.set(leftUser.uid, { manager: gameManager, side: 'left' })
+    this.gamesByUser.set(rightUser.uid, { manager: gameManager, side: 'right' })
+    gameManager.startGame()
+  }
+
+  deleteGame(gameId: number) {
+    const gameManager = this.gamesByGameId.get(gameId)
+    if (gameManager) {
+      this.gamesByGameId.delete(gameId)
+      this.gamesByUser.delete(gameManager.leftUser.uid)
+      this.gamesByUser.delete(gameManager.rightUser.uid)
     }
   }
 
-  startGame(
-    difficulty: CONSTANTS.PongMode,
-    user: { left: MatchData; right: MatchData },
-  ): number {
-    const game = new Pong(difficulty)
-
-    game.start()
-    const gameId = this.nextId
-
-    const runningGame = {
-      game,
-      leftTimer: setInterval(() => {
-        user.left.socket.emit('render', game)
-      }, CONSTANTS.UPDATE_INTERVAL),
-      rightTimer: setInterval(() => {
-        user.right.socket.emit('render', game)
-      }, CONSTANTS.UPDATE_INTERVAL),
-      gameTimer: setInterval(() => {
-        this.updateGame(runningGame, user)
-      }, CONSTANTS.UPDATE_INTERVAL),
-    }
-    this.games.set(gameId, runningGame)
-
-    this.gamesByUser.set(user.left.socket.id, { game, isLeftSide: true })
-    this.gamesByUser.set(user.right.socket.id, { game, isLeftSide: false })
-
-    this.nextId++
-    return gameId
+  getGameByGameId(gameId: number) {
+    return this.gamesByGameId.get(gameId)
   }
 
-  getGameByGameId(gameId: number): RunningPongGame | null {
-    return this.games.get(gameId)
-  }
-
-  getGameBySocketId(socketId: string): PongUser | null {
-    return this.gamesByUser.get(socketId)
+  getGameByUser(uid: number) {
+    return this.gamesByUser.get(uid)
   }
 }
