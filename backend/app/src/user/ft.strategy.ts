@@ -8,7 +8,7 @@ export class FtStrategy extends PassportStrategy(Strategy, 'ft') {
     super({
       clientID: process.env.FT_CLIENT_ID,
       clientSecret: process.env.FT_CLIENT_SECRET,
-      callbackURL: 'http://localhost:3000/api/auth/ft/callback',
+      callbackURL: 'http://localhost:3000',
       scope: ['public'],
     })
   }
