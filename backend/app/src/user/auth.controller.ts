@@ -1,4 +1,11 @@
-import { Controller, Get, UseGuards, Query, Req } from '@nestjs/common'
+import {
+  Controller,
+  Get,
+  UseGuards,
+  Query,
+  Req,
+  Redirect,
+} from '@nestjs/common'
 import { AuthGuard } from '@nestjs/passport'
 import { UserService } from 'src/user/user.service'
 
@@ -22,6 +29,7 @@ export class AuthController {
 
   @Get('ft/callback')
   @UseGuards(AuthGuard('ft'))
+  @Redirect()
   async callback(@Req() req: any) {
     const { id, username } = req.user
 
@@ -29,6 +37,9 @@ export class AuthController {
     if (!user) {
       user = await this.userService.create(id, username)
     }
-    return this.userService.issueToken(user)
+    return {
+      url: `/login?access_token=${await this.userService.issueToken(user)}`,
+      code: 302,
+    }
   }
 }

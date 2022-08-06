@@ -1,11 +1,20 @@
-import React from 'react'
-import Login from './Login'
+import { LoginRouter } from './Login'
+import { useEffect, useState } from 'react'
+import { MainRouter } from './MainRouter'
 
 export function App() {
-  return (
-    <>
-      <Login />
-    </>
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+
+  useEffect(() => {
+    if (window.sessionStorage.getItem('access_token')) {
+      setIsLoggedIn(true)
+    }
+  })
+
+  return isLoggedIn ? (
+    <MainRouter />
+  ) : (
+    <LoginRouter setIsLoggedIn={setIsLoggedIn} />
   )
 }
 
