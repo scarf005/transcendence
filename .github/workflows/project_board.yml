@@ -4,7 +4,7 @@ on:
     types: [opened, reopened, closed, assigned]
 
   pull_request_target:
-    types: [opened, reopened, review_requested, closed]
+    types: [opened, reopened, closed] # review_requested
 
 env:
   PROJECT_ID: 1
