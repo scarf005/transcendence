@@ -27,7 +27,7 @@ interface User {
   name: string
 }
 
-const games: Game[] = [
+const gamesList: Game[] = [
   {
     leftUser: u1,
     rightUser: u1,
@@ -52,11 +52,11 @@ const Item = styled(Paper)(({ theme }) => ({
   color: theme.palette.text.secondary,
 }))
 
-export default function GameList() {
+export default function GameList({ games }: any) {
   return (
     <Box sx={{ width: '100%' }}>
       <Stack spacing={2}>
-        {games.map((game: Game) => (
+        {gamesList.map((game: Game) => (
           <Item>
             {game.leftUser.name}VS{game.rightUser.name}
           </Item>

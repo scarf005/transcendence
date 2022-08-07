@@ -1,12 +1,10 @@
-import {
-  Injectable,
-  ConflictException,
-  InternalServerErrorException,
-} from '@nestjs/common'
+import { Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { User } from './entity/user.entity'
+import { User } from './user.entity'
 import { Repository } from 'typeorm'
 import { JwtService } from '@nestjs/jwt'
+import { UserPayload } from 'src/configs/jwt-token.config'
+import { RegisterUserDto } from 'src/dto/register-user.dto'
 
 @Injectable()
 export class UserService {
@@ -16,36 +14,35 @@ export class UserService {
     private userRepository: Repository<User>,
   ) {}
 
-  findAll(): Promise<User[]> {
-    return this.userRepository.find()
+  async findAll(): Promise<User[]> {
+    return await this.userRepository.find()
   }
 
-  async create(intra_id: string, intra_username: string): Promise<User> {
+  async create(userData: RegisterUserDto): Promise<User> {
     const user = new User()
-    user.intra_id = intra_id
-    user.intra_username = intra_username
-    return this.userRepository.save(user).catch((err) => {
-      if ((err.code = 23505)) {
-        throw new ConflictException(`User ${intra_username} already exists`)
-      } else {
-        throw new InternalServerErrorException(
-          `Error creating user ${intra_username}`,
-        )
-      }
-    })
+
+    user.avata = userData.avata
+    user.nickname = userData.nickname
+    user.twoFactor = userData.twoFactor
+    user.isActive = true
+
+    return await this.userRepository.save(user)
   }
 
-  async findOne(intra_id: string): Promise<User> {
-    return this.userRepository.findOneBy({ intra_id: intra_id })
+  async findOne(uid: number): Promise<User> {
+    return await this.userRepository.findOneBy({ uid })
   }
 
-  async remove(id: string): Promise<void> {
-    await this.userRepository.delete(id)
+  async remove(uid: number): Promise<void> {
+    await this.userRepository.delete({ uid })
   }
 
-  async issueToken(user: User) {
-    const id = user.id
-    user.access_token = this.jwtService.sign({ id })
-    return user
+  issueToken(user: User, twoFactorPassed: boolean): string {
+    const payload: UserPayload = {
+      uidType: 'user',
+      uid: user.uid,
+      twoFactorPassed,
+    }
+    return this.jwtService.sign(payload)
   }
 }

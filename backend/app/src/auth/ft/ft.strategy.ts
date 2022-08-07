@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { PassportStrategy } from '@nestjs/passport'
 import { Strategy } from 'passport-42'
+import { AuthGuard } from '@nestjs/passport'
 
 @Injectable()
 export class FtStrategy extends PassportStrategy(Strategy, 'ft') {
@@ -14,6 +15,9 @@ export class FtStrategy extends PassportStrategy(Strategy, 'ft') {
   }
 
   validate(access_token, refresh_token, profile, done) {
-    return done(null, profile)
+    return done(null, { uid: profile.id })
   }
 }
+
+@Injectable()
+export class FtGuard extends AuthGuard('ft') {}

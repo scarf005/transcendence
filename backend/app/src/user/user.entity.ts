@@ -3,16 +3,16 @@ import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm'
 @Entity()
 export class User {
   @PrimaryGeneratedColumn()
-  id: number
+  uid: number
 
   @Column()
-  intra_id: string
+  twoFactor: boolean
 
   @Column()
-  intra_username: string
+  nickname: string
 
-  @Column({ nullable: true })
-  access_token: string
+  @Column()
+  avata: string
 
   @Column({ default: true })
   isActive: boolean

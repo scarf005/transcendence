@@ -6,7 +6,7 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets'
 import { Server, Socket } from 'socket.io'
-import { chatEvent } from 'src/configs/chatEvent.constants'
+import { chatEvent } from 'src/configs/chat-event.constants'
 import { ChatMessageDto } from './chat.dto'
 
 @WebSocketGateway({ namespace: 'chat', cors: true })

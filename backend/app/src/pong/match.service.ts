@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { Socket } from 'socket.io'
-import { PongMode } from './constants'
+import { PongMode } from '../configs/pong.config'
 
 type UserSocket = Socket & { uid: number }
 
