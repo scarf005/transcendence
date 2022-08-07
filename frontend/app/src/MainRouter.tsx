@@ -2,9 +2,9 @@ import { Route, Routes } from 'react-router-dom'
 import Nav from './Nav'
 import GameView from './GameView'
 import FriendView from './FriendView'
-import { Profile } from './components/Profile'
+import { Profile } from 'components/profile/Profile'
 
-import { mockUser } from './mock/mockUser'
+import { mockUser } from 'mock/mockUser'
 
 export function MainRouter() {
   return (
