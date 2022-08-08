@@ -12,7 +12,7 @@ export class User {
   nickname: string
 
   @Column()
-  avata: string
+  avatar: string
 
   @Column({ default: true })
   isActive: boolean

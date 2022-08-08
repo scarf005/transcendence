@@ -8,5 +8,5 @@ export class RegisterUserDto {
   nickname: string
 
   @IsUrl()
-  avata: string
+  avatar: string
 }

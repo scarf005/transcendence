@@ -3,8 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { User } from './user.entity'
 import { Repository } from 'typeorm'
 import { JwtService } from '@nestjs/jwt'
-import { UserPayload } from 'src/configs/jwt-token.config'
-import { RegisterUserDto } from 'src/dto/register-user.dto'
+import { UserPayload } from 'configs/jwt-token.config'
+import { RegisterUserDto } from 'dto/register-user.dto'
 
 @Injectable()
 export class UserService {
@@ -21,7 +21,7 @@ export class UserService {
   async create(userData: RegisterUserDto): Promise<User> {
     const user = new User()
 
-    user.avata = userData.avata
+    user.avatar = userData.avatar
     user.nickname = userData.nickname
     user.twoFactor = userData.twoFactor
     user.isActive = true

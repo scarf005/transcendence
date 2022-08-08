@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 import { JwtService } from '@nestjs/jwt'
 import { FtUser } from './ft-user.entity'
-import { UserPayload } from 'src/configs/jwt-token.config'
+import { UserPayload } from 'configs/jwt-token.config'
 
 @Injectable()
 export class FtOauthService {

@@ -2,9 +2,9 @@ import { Entity, JoinColumn, OneToOne, PrimaryColumn } from 'typeorm'
 import { User } from 'user/user.entity'
 
 @Entity()
-export class FtUser {
+export class TwoFactor {
   @PrimaryColumn()
-  uid: number
+  secret: string
 
   @OneToOne(() => User)
   @JoinColumn()

@@ -199,7 +199,7 @@ export function RegisterUser() {
   const [nickname, setNickname] = useState('')
   const [twoFactorKind, setTwoFactorKind]: [TwoFactorOptions, any] =
     useState('none')
-  const [avata, _setAvata] = useState(
+  const [avatar, _setavatar] = useState(
     'https://i0.wp.com/42place.innovationacademy.kr/wp-content/uploads/2021/12/2.jpg?resize=500%2C500&ssl=1',
   )
   const navigate = useNavigate()
@@ -209,7 +209,7 @@ export function RegisterUser() {
       method: 'PUT',
       body: JSON.stringify({
         nickname,
-        avata,
+        avatar,
         twoFactor: twoFactorKind === 'none' ? false : true,
       }),
       headers: {
@@ -235,7 +235,7 @@ export function RegisterUser() {
           </div>
         </Box>
         <div style={{ textAlign: 'center' }}>
-          <Img src={avata} />
+          <Img src={avatar} />
         </div>
         <FormControl>
           <FormLabel>2차 인증(2FA) 설정</FormLabel>

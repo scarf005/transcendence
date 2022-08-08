@@ -7,11 +7,11 @@ import {
   OnGatewayConnection,
 } from '@nestjs/websockets'
 import { Socket } from 'socket.io'
-import { PongMatchType, PongMode } from 'src/configs/pong.config'
+import { PongMatchType, PongMode } from 'configs/pong.config'
 import { MatchService } from './match.service'
 import { PongService } from './pong.service'
 import * as jwt from 'jsonwebtoken'
-import { jwtConstants } from 'src/configs/jwt-token.config'
+import { jwtConstants } from 'configs/jwt-token.config'
 
 export type MatchMessage = {
   mode?: PongMode

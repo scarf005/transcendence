@@ -1,11 +1,11 @@
 import { Body, Get, Put, Redirect, Req } from '@nestjs/common'
 import { Controller } from '@nestjs/common'
-import { UserService } from 'src/user/user.service'
+import { UserService } from 'user/user.service'
 import { FtOauthService } from './ft-oauth.service'
 import { UseGuards } from '@nestjs/common'
 import { FtGuard } from './ft.strategy'
 import { JwtFtGuard } from './jwt-ft.strategy'
-import { RegisterUserDto } from 'src/dto/register-user.dto'
+import { RegisterUserDto } from 'dto/register-user.dto'
 
 @Controller('api/auth/ft')
 export class FtController {
@@ -14,7 +14,7 @@ export class FtController {
     private readonly ftOauthService: FtOauthService,
   ) {}
 
-  @Get('/')
+  @Get()
   @UseGuards(FtGuard)
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   async auth() {}
