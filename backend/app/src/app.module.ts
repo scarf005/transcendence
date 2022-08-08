@@ -7,6 +7,7 @@ import { TypeOrmModule } from '@nestjs/typeorm'
 import { typeORMConfig } from './configs/typeorm.config'
 import { ChatModule } from './chat/chat.module'
 import { AuthModule } from './auth/auth.module'
+import { AvatarModule } from './avatar/avatar.module'
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { AuthModule } from './auth/auth.module'
     PongModule,
     ChatModule,
     AuthModule,
+    AvatarModule,
   ],
   controllers: [AppController],
 })

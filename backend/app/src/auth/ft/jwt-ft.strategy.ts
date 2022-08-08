@@ -17,7 +17,7 @@ export class JwtFtStrategy extends PassportStrategy(Strategy, 'jwt-ftUser') {
   }
 
   async validate(payload: UserPayload) {
-    if (payload.uidType !== 'ft') {
+    if (payload.uidType !== 'ft' && payload.uidType !== 'user') {
       throw new UnauthorizedException()
     }
     return {
