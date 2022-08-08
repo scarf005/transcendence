@@ -18,3 +18,5 @@ Default.args = { user: mockUser }
 
 export const Playing = Template.bind({})
 Playing.args = { user: { ...mockUser, status: 123 } as User }
+
+// FIXME: 이름 Profile로 변경

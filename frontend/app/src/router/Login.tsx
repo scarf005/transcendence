@@ -1,6 +1,6 @@
 import { Route, Routes, useNavigate, useSearchParams } from 'react-router-dom'
 import { useEffect } from 'react'
-import UserSet, { RegisterUser } from './UserSet'
+import UserSet, { RegisterUser } from 'view/UserSet'
 import styled from 'styled-components'
 
 const CenterAlignedDiv = styled.div`

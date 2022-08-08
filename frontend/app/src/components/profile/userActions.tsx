@@ -1,4 +1,4 @@
-import { IconButtonWrap } from './IconButtonWrap'
+import { IconButtonWrap } from '../utils/IconButtonWrap'
 import {
   Block,
   LocalPostOffice,
@@ -6,11 +6,11 @@ import {
   PersonRemove,
 } from '@mui/icons-material'
 
-interface onClickProps {
+interface OnClickProps {
   onClick: (...args: unknown[]) => void
 }
 
-export const AddFriendButton = ({ onClick }: onClickProps) => (
+export const AddFriendButton = ({ onClick }: OnClickProps) => (
   <IconButtonWrap
     title="add to friend"
     icon={<PersonAdd />}
@@ -18,7 +18,7 @@ export const AddFriendButton = ({ onClick }: onClickProps) => (
   />
 )
 
-export const RemoveFriendButton = ({ onClick }: onClickProps) => {
+export const RemoveFriendButton = ({ onClick }: OnClickProps) => {
   return (
     <IconButtonWrap
       title="remove from friend"
@@ -28,15 +28,15 @@ export const RemoveFriendButton = ({ onClick }: onClickProps) => {
   )
 }
 
-export const BlockButton = ({ onClick }: onClickProps) => {
+export const BlockButton = ({ onClick }: OnClickProps) => {
   return <IconButtonWrap title="Block" icon={<Block />} onClick={onClick} />
 }
 
-export const UnblockButton = ({ onClick }: onClickProps) => {
+export const UnblockButton = ({ onClick }: OnClickProps) => {
   return <IconButtonWrap title="Unblock" icon={<Block />} onClick={onClick} />
 }
 
-export const MessageButton = ({ onClick }: onClickProps) => {
+export const MessageButton = ({ onClick }: OnClickProps) => {
   return (
     <IconButtonWrap
       title="Send Direct Message"

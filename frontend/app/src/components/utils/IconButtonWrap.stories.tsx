@@ -6,6 +6,7 @@ import { IconButtonWrap } from './IconButtonWrap'
 import { PersonAdd } from '@mui/icons-material'
 
 export default {
+  title: 'Utils/IconButtonWrap',
   component: IconButtonWrap,
 } as ComponentMeta<typeof IconButtonWrap>
 

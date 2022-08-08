@@ -21,8 +21,14 @@ const getData = (
 interface UserStatusProps {
   status: UserStatusType
   avatar?: JSX.Element
+  big?: boolean
 }
-export const UserStatus = ({ status, avatar }: UserStatusProps) => {
+/** TODO: make size configurable */
+export const UserStatus = ({
+  status,
+  avatar,
+  big = false,
+}: UserStatusProps) => {
   const { color, badgeContent, tooltip } = getData(status)
 
   return (
@@ -31,6 +37,7 @@ export const UserStatus = ({ status, avatar }: UserStatusProps) => {
         color={color}
         badgeContent={badgeContent}
         overlap="circular"
+        variant={big ? 'standard' : 'dot'}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
       >
         {avatar}

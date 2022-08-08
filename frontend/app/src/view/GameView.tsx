@@ -20,7 +20,7 @@ const theme = createTheme({
   },
 })
 
-const GameView = () => {
+export const GameView = () => {
   const [state, setState] = useState('watching')
   const handleClick = () => {
     setState('joingame')
@@ -40,4 +40,3 @@ const GameView = () => {
     </ThemeProvider>
   )
 }
-export default GameView

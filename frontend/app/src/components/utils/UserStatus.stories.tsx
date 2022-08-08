@@ -4,7 +4,7 @@ import { ComponentStory, ComponentMeta } from '@storybook/react'
 import { UserStatus } from './UserStatus'
 
 export default {
-  title: 'Profile/UserStatus',
+  title: 'Utils/UserStatus',
   component: UserStatus,
 } as ComponentMeta<typeof UserStatus>
 

@@ -1,6 +1,5 @@
-import { LoginRouter } from './Login'
 import { useEffect, useState } from 'react'
-import { MainRouter } from './MainRouter'
+import { MainRouter, LoginRouter } from 'router'
 
 export function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
@@ -11,11 +10,11 @@ export function App() {
     }
   })
 
-  return isLoggedIn ? (
-    <MainRouter />
-  ) : (
-    <LoginRouter setIsLoggedIn={setIsLoggedIn} />
-  )
+  if (isLoggedIn) {
+    return <MainRouter />
+  } else {
+    return <LoginRouter setIsLoggedIn={setIsLoggedIn} />
+  }
 }
 
 export default App
