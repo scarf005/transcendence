@@ -1,0 +1,16 @@
+프론트엔드:
+  - frontend/app/**/*
+
+백엔드:
+  - backend/app/**/*
+
+ci:
+  [
+    ".github/**/*",
+    "**/*.yml",
+    "**/*.yaml",
+    "**/*Dockerfile*",
+    "**/*Dockerfile*.*",
+    "**/*compose*.*.yml",
+    "**/*compose*.yml",
+  ]

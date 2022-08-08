@@ -3,8 +3,8 @@ on:
   issues:
     types: [opened, reopened, closed, assigned]
 
-  pull_request:
-    types: [opened, reopened, review_requested, closed]
+  pull_request_target:
+    types: [opened, reopened, closed] # review_requested
 
 env:
   PROJECT_ID: 1
@@ -46,7 +46,7 @@ jobs:
           echo "::set-output name=moveto::$TO"
           echo "::set-output name=node_id::$NODE"
       - name: move card to ${{ steps.figure.outputs.moveto }}
-        uses: leonsteinhaeuser/project-beta-automations@v1.2.1
+        uses: leonsteinhaeuser/project-beta-automations@v1.3.0
         with:
           gh_token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
           organization: ${{ github.repository_owner }}
