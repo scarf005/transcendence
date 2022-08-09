@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { User } from './user.entity'
 import { Repository } from 'typeorm'
 import { JwtService } from '@nestjs/jwt'
-import { UserPayload } from 'configs/jwt-token.config'
+import { UserPayload, jwtConstants } from 'configs/jwt-token.config'
 import { RegisterUserDto } from 'dto/register-user.dto'
 
 @Injectable()
@@ -48,5 +48,13 @@ export class UserService {
       twoFactorPassed,
     }
     return this.jwtService.sign(payload)
+  }
+
+  getUidFromToken(token: string): number {
+    const decoded = this.jwtService.verify(token, {
+      secret: jwtConstants.secret,
+    })
+    //TODO: catch exception when verification failed.
+    return decoded.uid
   }
 }
