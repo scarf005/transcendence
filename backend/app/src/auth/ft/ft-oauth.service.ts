@@ -25,7 +25,10 @@ export class FtOauthService {
   }
 
   async findOne(intraUid: number) {
-    return this.ftOauthRepository.findOneBy({ uid: intraUid })
+    return this.ftOauthRepository.findOne({
+      where: { uid: intraUid },
+      relations: ['user'],
+    })
   }
 
   async remove(intraUid: number) {

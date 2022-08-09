@@ -4,6 +4,7 @@ import { JwtModule } from '@nestjs/jwt'
 import { TypeOrmModule } from '@nestjs/typeorm'
 import { User } from './user.entity'
 import { jwtConstants } from 'configs/jwt-token.config'
+import { UserController } from './user.controller'
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { jwtConstants } from 'configs/jwt-token.config'
     }),
   ],
   providers: [UserService],
+  controllers: [UserController],
   exports: [UserService],
 })
 export class UserModule {}

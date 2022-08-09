@@ -46,7 +46,6 @@ export class MatchService {
     mode?: PongMode,
     opponent?: number,
   ): { left: UserSocket; right: UserSocket; mode: PongMode } | null {
-    console.log(player.uid, opponent)
     if (opponent && this.privateMap.has(opponent)) {
       const owner = this.privateMap.get(opponent)
       this.privateMap.delete(opponent)

@@ -10,6 +10,6 @@ export class AppController {
   @UseGuards(JwtAfterTwoFactorUserGuard)
   async getProfile(@Req() req: any) {
     const { uid } = req.user
-    return await this.userService.findOne(uid)
+    return await this.userService.findOneByUid(uid)
   }
 }

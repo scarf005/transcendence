@@ -8,7 +8,7 @@ export class User {
   @Column()
   twoFactor: boolean
 
-  @Column()
+  @Column({ unique: true })
   nickname: string
 
   @Column()

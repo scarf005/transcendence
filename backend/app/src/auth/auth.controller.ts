@@ -49,7 +49,7 @@ export class AuthController {
     const verified = await this.twoFactorService.verify(uid, token)
 
     if (verified) {
-      const user = await this.userService.findOne(uid)
+      const user = await this.userService.findOneByUid(uid)
 
       return {
         access_token: this.userService.issueToken(user, true),

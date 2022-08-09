@@ -29,7 +29,11 @@ export class UserService {
     return await this.userRepository.save(user)
   }
 
-  async findOne(uid: number): Promise<User> {
+  async findOneByNickname(nickname: string): Promise<User> {
+    return await this.userRepository.findOneBy({ nickname })
+  }
+
+  async findOneByUid(uid: number): Promise<User> {
     return await this.userRepository.findOneBy({ uid })
   }
 
