@@ -1,4 +1,4 @@
-import { useState, ChangeEvent } from 'react'
+import { useState, ChangeEvent, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 //css
 import styled from 'styled-components'
@@ -58,7 +58,12 @@ function TwoFactorButton(props: {
 function NickNameInput(props: {
   value: string
   label: string
-  setValue: (value: string) => void
+  setValue: React.Dispatch<
+    React.SetStateAction<{
+      checked: boolean
+      name: string
+    }>
+  >
 }) {
   return (
     <TextField
@@ -66,7 +71,7 @@ function NickNameInput(props: {
       variant="standard"
       value={props.value}
       onChange={(e: ChangeEvent<HTMLInputElement>) => {
-        props.setValue(e.target.value)
+        props.setValue({ checked: false, name: e.target.value })
       }}
     />
   )
@@ -75,21 +80,62 @@ function NickNameInput(props: {
 export function RegisterUser(props: {
   setIsLoggedIn: (value: boolean) => void
 }) {
-  const [nickname, setNickname] = useState('')
+  const imgInput = useRef<HTMLInputElement>(null)
+  const [nickname, setNickname] = useState({ checked: false, name: '' })
   const [enableTwoFactor, setEnableTwoFactor] = useState(false)
-  const [avatar, _setavatar] = useState(
-    'https://i0.wp.com/42place.innovationacademy.kr/wp-content/uploads/2021/12/2.jpg?resize=500%2C500&ssl=1',
-  )
+  const [avatar, setAvatar] = useState({
+    imgUrl:
+      'https://i0.wp.com/42place.innovationacademy.kr/wp-content/uploads/2021/12/2.jpg?resize=500%2C500&ssl=1',
+    files: '',
+  })
   const [nicknameLabel, setNicknameLabel] = useState('닉네임을 입력해주세요')
 
   const navigate = useNavigate()
 
+  const onLoadFile = (e: any) => {
+    const file = e.target.files
+    const imgTarget = file[0]
+    const fileReader = new FileReader()
+    fileReader.readAsDataURL(imgTarget)
+    sendAvatar(file[0])
+    fileReader.onload = (e: any) => {
+      setAvatar({ imgUrl: e.target.result, files: file })
+    }
+  }
+
+  const sendAvatar = (file: any) => {
+    const formdata = new FormData()
+    formdata.append('file', file)
+    const token = window.sessionStorage.getItem('temp_token')
+    if (file) {
+      fetch('http://localhost:3000/api/avatar', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formdata,
+      })
+        .then(async (res) => {
+          if (!res.ok) {
+            return Promise.reject(res.statusText)
+          } else {
+            const data = await res.json()
+            console.log(data.filename)
+          }
+        })
+        .catch((err) => {
+          console.log(err)
+        })
+    }
+  }
+
   const handleSubmit = () => {
+    if (nickname.checked === false || nickname.name === '')
+      return setNicknameLabel('닉네임 중복 확인을 해주세요')
     fetch('/api/auth/ft/register', {
       method: 'PUT',
       body: JSON.stringify({
-        nickname,
-        avatar,
+        nickname: nickname.name,
         twoFactor: enableTwoFactor,
       }),
       headers: {
@@ -117,7 +163,7 @@ export function RegisterUser(props: {
   }
 
   const handleNicknameCheck = () => {
-    fetch(`/api/user/check?nickname=${nickname}`)
+    fetch(`/api/user/check?nickname=${nickname.name}`)
       .then(async (res) => {
         if (!res.ok) {
           return Promise.reject('다시 시도해 주세요')
@@ -126,14 +172,13 @@ export function RegisterUser(props: {
         const isAvailable = await res.json()
 
         if (isAvailable) {
-          setNickname(nickname)
+          setNickname({ checked: true, name: nickname.name })
           setNicknameLabel('사용 가능합니다')
         } else {
           return Promise.reject('이미 사용중인 닉네임입니다')
         }
       })
       .catch((err) => {
-        setNickname('')
         setNicknameLabel(err)
       })
   }
@@ -150,7 +195,7 @@ export function RegisterUser(props: {
           <div>
             <NickNameInput
               label={nicknameLabel}
-              value={nickname}
+              value={nickname.name}
               setValue={setNickname}
             />
           </div>
@@ -158,9 +203,22 @@ export function RegisterUser(props: {
         <Button variant="outlined" onClick={handleNicknameCheck}>
           중복 확인
         </Button>
-        <div style={{ textAlign: 'center' }}>
+        {/* <div style={{ textAlign: 'center' }}>
           <Img src={avatar} />
+        </div> */}
+        <div style={{ textAlign: 'center' }}>
+          <Img src={avatar.imgUrl} />
         </div>
+        <input
+          ref={imgInput}
+          type="file"
+          accept="image/*"
+          onChange={onLoadFile}
+          style={{ display: 'none' }}
+        />
+        <Button variant="outlined" onClick={() => imgInput.current?.click()}>
+          이미지 업로드
+        </Button>
         <FormControl>
           <FormLabel>2차 인증(2FA) 설정</FormLabel>
           <TwoFactorButton

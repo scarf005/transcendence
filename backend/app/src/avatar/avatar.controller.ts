@@ -23,7 +23,7 @@ export class AvatarController {
   @Bind(UploadedFile())
   @UseGuards(JwtFtGuard)
   async upload(@UploadedFile() file: any) {
-    return file.filename
+    return { filename: file.filename }
   }
 
   @Get(':uuid')
