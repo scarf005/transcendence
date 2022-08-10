@@ -83,50 +83,34 @@ export function RegisterUser(props: {
   const imgInput = useRef<HTMLInputElement>(null)
   const [nickname, setNickname] = useState({ checked: false, name: '' })
   const [enableTwoFactor, setEnableTwoFactor] = useState(false)
-  const [avatar, setAvatar] = useState({
-    imgUrl:
-      'https://i0.wp.com/42place.innovationacademy.kr/wp-content/uploads/2021/12/2.jpg?resize=500%2C500&ssl=1',
-    files: '',
-  })
+  const [avatar, setAvatar] = useState('/api/avatar/default.jpg')
   const [nicknameLabel, setNicknameLabel] = useState('닉네임을 입력해주세요')
 
   const navigate = useNavigate()
 
-  const onLoadFile = (e: any) => {
-    const file = e.target.files
-    const imgTarget = file[0]
-    const fileReader = new FileReader()
-    fileReader.readAsDataURL(imgTarget)
-    sendAvatar(file[0])
-    fileReader.onload = (e: any) => {
-      setAvatar({ imgUrl: e.target.result, files: file })
-    }
-  }
-
-  const sendAvatar = (file: any) => {
+  const sendAvatar = (avatar: File) => {
     const formdata = new FormData()
-    formdata.append('file', file)
-    const token = window.sessionStorage.getItem('temp_token')
-    if (file) {
-      fetch('http://localhost:3000/api/avatar', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        body: formdata,
+    formdata.append('file', avatar)
+
+    const token = window.localStorage.getItem('temp_token')
+    fetch('http://localhost:3000/api/avatar', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: formdata,
+    })
+      .then(async (res) => {
+        if (!res.ok) {
+          return Promise.reject(res.statusText)
+        } else {
+          const { filename } = await res.json()
+          setAvatar(`/api/avatar/${filename}`)
+        }
       })
-        .then(async (res) => {
-          if (!res.ok) {
-            return Promise.reject(res.statusText)
-          } else {
-            const data = await res.json()
-            console.log(data.filename)
-          }
-        })
-        .catch((err) => {
-          console.log(err)
-        })
-    }
+      .catch((err) => {
+        console.log(err)
+      })
   }
 
   const handleSubmit = () => {
@@ -137,10 +121,11 @@ export function RegisterUser(props: {
       body: JSON.stringify({
         nickname: nickname.name,
         twoFactor: enableTwoFactor,
+        avatar,
       }),
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${window.sessionStorage.getItem('temp_token')}`,
+        Authorization: `Bearer ${window.localStorage.getItem('temp_token')}`,
       },
     })
       .then(async (res) => {
@@ -149,11 +134,11 @@ export function RegisterUser(props: {
         }
         const { access_token } = await res.json()
         if (enableTwoFactor) {
-          window.sessionStorage.setItem('temp_token', access_token)
+          window.localStorage.setItem('temp_token', access_token)
           navigate('/two-factor')
         } else {
           props.setIsLoggedIn(true)
-          window.sessionStorage.setItem('access_token', access_token)
+          window.localStorage.setItem('access_token', access_token)
           navigate('/')
         }
       })
@@ -207,13 +192,17 @@ export function RegisterUser(props: {
           <Img src={avatar} />
         </div> */}
         <div style={{ textAlign: 'center' }}>
-          <Img src={avatar.imgUrl} />
+          <Img src={avatar} />
         </div>
         <input
           ref={imgInput}
           type="file"
           accept="image/*"
-          onChange={onLoadFile}
+          onChange={(e) => {
+            if (e.target.files !== null) {
+              sendAvatar(e.target.files[0])
+            }
+          }}
           style={{ display: 'none' }}
         />
         <Button variant="outlined" onClick={() => imgInput.current?.click()}>

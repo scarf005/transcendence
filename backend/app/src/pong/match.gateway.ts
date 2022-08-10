@@ -22,11 +22,10 @@ export type MatchMessage = {
 type UserSocket = Socket & { uid: number }
 
 type PongKeyEvent = {
-  key: 'up' | 'down'
-  isDown: boolean
+  key: 'up' | 'down' | 'stop'
 }
 
-@WebSocketGateway({ namespace: 'api/pong/match', cors: ['*'] })
+@WebSocketGateway({ namespace: 'api/pong', cors: ['*'] })
 export class MatchGateWay implements OnGatewayDisconnect, OnGatewayConnection {
   constructor(
     private matchService: MatchService,
@@ -71,13 +70,7 @@ export class MatchGateWay implements OnGatewayDisconnect, OnGatewayConnection {
       return
     }
 
-    let direction: 'up' | 'down' | 'stop'
-    if (!message.isDown) {
-      direction = 'stop'
-    } else {
-      direction = message.key
-    }
-    manager.game.changePaddleVelocity(side, direction)
+    manager.game.changePaddleVelocity(side, message.key)
   }
 
   @SubscribeMessage('spectator')
@@ -99,25 +92,20 @@ export class MatchGateWay implements OnGatewayDisconnect, OnGatewayConnection {
   }
 
   handleConnection(client: UserSocket) {
-    const authString = client.handshake.headers.authorization
+    const { token } = client.handshake.auth
 
-    if (!authString) {
-      client.disconnect()
-      return
-    }
-
-    const accessToken = authString.split(' ')[1]
-    if (!accessToken) {
+    if (token === undefined) {
       client.disconnect()
       return
     }
 
     try {
-      const decoded = jwt.verify(
-        accessToken,
-        jwtConstants.secret,
-      ) as jwt.JwtPayload
-      client.uid = Number(decoded.id)
+      const decoded = jwt.verify(token, jwtConstants.secret) as jwt.JwtPayload
+      if (decoded.uidType !== 'user' || decoded.twoFactorPassed !== true) {
+        client.disconnect()
+        return
+      }
+      client.uid = decoded.uid
     } catch {
       client.disconnect()
     }

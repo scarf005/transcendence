@@ -43,7 +43,7 @@ export const InputCode = (props: {
   const handleOtpCheck = async () => {
     fetch(`/api/auth/2fa?token=${token}`, {
       headers: {
-        Authorization: `Bearer ${window.sessionStorage.getItem('temp_token')}`,
+        Authorization: `Bearer ${window.localStorage.getItem('temp_token')}`,
       },
     })
       .then(async (res) => {
@@ -51,7 +51,7 @@ export const InputCode = (props: {
           return Promise.reject('코드가 일치하지 않습니다')
         }
         const { access_token } = await res.json()
-        window.sessionStorage.setItem('access_token', access_token)
+        window.localStorage.setItem('access_token', access_token)
         props.setIsLoggedIn(true)
         navigate('/')
       })
@@ -91,7 +91,7 @@ const QrPage = (props: { setIsLoggedIn: (value: boolean) => void }) => {
   const [otpRegisterLink, setOtpRegisterLink] = useState('')
 
   useEffect(() => {
-    const jwt = window.sessionStorage.getItem('temp_token')
+    const jwt = window.localStorage.getItem('temp_token')
     fetch('api/auth/2fa', {
       method: 'PUT',
       headers: {

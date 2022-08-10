@@ -181,7 +181,7 @@ const Pong = () => {
   }
   return (
     <>
-      <Canvas width="700" height="400" ref={canvasRef} />
+      <Canvas width="600" height="600" ref={canvasRef} />
     </>
   )
 }

@@ -40,12 +40,12 @@ function ProcessLogin(props: { setIsLoggedIn: (value: boolean) => void }) {
     if (accessToken === null || isDone === null) return
 
     if (isDone === '1') {
-      window.sessionStorage.setItem('access_token', accessToken)
+      window.localStorage.setItem('access_token', accessToken)
       navigate('/')
       props.setIsLoggedIn(true)
     } else {
       const reason = searchParams.get('reason')
-      window.sessionStorage.setItem('temp_token', accessToken)
+      window.localStorage.setItem('temp_token', accessToken)
 
       if (reason === 'twofactor') {
         navigate('/two-factor')

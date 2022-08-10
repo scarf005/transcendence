@@ -5,7 +5,7 @@ export function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
 
   useEffect(() => {
-    if (window.sessionStorage.getItem('access_token')) {
+    if (window.localStorage.getItem('access_token')) {
       setIsLoggedIn(true)
     }
   })

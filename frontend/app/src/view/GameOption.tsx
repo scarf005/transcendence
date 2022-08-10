@@ -3,27 +3,36 @@ import Radio from '@mui/material/Radio'
 import RadioGroup from '@mui/material/RadioGroup'
 import FormControlLabel from '@mui/material/FormControlLabel'
 import FormControl from '@mui/material/FormControl'
-import FormLabel from '@mui/material/FormLabel'
-
 import Button from '@mui/material/Button'
-import styled from 'styled-components'
 
-export default function RowRadioButtonsGroup({ handleClick }: any) {
-  const [value, setValue] = React.useState('Easy')
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setValue((event.target as HTMLInputElement).value)
+export const PongMatchForm = (props: {
+  requestMatch: (matchData: any) => void
+}) => {
+  const [value, setValue] = React.useState('easy')
+  const submitRanked = () => {
+    props.requestMatch({
+      matchType: 'ranked',
+    })
   }
+
+  const submitQuick = () => {
+    props.requestMatch({
+      matchType: 'quick',
+      mode: value,
+    })
+  }
+
   return (
     <FormControl>
       <Button
-        onClick={() => handleClick()}
+        onClick={submitRanked}
         variant="outlined"
         style={{ margin: '0.5rem' }}
       >
         Rank Game
       </Button>
       <Button
-        onClick={() => handleClick()}
+        onClick={submitQuick}
         variant="outlined"
         style={{ margin: '0.5rem' }}
       >
@@ -34,11 +43,13 @@ export default function RowRadioButtonsGroup({ handleClick }: any) {
         aria-labelledby="demo-row-radio-buttons-group-label"
         name="row-radio-buttons-group"
         value={value}
-        onChange={handleChange}
+        onChange={(e) => {
+          setValue(e.target.value)
+        }}
       >
-        <FormControlLabel value="Easy" control={<Radio />} label="Easy" />
-        <FormControlLabel value="Nomal" control={<Radio />} label="Nomal" />
-        <FormControlLabel value="Hard" control={<Radio />} label="Hard" />
+        <FormControlLabel value="easy" control={<Radio />} label="Easy" />
+        <FormControlLabel value="medium" control={<Radio />} label="Nomal" />
+        <FormControlLabel value="hard" control={<Radio />} label="Hard" />
       </RadioGroup>
     </FormControl>
   )
