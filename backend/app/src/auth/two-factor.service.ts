@@ -35,7 +35,7 @@ export class TwoFactorService {
   async disable(uid: number): Promise<void> {
     const user = await this.userRepository.findOneBy({ uid })
     user.twoFactor = false
-    await this.twoFactorRepository.delete({ user })
+    await this.twoFactorRepository.delete({ user: { uid } })
     await this.userRepository.save(user)
   }
 
