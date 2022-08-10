@@ -18,15 +18,38 @@ export class UserService {
     return await this.userRepository.find()
   }
 
-  async create(userData: RegisterUserDto): Promise<User> {
+  async create(userData: RegisterUserDto): Promise<User[]> {
     const user = new User()
-
+  
     user.avatar = userData.avatar
     user.nickname = userData.nickname
     user.twoFactor = userData.twoFactor
     user.isActive = true
 
-    return await this.userRepository.save(user)
+    // tmp dummy user for testing
+    const user1 = new User()
+    const user2 = new User()
+    const user3 = new User()
+    user1.avatar = userData.avatar
+    user1.nickname = 'dummy1'
+    user1.twoFactor = false
+    user1.isActive = true
+    user2.avatar = userData.avatar
+    user2.nickname = 'dummy2'
+    user2.twoFactor = false
+    user2.isActive = true
+    user3.avatar = userData.avatar
+    user3.nickname = 'dummy3'
+    user3.twoFactor = false
+    user3.isActive = true
+    await this.userRepository.save(user1)
+    await this.userRepository.save(user2)
+    await this.userRepository.save(user3)
+
+    // return await this.userRepository.save(user)
+    await this.userRepository.save(user)
+
+    return await this.userRepository.find();
   }
 
   async findOneByNickname(nickname: string): Promise<User> {

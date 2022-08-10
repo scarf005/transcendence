@@ -1,11 +1,8 @@
-import React, { useState, useEffect } from 'react'
+import { useState } from 'react'
 import styled from 'styled-components'
-import Pong from './Pong'
-import RowRadioButtonsGroup from './GameOption'
+import { PongMatchForm } from './GameOption'
 import Button from '@mui/material/Button'
 import GameList from './GameList'
-import { createTheme, ThemeProvider } from '@mui/material/styles'
-import axios from 'axios'
 
 const Grid = styled.div`
   display: grid;
@@ -34,7 +31,7 @@ const List = styled.div`
   border-style: solid;
 `
 
-const GameGrid = ({ handleClick }: any) => {
+const GameGrid = (props: { requestMatch: (matchData: any) => void }) => {
   const [games, setGames] = useState({})
   const refreshGameList = () => {
     // axios.get('/game').then((res) => setGames(res))
@@ -45,7 +42,7 @@ const GameGrid = ({ handleClick }: any) => {
   return (
     <Grid>
       <Game>
-        <RowRadioButtonsGroup handleClick={handleClick} />
+        <PongMatchForm requestMatch={props.requestMatch} />
       </Game>
       <Watch>
         <Button
