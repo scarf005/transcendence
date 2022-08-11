@@ -1,11 +1,17 @@
 import { Injectable } from '@nestjs/common'
+import { InjectRepository } from '@nestjs/typeorm'
+import { Repository } from 'typeorm'
 import { Socket } from 'socket.io'
 import { PongMode } from '../configs/pong.config'
+import { Match } from './match.entity'
+import { User } from 'user/user.entity'
 
 type UserSocket = Socket & { uid: number }
 
 @Injectable()
 export class MatchService {
+  @InjectRepository(Match)
+  private matchRepository: Repository<Match>
   private readonly quickQueue: {
     easy: UserSocket[]
     medium: UserSocket[]
@@ -68,5 +74,29 @@ export class MatchService {
       1,
     )
     this.privateMap.delete(player.uid)
+  }
+
+  async findAll(): Promise<Match[]> {
+    return await this.matchRepository
+    .createQueryBuilder('match')
+    .select([
+      'match.id',
+      'winner.uid',
+      'winner.nickname',
+      'winner.avatar',
+      'loser.uid',
+      'loser.nickname',
+      'loser.avatar',
+    ])
+    .innerJoin('match.winner', 'winner')
+    .innerJoin('match.loser', 'loser')
+    .getMany()
+  }
+
+  endMatch(winner: User, loser: User): Promise<Match> {
+    const newMatch = new Match()
+    newMatch.winner = winner
+    newMatch.loser = loser
+    return this.matchRepository.save(newMatch)
   }
 }
