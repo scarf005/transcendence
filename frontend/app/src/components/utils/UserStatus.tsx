@@ -10,9 +10,9 @@ const getData = (
       return { tooltip: 'Online', color: 'success', badgeContent: ' ' }
     case 'OFFLINE':
       return { tooltip: 'Offline', color: 'error', badgeContent: ' ' }
-    default:
+    case 'GAME':
       return {
-        tooltip: `Playing game id#${status}`,
+        tooltip: `Playing game`,
         color: 'primary',
         badgeContent: <VideogameAssetIcon />,
       }

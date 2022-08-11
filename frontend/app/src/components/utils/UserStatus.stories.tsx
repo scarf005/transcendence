@@ -19,4 +19,4 @@ export const Offline = Template.bind({})
 Offline.args = { status: 'OFFLINE' }
 
 export const InGame = Template.bind({})
-InGame.args = { status: 1242 }
+InGame.args = { status: 'GAME' }

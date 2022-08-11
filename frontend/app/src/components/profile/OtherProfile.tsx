@@ -18,9 +18,9 @@ import {
 
 type userStatus = 'DEFAULT' | 'BLOCKED' | 'FRIEND'
 const getStatus = (user: User, refUser: User): userStatus => {
-  if (refUser.blocks.includes(user.id)) {
+  if (refUser.blocks.includes(user.uid)) {
     return 'BLOCKED'
-  } else if (refUser.friends.includes(user.id)) {
+  } else if (refUser.friends.includes(user.uid)) {
     return 'FRIEND'
   } else {
     return 'DEFAULT'

@@ -1,18 +1,16 @@
-type gameID = number
-type userID = string
+type userID = number
 
-export type UserStatusType = 'ONLINE' | 'OFFLINE' | gameID
+export type UserStatusType = 'ONLINE' | 'OFFLINE' | 'GAME'
 
 export interface Stat {
   wins: number
   loses: number
-  draws: number
   rating: number
 }
 
 export interface User {
-  id: userID
-  name: string
+  uid: userID
+  nickname: string
   avatar: string
   status: UserStatusType
   friends: userID[]

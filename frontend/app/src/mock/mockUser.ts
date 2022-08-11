@@ -1,16 +1,20 @@
 import { User } from 'data/User.dto'
-
+enum USER_ID {
+  DefaultUser,
+  RefUser,
+  BlockedUser,
+  FriendUser,
+}
 const mockUserGen = (params: Partial<User>): User => {
   return {
-    id: 'exampleID',
-    name: 'Example User',
+    uid: USER_ID.DefaultUser,
+    nickname: 'Example User',
     status: 'ONLINE',
-    friends: ['friendID'],
-    blocks: ['blockedID'],
+    friends: [],
+    blocks: [],
     stat: {
       wins: 2,
       loses: 4,
-      draws: 4,
       rating: 3,
     },
     ...params,
@@ -19,15 +23,16 @@ const mockUserGen = (params: Partial<User>): User => {
 }
 
 export const mockUser = mockUserGen({})
+
 export const mockRefUser = mockUserGen({
-  id: 'refUserID',
-  name: 'This is your profile',
+  uid: USER_ID.RefUser,
+  nickname: 'This is your profile',
 })
 
 export const blockedUser = mockUserGen({
   ...mockUser,
-  id: 'blockedID',
-  name: 'Blocked User',
+  uid: USER_ID.BlockedUser,
+  nickname: 'Blocked User',
   status: 'OFFLINE',
   friends: [],
   blocks: [],
@@ -35,9 +40,9 @@ export const blockedUser = mockUserGen({
 
 export const friendUser = mockUserGen({
   ...mockUser,
-  id: 'friendID',
-  name: 'Friend User',
-  status: 123,
+  uid: USER_ID.FriendUser,
+  nickname: 'Friend User',
+  status: 'GAME',
   friends: [],
   blocks: [],
 })
