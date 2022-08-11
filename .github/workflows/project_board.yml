@@ -34,7 +34,7 @@ jobs:
                 closed) TO="$done";;
               esac
             ;;
-            pull_request)
+            pull_request | pull_request_target)
               NODE="$node_pr"
               case $event_action in
                 opened | reopened | review_requested) TO="$in_progress";;

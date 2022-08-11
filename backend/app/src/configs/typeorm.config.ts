@@ -1,5 +1,8 @@
 import { TypeOrmModuleOptions } from '@nestjs/typeorm'
-import { User } from 'src/user/entity/user.entity'
+import { User } from 'user/user.entity'
+import { FtUser } from 'auth/ft/ft-user.entity'
+import { TwoFactor } from 'auth/two-factor.entity'
+import { Stat } from 'user/stat.entity'
 
 export const typeORMConfig: TypeOrmModuleOptions = {
   type: 'postgres',
@@ -8,6 +11,7 @@ export const typeORMConfig: TypeOrmModuleOptions = {
   username: 'transcendence',
   password: process.env.DB_PASSWORD,
   database: 'transcendence',
-  entities: [User],
+  // entities: ["**/*.entity.{ts,js}"],
+  entities: [User, FtUser, TwoFactor, Stat],
   synchronize: true,
 }

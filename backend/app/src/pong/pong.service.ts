@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { Socket } from 'socket.io'
 
-import * as CONSTANTS from './constants'
+import * as CONSTANTS from '../configs/pong.config'
 
 class Rect {
   x: number

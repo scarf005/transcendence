@@ -35,6 +35,8 @@ services:
       JWT_SECRET: ${JWT_SECRET}
       FT_CLIENT_ID: ${FT_CLIENT_ID}
       FT_CLIENT_SECRET: ${FT_CLIENT_SECRET}
+      FT_REDIRECT_URL: ${FT_REDIRECT_URL}
+      BASE_URL: ${BASE_URL}
 
     expose:
       - 3000
