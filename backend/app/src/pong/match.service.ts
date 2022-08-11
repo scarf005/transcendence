@@ -78,19 +78,19 @@ export class MatchService {
 
   async findAll(): Promise<Match[]> {
     return await this.matchRepository
-    .createQueryBuilder('match')
-    .select([
-      'match.id',
-      'winner.uid',
-      'winner.nickname',
-      'winner.avatar',
-      'loser.uid',
-      'loser.nickname',
-      'loser.avatar',
-    ])
-    .innerJoin('match.winner', 'winner')
-    .innerJoin('match.loser', 'loser')
-    .getMany()
+      .createQueryBuilder('match')
+      .select([
+        'match.id',
+        'winner.uid',
+        'winner.nickname',
+        'winner.avatar',
+        'loser.uid',
+        'loser.nickname',
+        'loser.avatar',
+      ])
+      .innerJoin('match.winner', 'winner')
+      .innerJoin('match.loser', 'loser')
+      .getMany()
   }
 
   endMatch(winner: User, loser: User): Promise<Match> {

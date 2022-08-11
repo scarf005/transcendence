@@ -6,9 +6,7 @@ import { MatchService } from './match.service'
 import { PongService } from './pong.service'
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([Match]),
-  ],
+  imports: [TypeOrmModule.forFeature([Match])],
   providers: [MatchGateWay, MatchService, PongService],
   exports: [MatchService],
 })

@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException, BadRequestException, InternalServerErrorException } from '@nestjs/common'
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  InternalServerErrorException,
+} from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { User } from './user.entity'
 import { Repository } from 'typeorm'
@@ -20,25 +25,26 @@ export class UserService {
 
   async findAll(): Promise<User[]> {
     return await this.userRepository
-    .createQueryBuilder('user')
-    .select([
-      'user.uid',
-      'user.nickname',
-      'user.avatar',
-      'user.status',
-      'user.friends',
-      'user.blocks',
-      'stat.win',
-      'stat.lose',
-      'stat.rating'])
-    .innerJoin('user.stat', 'stat')
-    .getMany()
+      .createQueryBuilder('user')
+      .select([
+        'user.uid',
+        'user.nickname',
+        'user.avatar',
+        'user.status',
+        'user.friends',
+        'user.blocks',
+        'stat.win',
+        'stat.lose',
+        'stat.rating',
+      ])
+      .innerJoin('user.stat', 'stat')
+      .getMany()
   }
 
   async create(userData: RegisterUserDto): Promise<User> {
     const user = new User()
     const stat = new Stat()
-  
+
     user.avatar = userData.avatar
     user.nickname = userData.nickname
     user.twoFactor = userData.twoFactor
@@ -76,20 +82,21 @@ export class UserService {
 
   async findOneByNickname(nickname: string): Promise<User> {
     return await this.userRepository
-    .createQueryBuilder('user')
-    .select([
-      'user.uid',
-      'user.nickname',
-      'user.avatar',
-      'user.status',
-      'user.friends',
-      'user.blocks',
-      'stat.win',
-      'stat.lose',
-      'stat.rating'])
-    .innerJoin('user.stat', 'stat')
-    .where('user.nickname = :nickname', { nickname })
-    .getOne()
+      .createQueryBuilder('user')
+      .select([
+        'user.uid',
+        'user.nickname',
+        'user.avatar',
+        'user.status',
+        'user.friends',
+        'user.blocks',
+        'stat.win',
+        'stat.lose',
+        'stat.rating',
+      ])
+      .innerJoin('user.stat', 'stat')
+      .where('user.nickname = :nickname', { nickname })
+      .getOne()
   }
 
   async update(user: User): Promise<User> {
@@ -98,20 +105,21 @@ export class UserService {
 
   async findOneByUid(uid: number): Promise<User> {
     return await this.userRepository
-    .createQueryBuilder('user')
-    .select([
-      'user.uid',
-      'user.nickname',
-      'user.avatar',
-      'user.status',
-      'user.friends',
-      'user.blocks',
-      'stat.win',
-      'stat.lose',
-      'stat.rating'])
-    .innerJoin('user.stat', 'stat')
-    .where('user.uid = :uid', { uid })
-    .getOne()
+      .createQueryBuilder('user')
+      .select([
+        'user.uid',
+        'user.nickname',
+        'user.avatar',
+        'user.status',
+        'user.friends',
+        'user.blocks',
+        'stat.win',
+        'stat.lose',
+        'stat.rating',
+      ])
+      .innerJoin('user.stat', 'stat')
+      .where('user.uid = :uid', { uid })
+      .getOne()
   }
 
   async remove(uid: number): Promise<void> {
@@ -137,63 +145,73 @@ export class UserService {
 
   async addFriend(uid: number, friendUid: number): Promise<string> {
     const user = await this.userRepository.findOne({ where: { uid } })
-    const friend = await this.userRepository.findOne({ where: { uid: friendUid } })
-    if (!friend)
-      throw new NotFoundException("Friend not found")
-    if (user.friends.find(id => id === friendUid))
-      throw new BadRequestException("Already friend")
+    const friend = await this.userRepository.findOne({
+      where: { uid: friendUid },
+    })
+    if (!friend) throw new NotFoundException('Friend not found')
+    if (user.friends.find((id) => id === friendUid))
+      throw new BadRequestException('Already friend')
     user.friends.push(friendUid)
     this.userRepository.save(user).catch(() => {
-      throw new InternalServerErrorException("database error")
+      throw new InternalServerErrorException('database error')
     })
     return `${user.nickname} is now friend with ${friend.nickname}`
   }
 
   async addBlock(uid: number, blockUid: number): Promise<string> {
     const user = await this.userRepository.findOne({ where: { uid } })
-    const block = await this.userRepository.findOne({ where: { uid: blockUid } })
-    if (!block)
-      throw new NotFoundException("Block User not found")
-    if (user.blocks.find(id => id === blockUid))
-      throw new BadRequestException("Already blocked")
+    const block = await this.userRepository.findOne({
+      where: { uid: blockUid },
+    })
+    if (!block) throw new NotFoundException('Block User not found')
+    if (user.blocks.find((id) => id === blockUid))
+      throw new BadRequestException('Already blocked')
     user.blocks.push(blockUid)
     this.userRepository.save(user).catch(() => {
-      throw new InternalServerErrorException("database error")
+      throw new InternalServerErrorException('database error')
     })
     return `${user.nickname} is now blocked with ${block.nickname}`
   }
 
   async deleteFriend(uid: number, friendUid: number): Promise<string> {
     const user = await this.userRepository.findOne({ where: { uid } })
-    const friend = await this.userRepository.findOne({ where: { uid: friendUid } })
-    if (!friend)
-      throw new NotFoundException("Friend not found")
-    if (!user.friends.find(id => id === friendUid))
-      throw new BadRequestException("Not friend")
-    user.friends = user.friends.filter(id => id !== friendUid)
+    const friend = await this.userRepository.findOne({
+      where: { uid: friendUid },
+    })
+    if (!friend) throw new NotFoundException('Friend not found')
+    if (!user.friends.find((id) => id === friendUid))
+      throw new BadRequestException('Not friend')
+    user.friends = user.friends.filter((id) => id !== friendUid)
     this.userRepository.save(user).catch(() => {
-      throw new InternalServerErrorException("database error")
+      throw new InternalServerErrorException('database error')
     })
     return `${user.nickname} is no longer friend with ${friend.nickname}`
   }
 
   async deleteBlock(uid: number, blockUid: number): Promise<string> {
     const user = await this.userRepository.findOne({ where: { uid } })
-    const block = await this.userRepository.findOne({ where: { uid: blockUid } })
-    if (!block)
-      throw new NotFoundException("Blocked user not found")
-    if (!user.blocks.find(id => id === blockUid))
-      throw new BadRequestException("Not Blocked")
-    user.blocks = user.friends.filter(id => id !== blockUid)
+    const block = await this.userRepository.findOne({
+      where: { uid: blockUid },
+    })
+    if (!block) throw new NotFoundException('Blocked user not found')
+    if (!user.blocks.find((id) => id === blockUid))
+      throw new BadRequestException('Not Blocked')
+    user.blocks = user.friends.filter((id) => id !== blockUid)
     this.userRepository.save(user).catch(() => {
-      throw new InternalServerErrorException("database error")
+      throw new InternalServerErrorException('database error')
     })
     return `${user.nickname} is no longer blocked with ${block.nickname}`
   }
 
   async matchTest(): Promise<Match> {
-    const user1 = await this.userRepository.findOne({ where: { uid : 1 }, relations: ['stat'] })
-    const user2 = await this.userRepository.findOne({ where: { uid : 2 }, relations: ['stat'] })
+    const user1 = await this.userRepository.findOne({
+      where: { uid: 1 },
+      relations: ['stat'],
+    })
+    const user2 = await this.userRepository.findOne({
+      where: { uid: 2 },
+      relations: ['stat'],
+    })
     ++user1.stat.win
     ++user2.stat.lose
     user1.stat.rating += 20
