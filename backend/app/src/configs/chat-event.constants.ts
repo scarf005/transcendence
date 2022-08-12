@@ -1,10 +1,10 @@
 export const chatEvent = {
-  JOIN,
-  LEAVE,
-  CREATE,
-  SEND,
-  RECEIVE,
-  NOTICE,
-  ADD_ADMIN,
-  REMOVE_ADMIN,
+  JOIN: 'JOIN',
+  LEAVE: 'LEAVE',
+  CREATE: 'CREATE',
+  SEND: 'SEND',
+  RECEIVE: 'RECEIVE',
+  NOTICE: 'NOTICE',
+  ADD_ADMIN: 'ADD_ADMIN',
+  REMOVE_ADMIN: 'REMOVE_ADMIN',
 } as const
