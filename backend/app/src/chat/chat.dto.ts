@@ -11,7 +11,7 @@ export class ChatRoomDto {
 
 export class ChatRoomStatusDto extends ChatRoomDto {
   @ApiProperty()
-  roomId: string
+  roomId: number
   @ApiProperty()
   adminUid: Array<number>
   @ApiProperty()
@@ -27,5 +27,12 @@ export class ChatMessageDto {
   @ApiProperty({ description: '메시지 본문' })
   msgContent: string
   @ApiProperty({ description: '채팅방id' })
-  roomId: string
+  roomId: number
+}
+
+export class UserInRoomDto {
+  @ApiProperty()
+  roomId: number
+  @ApiProperty()
+  uid: number
 }

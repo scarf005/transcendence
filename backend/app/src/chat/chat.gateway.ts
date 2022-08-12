@@ -8,34 +8,37 @@ import {
 import { AsyncApiPub, AsyncApiService, AsyncApiSub } from 'nestjs-asyncapi'
 import { Server, Socket } from 'socket.io'
 import { chatEvent } from 'configs/chat-event.constants'
-import { ChatMessageDto } from './chat.dto'
+import { ChatMessageDto, UserInRoomDto } from './chat.dto'
+import { ChatService } from './chat.service'
 import { UserService } from 'user/user.service'
 
 @AsyncApiService()
 @WebSocketGateway({ namespace: 'api/chat', cors: true })
 export class ChatGateway {
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    private readonly userService: UserService,
+    private readonly chatService: ChatService,
+  ) {}
   @WebSocketServer()
   server: Server
 
   clients = []
 
-  afterInit(server: Server) {
-    console.log('chat: new server')
-  }
-
   handleConnection(client: Socket) {
-    console.log('chat: new connection')
-    let token = client.handshake.auth.token
+    // FIXME: prod에선 쿼리로부터 uid를 확인할 필요 없음
+    // TODO: change user status to online
+    const token = client.handshake.auth.token
     if (token === undefined) {
-      token = client.handshake.query.token
+      client.data.uid = Number(client.handshake.query.uid)
+    } else {
+      client.data.uid = this.userService.getUidFromToken(token)
     }
-    client.data.uid = this.userService.getUidFromToken(token)
-    console.log('uid: ' + client.data.uid)
+    console.log(`chat: uid ${client.data.uid} connected.`)
   }
 
   handleDisconnect(client: Socket) {
-    console.log('chat: disconnected')
+    // TODO: change user status to offline
+    console.log(`chat: uid ${client.data.uid} disconnected`)
   }
 
   @SubscribeMessage(chatEvent.SEND)
@@ -69,15 +72,16 @@ export class ChatGateway {
     channel: chatEvent.JOIN,
     summary: '채팅방에 참가',
     description: 'user가 채팅방에 새로 입장. 알림메시지를 모든 구성원에게 전송',
-    message: { name: 'roomId', payload: { type: String } },
+    message: { name: 'roomId', payload: { type: Number } },
   })
   async onJoinRoom(
     @ConnectedSocket() client: Socket,
-    @MessageBody() roomId: string,
+    @MessageBody() roomId: number,
   ) {
     // TODO: 유효한 roomId인지 확인
     // TODO: banned 여부 확인
-    client.join(roomId)
+    this.chatService.addUserToRoom(client.data.uid, roomId)
+    client.join(roomId.toString())
     console.log(`chat: ${client.data.uid} has entered to ${roomId}`)
     this.emitNotice(client, roomId, 'join')
   }
@@ -87,13 +91,14 @@ export class ChatGateway {
     channel: chatEvent.LEAVE,
     summary: '채팅방에서 나가기',
     description: 'user가 채팅방에서 나감. 알림메시지를 모든 구성원에게 전송',
-    message: { name: 'roomId', payload: { type: String } },
+    message: { name: 'roomId', payload: { type: Number } },
   })
   async onLeaveRoom(
     @ConnectedSocket() client: Socket,
-    @MessageBody() roomId: string,
+    @MessageBody() roomId: number,
   ) {
-    client.leave(roomId)
+    this.chatService.removeUserFromRoom(client.data.uid, roomId)
+    client.leave(roomId.toString())
     console.log(`chat: ${client.data.uid} leaved ${roomId}`)
     this.emitNotice(client, roomId, 'leave')
   }
@@ -104,12 +109,62 @@ export class ChatGateway {
     description: 'user 입장, 퇴장 등의 메시지',
     message: { name: 'data', payload: { type: ChatMessageDto } },
   })
-  async emitNotice(client, roomId: string, msg: string) {
+  async emitNotice(client, roomId: number, msg: string) {
     const data: ChatMessageDto = {
       roomId: roomId,
       senderUid: client.data.uid,
       msgContent: msg,
     }
-    this.server.to(roomId).emit(chatEvent.NOTICE, data)
+    this.server.to(roomId.toString()).emit(chatEvent.NOTICE, data)
+  }
+
+  @AsyncApiPub({
+    channel: chatEvent.CREATE,
+    summary: '새로운 채팅방 생성',
+    message: { name: 'room_title', payload: { type: String } },
+  })
+  @SubscribeMessage(chatEvent.CREATE)
+  async onCreateRoom(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() title: string,
+  ) {
+    const newRoom = this.chatService.createChatroom(client.data.uid, title)
+    this.onJoinRoom(client, newRoom.roomId)
+  }
+
+  @AsyncApiPub({
+    channel: chatEvent.ADD_ADMIN,
+    summary: 'uid를 roomId의 admin에 추가',
+    message: { name: 'data', payload: { type: UserInRoomDto } },
+  })
+  @SubscribeMessage(chatEvent.ADD_ADMIN)
+  async onAddAdmin(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() data: UserInRoomDto,
+  ) {
+    // client가 현재 admin이고, 새 admin이 현재 chatroom의 참가자라면
+    if (
+      this.chatService.isAdmin(client.data.uid, data.roomId) &&
+      this.chatService.isJoined(data.uid, data.roomId)
+    )
+      this.chatService.addUserAsAdmin(data.uid, data.roomId)
+  }
+
+  @AsyncApiPub({
+    channel: chatEvent.REMOVE_ADMIN,
+    summary: 'uid를  roomId의 admin에서 삭제',
+    message: { name: 'data', payload: { type: UserInRoomDto } },
+  })
+  @SubscribeMessage(chatEvent.REMOVE_ADMIN)
+  async onRemoveAdmin(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() data: UserInRoomDto,
+  ) {
+    // client가 현재 admin이고, 새 admin이 현재 chatroom의 참가자라면
+    if (
+      this.chatService.isAdmin(client.data.uid, data.roomId) &&
+      this.chatService.isJoined(data.uid, data.roomId)
+    )
+      this.chatService.removeUserAsAdmin(data.uid, data.roomId)
   }
 }
