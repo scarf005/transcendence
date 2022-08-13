@@ -1,51 +1,172 @@
-import { Injectable } from '@nestjs/common'
-import { ChatRoomStatusDto } from './chat.dto'
+import {
+  Injectable,
+  NotFoundException,
+  InternalServerErrorException,
+  BadRequestException,
+  UnauthorizedException,
+} from '@nestjs/common'
+import { InjectRepository } from '@nestjs/typeorm'
+import { Not, Repository } from 'typeorm'
+import { ChatRoom } from './chatroom.entity'
+import { ChatUser } from './chatuser.entity'
+import { UserService } from 'user/user.service'
+import { RoomType } from './roomtype.enum'
 
 @Injectable()
 export class ChatService {
-  private maxRoomId = 0
-  private channels: Map<number, ChatRoomStatusDto> = new Map()
+  constructor(
+    @InjectRepository(ChatRoom)
+    private chatRoomRepository: Repository<ChatRoom>,
+    @InjectRepository(ChatUser)
+    private chatUserRepository: Repository<ChatUser>,
+    private readonly userService: UserService,
+  ) {}
 
-  getAllChatrooms() {
-    return this.channels
+  getAllChatrooms(): Promise<ChatRoom[]> {
+    return this.chatRoomRepository.find({
+      select: ['id', 'name', 'roomtype'],
+      where: { roomtype: Not(RoomType.PRIVATE) },
+    })
   }
 
-  createChatroom(creator: number, roomTitle: string) {
-    this.maxRoomId++
-    const item: ChatRoomStatusDto = {
-      roomId: this.maxRoomId,
-      roomName: roomTitle,
-      ownerUid: creator,
-      adminUid: [creator],
-      joinedUsers: [],
+  async createChatroom(
+    creatorId: number,
+    roomTitle: string,
+  ): Promise<ChatRoom> {
+    const room = new ChatRoom()
+    let chatuser = new ChatUser()
+    const user = await this.userService
+      .findSimpleOneByUid(creatorId)
+      .catch(() => {
+        throw new NotFoundException('User not found')
+      })
+    chatuser.user = user
+    chatuser.isAdmin = true
+    chatuser.isOwner = true
+    chatuser = await this.chatUserRepository.save(chatuser).catch(() => {
+      throw new InternalServerErrorException('ChatUser not created')
+    })
+    room.name = roomTitle
+    room.chatUser = []
+    room.chatUser.push(chatuser)
+    return await this.chatRoomRepository.save(room).catch(() => {
+      throw new InternalServerErrorException('Room not created')
+    })
+  }
+
+  async addUserToRoom(uid: number, roomId: number): Promise<ChatRoom> {
+    const room = await this.chatRoomRepository
+      .findOne({
+        where: { id: roomId },
+        relations: ['chatUser', 'chatUser.user'],
+      })
+      .catch(() => {
+        throw new NotFoundException('Room not found')
+      })
+    if (room.bannedIds.includes(uid)) {
+      throw new BadRequestException('User is banned')
     }
-    this.channels[this.maxRoomId] = item
-    return item
+    const user = await this.userService.findSimpleOneByUid(uid).catch(() => {
+      throw new NotFoundException('User not found')
+    })
+    room.chatUser.map((chatUser) => {
+      if (chatUser.user.uid === user.uid) {
+        throw new BadRequestException('User already in room')
+      }
+    })
+    let chatuser = new ChatUser()
+    chatuser.user = user
+    chatuser = await this.chatUserRepository.save(chatuser).catch(() => {
+      throw new InternalServerErrorException('ChatUser not created')
+    })
+    room.chatUser.push(chatuser)
+    return await this.chatRoomRepository.save(room).catch(() => {
+      throw new InternalServerErrorException('Room not updated')
+    })
   }
 
-  addUserToRoom(uid: number, roomId: number) {
-    this.channels[roomId].joinedUsers.push(uid)
+  async removeUserFromRoom(uid: number, roomId: number) {
+    const room = await this.chatRoomRepository
+      .findOne({
+        select: ['chatUser'],
+        where: { id: roomId, chatUser: { user: { uid } } },
+        relations: ['chatUser', 'chatUser.user'],
+      })
+      .catch(() => {
+        throw new NotFoundException('Room not found or User not in room')
+      })
+    return await this.chatUserRepository
+      .delete({ id: room.chatUser[0].id })
+      .catch(() => {
+        throw new InternalServerErrorException('user not removed')
+      })
   }
 
-  removeUserFromRoom(uid: number, roomId: number) {
-    const idx = this.channels[roomId].joinedUsers.indexOf(uid)
-    this.channels[roomId].joinedUsers.splice(idx, 1)
+  async addUserAsAdmin(uid: number, roomId: number) {
+    const room = await this.chatRoomRepository
+      .findOne({
+        select: ['chatUser'],
+        where: { id: roomId, chatUser: { user: { uid } } },
+        relations: ['chatUser', 'chatUser.user'],
+      })
+      .catch(() => {
+        throw new NotFoundException('Room not found or User not in room')
+      })
+    room.chatUser[0].isAdmin = true
   }
 
-  addUserAsAdmin(uid: number, roomId: number) {
-    this.channels[roomId].adminUid.push(uid)
+  async removeUserAsAdmin(uid: number, roomId: number) {
+    const room = await this.chatRoomRepository
+      .findOne({
+        select: ['chatUser'],
+        where: { id: roomId, chatUser: { user: { uid } } },
+        relations: ['chatUser', 'chatUser.user'],
+      })
+      .catch(() => {
+        throw new NotFoundException('Room not found or User not in room')
+      })
+    room.chatUser[0].isAdmin = false
   }
 
-  removeUserAsAdmin(uid: number, roomId: number) {
-    const idx = this.channels[roomId].adminUid.indexOf(uid)
-    this.channels[roomId].adminUid.splice(idx, 1)
+  async isAdmin(uid: number, roomId: number) {
+    const room = await this.chatRoomRepository
+      .findOne({
+        select: ['chatUser'],
+        where: { id: roomId, chatUser: { user: { uid } } },
+        relations: ['chatUser', 'chatUser.user'],
+      })
+      .catch(() => {
+        throw new NotFoundException('Room not found or User not in room')
+      })
+    if (!room.chatUser[0].isAdmin)
+      throw new UnauthorizedException('User is not admin')
+    return true
   }
 
-  isAdmin(uid: number, roomId: number) {
-    return this.channels[roomId].adminUid.includes(uid)
+  async findRoomByRoomid(id: number): Promise<ChatRoom> {
+    return await this.chatRoomRepository
+      .createQueryBuilder('chatRoom')
+      .select([
+        'chatRoom.id',
+        'chatRoom.name',
+        'chatRoom.type',
+        'chatUser.isAdmin',
+        'chatUser.isOwner',
+        'user.id',
+      ])
+      .leftJoin('chatRoom.chatUser', 'chatUser')
+      .leftJoin('chatUser.user', 'user')
+      .where('chatRoom.id = :id', { id })
+      .getOne()
   }
 
-  isJoined(uid: number, roomId: number) {
-    return this.channels[roomId].joinedUsers.includes(uid)
+  async findRoomsByUserId(id: number): Promise<ChatRoom[]> {
+    return await this.chatRoomRepository
+      .createQueryBuilder('chatRoom')
+      .select(['chatRoom.id', 'chatRoom.name', 'chatRoom.type'])
+      .leftJoin('chatRoom.chatUser', 'chatUser')
+      .leftJoin('chatUser.user', 'user')
+      .where('user.id = :id', { id })
+      .getMany()
   }
 }

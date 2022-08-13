@@ -74,7 +74,7 @@ export class ChatGateway {
   async broadcastMessage(client, data: ChatMessageDto) {
     // TODO: block 여부 확인
     data.senderUid = client.data.uid
-    client.broadcast.to(data.roomId).emit(chatEvent.RECEIVE, data)
+    client.broadcast.to(data.roomId.toString()).emit(chatEvent.RECEIVE, data)
   }
 
   @SubscribeMessage(chatEvent.JOIN)
@@ -138,8 +138,11 @@ export class ChatGateway {
     @ConnectedSocket() client: Socket,
     @MessageBody() title: string,
   ) {
-    const newRoom = this.chatService.createChatroom(client.data.uid, title)
-    this.onJoinRoom(client, newRoom.roomId)
+    const newRoom = await this.chatService.createChatroom(
+      client.data.uid,
+      title,
+    )
+    this.onJoinRoom(client, newRoom.id)
   }
 
   @AsyncApiPub({
@@ -153,10 +156,7 @@ export class ChatGateway {
     @MessageBody() data: UserInRoomDto,
   ) {
     // client가 현재 admin이고, 새 admin이 현재 chatroom의 참가자라면
-    if (
-      this.chatService.isAdmin(client.data.uid, data.roomId) &&
-      this.chatService.isJoined(data.uid, data.roomId)
-    )
+    if (this.chatService.isAdmin(client.data.uid, data.roomId))
       this.chatService.addUserAsAdmin(data.uid, data.roomId)
   }
 
@@ -171,10 +171,7 @@ export class ChatGateway {
     @MessageBody() data: UserInRoomDto,
   ) {
     // client가 현재 admin이고, 새 admin이 현재 chatroom의 참가자라면
-    if (
-      this.chatService.isAdmin(client.data.uid, data.roomId) &&
-      this.chatService.isJoined(data.uid, data.roomId)
-    )
+    if (this.chatService.isAdmin(client.data.uid, data.roomId))
       this.chatService.removeUserAsAdmin(data.uid, data.roomId)
   }
 }

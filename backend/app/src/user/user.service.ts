@@ -8,7 +8,7 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { User } from './user.entity'
 import { Repository } from 'typeorm'
 import { JwtService } from '@nestjs/jwt'
-import { UserPayload, jwtConstants } from 'configs/jwt-token.config'
+import { UserPayload } from 'configs/jwt-token.config'
 import { RegisterUserDto } from 'dto/register-user.dto'
 import { Stat } from './stat.entity'
 import { Match } from 'pong/match.entity'
@@ -120,6 +120,10 @@ export class UserService {
       .innerJoin('user.stat', 'stat')
       .where('user.uid = :uid', { uid })
       .getOne()
+  }
+
+  async findSimpleOneByUid(uid: number): Promise<User> {
+    return await this.userRepository.findOneBy({ uid })
   }
 
   async remove(uid: number): Promise<void> {
