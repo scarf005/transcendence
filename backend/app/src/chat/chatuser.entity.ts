@@ -17,7 +17,7 @@ export class ChatUser {
 
   @Column({ default: false })
   isOwner: boolean
-  
+
   @Column({ type: 'timestamptz', nullable: true })
   endOfMute: Date
 
