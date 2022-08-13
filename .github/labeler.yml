@@ -4,13 +4,15 @@
 백엔드:
   - backend/app/**/*
 
+테스트:
+  - "**/*.spec.*"
+  - "**/*.test.*"
+
 ci:
-  [
-    ".github/**/*",
-    "**/*.yml",
-    "**/*.yaml",
-    "**/*Dockerfile*",
-    "**/*Dockerfile*.*",
-    "**/*compose*.*.yml",
-    "**/*compose*.yml",
-  ]
+  - ".github/**/*"
+  - "**/*.yml"
+  - "**/*.yaml"
+  - "**/*Dockerfile*"
+  - "**/*Dockerfile*.*"
+  - "**/*compose*.*.yml"
+  - "**/*compose*.yml"

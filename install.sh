@@ -1,2 +1,2 @@
-(cd backend/app && npm install)
-(cd frontend/app && npm install)
+(cd backend/app && npm ci)
+(cd frontend/app && npm ci)
