@@ -10,29 +10,39 @@ import { Server, Socket } from 'socket.io'
 import { chatEvent } from 'configs/chat-event.constants'
 import { ChatMessageDto, UserInRoomDto } from './chat.dto'
 import { ChatService } from './chat.service'
-import { UserService } from 'user/user.service'
+import * as jwt from 'jsonwebtoken'
+import { jwtConstants } from 'configs/jwt-token.config'
 
 @AsyncApiService()
 @WebSocketGateway({ namespace: 'api/chat', cors: true })
 export class ChatGateway {
-  constructor(
-    private readonly userService: UserService,
-    private readonly chatService: ChatService,
-  ) {}
+  constructor(private readonly chatService: ChatService) {}
   @WebSocketServer()
   server: Server
 
   clients = []
 
   handleConnection(client: Socket) {
+    const { token } = client.handshake.auth
     // FIXME: prod에선 쿼리로부터 uid를 확인할 필요 없음
-    // TODO: change user status to online
-    const token = client.handshake.auth.token
     if (token === undefined) {
-      client.data.uid = Number(client.handshake.query.uid)
-    } else {
-      client.data.uid = this.userService.getUidFromToken(token)
+      const uid = Number(client.handshake.query.uid)
+      if (uid !== undefined) {
+        client.data.uid = Number(client.handshake.query.uid)
+        console.log(`chat: uid ${client.data.uid} connected.`)
+        return
+      } else return client.disconnect()
     }
+    try {
+      const decoded = jwt.verify(token, jwtConstants.secret) as jwt.JwtPayload
+      if (decoded.uidType !== 'user' || decoded.twoFactorPassed !== true) {
+        return client.disconnect()
+      }
+      client.data.uid = decoded.uid
+    } catch {
+      return client.disconnect()
+    }
+    // TODO: change user status to online
     console.log(`chat: uid ${client.data.uid} connected.`)
   }
 

@@ -135,14 +135,6 @@ export class UserService {
     return this.jwtService.sign(payload)
   }
 
-  getUidFromToken(token: string): number {
-    const decoded = this.jwtService.verify(token, {
-      secret: jwtConstants.secret,
-    })
-    //TODO: catch exception when verification failed.
-    return decoded.uid
-  }
-
   async addFriend(uid: number, friendUid: number): Promise<string> {
     const user = await this.userRepository.findOne({ where: { uid } })
     const friend = await this.userRepository.findOne({
