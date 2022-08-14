@@ -83,24 +83,14 @@ export class UserService {
   }
 
   async findOneByNickname(nickname: string): Promise<User> {
-    if (!nickname) return null
-    if (nickname.length == 0) return null
-    return await this.userRepository
+    if (nickname.search(/^\w{2,10}$/) === -1)
+      throw new BadRequestException('Nickname is invalid')
+    const user = await this.userRepository
       .createQueryBuilder('user')
-      .select([
-        'user.uid',
-        'user.nickname',
-        'user.avatar',
-        'user.status',
-        'user.friends',
-        'user.blocks',
-        'stat.win',
-        'stat.lose',
-        'stat.rating',
-      ])
-      .innerJoin('user.stat', 'stat')
       .where('user.nickname = :nickname', { nickname })
       .getOne()
+    if (user) throw new BadRequestException('Nickname already exists')
+    return null
   }
 
   async update(user: User): Promise<User> {
@@ -231,5 +221,15 @@ export class UserService {
 
   async matchAll(): Promise<Match[]> {
     return await this.matchService.findAll()
+  }
+
+  async findBlockedByUid(uid: number): Promise<number[]> {
+    const user = await this.userRepository.findOne({ where: { uid } })
+    if (!user) throw new NotFoundException('User not found')
+    const users = await this.userRepository
+      .createQueryBuilder('user')
+      .where(':uid = ANY(user.blocks)', { uid: uid })
+      .getMany()
+    return users.map((user) => user.uid)
   }
 }

@@ -12,7 +12,7 @@ import { ChatUser } from './chatuser.entity'
 import { UserService } from 'user/user.service'
 import { RoomType } from './roomtype.enum'
 import { User } from 'user/user.entity'
-import * as bcrypt from 'bcrypt'
+import * as bcrypt from 'bcryptjs'
 
 @Injectable()
 export class ChatService {
@@ -73,6 +73,8 @@ export class ChatService {
     if (password) {
       if (!(await bcrypt.compare(password, room.password)))
         throw new BadRequestException('Password is wrong')
+    } else if (room.roomtype === RoomType.PROTECTED) {
+      throw new BadRequestException('Room need password')
     }
     const user = await this.userService.findSimpleOneByUid(uid)
     if (!user) throw new NotFoundException('User not found')
@@ -196,5 +198,9 @@ export class ChatService {
 
   async findOneByuid(uid: number): Promise<User> {
     return await this.userService.findOneByUid(uid)
+  }
+
+  async findBlockedMeUsers(uid: number): Promise<number[]> {
+    return await this.userService.findBlockedByUid(uid)
   }
 }
