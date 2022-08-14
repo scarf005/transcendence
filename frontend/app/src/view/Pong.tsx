@@ -1,9 +1,8 @@
-import React, { useRef, useEffect, useState } from 'react'
+import { useRef, useEffect, useState } from 'react'
 import Avatar from '@mui/material/Avatar'
-import { RecoilRoot, useRecoilValue } from 'recoil'
 import { Grid, Stack, Typography, Box, Modal } from '@mui/material'
-import { withPongProfile } from 'state/pong'
 import styled from 'styled-components'
+import { useUser } from 'hook/useUser'
 
 export type Rect = {
   x: number
@@ -41,36 +40,19 @@ const drawRect = (
 }
 
 const PongUser = (props: { uid: number }) => {
-  const profile = useRecoilValue(withPongProfile(props.uid))
+  const profile = useUser(props.uid)
 
-  return (
-    <Stack justifyContent="center" alignItems="center">
-      <Typography>{profile.nickname}</Typography>
-      <Avatar src={profile.avatar} />
-      <Typography>RATING: {profile.rating}</Typography>
-    </Stack>
-  )
-}
-
-const ScoreBoard = (props: { leftScore: number; rightScore: number }) => {
-  return (
-    <>
-      <Grid item xs={12} textAlign="center">
-        <Typography>SCORE</Typography>
-      </Grid>
-      <Grid item xs={2} />
-      <Grid item xs={3} textAlign="center">
-        <Typography>{props.rightScore}</Typography>
-      </Grid>
-      <Grid item xs={2} textAlign="center">
-        <Typography>VS</Typography>
-      </Grid>
-      <Grid item xs={3} textAlign="center">
-        <Typography>{props.leftScore}</Typography>
-      </Grid>
-      <Grid item xs={2} />
-    </>
-  )
+  if (profile === undefined) {
+    return null
+  } else {
+    return (
+      <Stack justifyContent="center" alignItems="center">
+        <Typography>{profile.nickname}</Typography>
+        <Avatar src={profile.avatar} />
+        <Typography>RATING: {profile.stat.rating}</Typography>
+      </Stack>
+    )
+  }
 }
 
 const remainTimeModalStyle = {
@@ -88,6 +70,7 @@ const remainTimeModalStyle = {
   justifyContent: 'center',
   flexDirection: 'column',
 }
+
 const PongGrid = styled.div`
   position: absolute;
   top: 50%;

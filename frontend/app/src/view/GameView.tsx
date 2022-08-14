@@ -1,21 +1,10 @@
-import React, { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import styled from 'styled-components'
 import Pong, { PongProps } from './Pong'
 import { createTheme, ThemeProvider } from '@mui/material/styles'
-import { io } from 'socket.io-client'
-import { Socket } from 'socket.io-client'
 import GameGrid from './GameGrid'
-import { withLocalStorage } from 'state/auth'
-import { useRecoilValue } from 'recoil'
 import { useAuthSocket } from 'hook/useAuthSocket'
 
-const Flex = styled.div`
-  display: flex;
-`
-const Profile = styled.div`
-  width: 20%;
-  text-align: center;
-`
 const theme = createTheme({
   palette: {
     primary: {
@@ -43,7 +32,7 @@ export const GameView = () => {
   const [state, setState] = useState('selecting')
   const [keyState, setKeyState] = useState({ up: false, down: false })
   const [pongState, setPongState] = useState<PongProps>()
-  const [socket, isReady] = useAuthSocket('/api/pong')
+  const socket = useAuthSocket('/api/pong')
 
   useEffect(() => {
     socket?.on('gameInfo', (msg: any) => {
@@ -66,7 +55,7 @@ export const GameView = () => {
   }, [socket])
 
   useEffect(() => {
-    if (socket === undefined || !isReady) {
+    if (socket === undefined) {
       return
     }
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -102,7 +91,7 @@ export const GameView = () => {
       window.removeEventListener('keydown', handleKeyDown)
       window.removeEventListener('keyup', handleKeyUp)
     }
-  }, [keyState, socket, isReady])
+  }, [keyState, socket])
 
   return (
     <ThemeProvider theme={theme}>
@@ -122,13 +111,3 @@ export const GameView = () => {
     </ThemeProvider>
   )
 }
-
-// {state === 'watching' ? (
-//   <GameGrid handleClick={handleClick} />
-// ) : (
-//   <Flex>
-//     <Profile>프로필1</Profile>
-//     <Pong />
-//     <Profile>프로필2</Profile>
-//   </Flex>
-// )}
