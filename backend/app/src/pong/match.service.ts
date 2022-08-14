@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 import { Socket } from 'socket.io'
-import { PongMode } from '../configs/pong.config'
 import { Match } from './match.entity'
 import { User } from 'user/user.entity'
 
@@ -13,14 +12,14 @@ export class MatchService {
   @InjectRepository(Match)
   private matchRepository: Repository<Match>
   private readonly quickQueue: {
-    easy: UserSocket[]
-    medium: UserSocket[]
-    hard: UserSocket[]
-  } = { easy: [], medium: [], hard: [] }
+    classic: UserSocket[]
+    speedup: UserSocket[]
+    sizedown: UserSocket[]
+  } = { classic: [], speedup: [], sizedown: [] }
   private readonly rankedQueue: UserSocket[] = []
   private readonly privateMap: Map<
     number,
-    { mode: PongMode; player: UserSocket }
+    { mode: 'classic' | 'speedup' | 'sizedown'; player: UserSocket }
   > = new Map()
 
   match(queue: UserSocket[]): { left: UserSocket; right: UserSocket } | null {
@@ -42,7 +41,7 @@ export class MatchService {
 
   matchQuick(
     player: UserSocket,
-    mode: PongMode,
+    mode: 'classic' | 'speedup' | 'sizedown',
   ): { left: UserSocket; right: UserSocket } | null {
     this.removeFromQueue(player)
     this.quickQueue[mode].push(player)
@@ -51,9 +50,13 @@ export class MatchService {
 
   matchPrivate(
     player: UserSocket,
-    mode?: PongMode,
+    mode?: 'classic' | 'speedup' | 'sizedown',
     opponent?: number,
-  ): { left: UserSocket; right: UserSocket; mode: PongMode } | null {
+  ): {
+    left: UserSocket
+    right: UserSocket
+    mode: 'classic' | 'speedup' | 'sizedown'
+  } | null {
     this.removeFromQueue(player)
     if (opponent && this.privateMap.has(opponent)) {
       const owner = this.privateMap.get(opponent)

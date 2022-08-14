@@ -1,6 +1,6 @@
 import { useRef, useEffect, useState } from 'react'
 import Avatar from '@mui/material/Avatar'
-import { Grid, Stack, Typography, Box, Modal } from '@mui/material'
+import { Stack, Typography, Box, Modal } from '@mui/material'
 import styled from 'styled-components'
 import { useUser } from 'hook/useUser'
 

@@ -72,20 +72,15 @@ function reflect(dot: number, mirror: number) {
   return 2 * mirror - dot
 }
 
+function vectorSetLength(x: number, y: number, newLength: number) {
+  const oldLength = Math.sqrt(x * x + y * y)
+
+  return [(x / oldLength) * newLength, (y / oldLength) * newLength]
+}
+
 class Ball extends MoveableRect {
-  constructor(difficulty: CONSTANTS.PongMode) {
-    let speedFactor = 1
-    switch (difficulty) {
-      case 'easy':
-        speedFactor /= CONSTANTS.EASY_SPEED
-        break
-      case 'medium':
-        speedFactor /= CONSTANTS.MEDIUM_SPEED
-        break
-      case 'hard':
-        speedFactor /= CONSTANTS.HARD_SPEED
-        break
-    }
+  constructor() {
+    const speedFactor = 1 / CONSTANTS.BALL_SPEED
 
     const theta = toRad(
       Math.random() * CONSTANTS.MAX_SHOOT_RIGHT_UP_DEGREE * 2 -
@@ -97,16 +92,27 @@ class Ball extends MoveableRect {
 
     if (Math.random() < 0.5) speedX = -speedX
 
+    // super(
+    //   CONSTANTS.WINDOW_WIDTH / 2 - CONSTANTS.BALL_SIZE / 2,
+    //   CONSTANTS.WINDOW_HEIGHT / 2 - CONSTANTS.BALL_SIZE / 2,
+    //   CONSTANTS.BALL_SIZE,
+    //   CONSTANTS.BALL_SIZE,
+    //   speedX,
+    //   speedY,
+    // )
+
     super(
       CONSTANTS.WINDOW_WIDTH / 2 - CONSTANTS.BALL_SIZE / 2,
       CONSTANTS.WINDOW_HEIGHT / 2 - CONSTANTS.BALL_SIZE / 2,
       CONSTANTS.BALL_SIZE,
       CONSTANTS.BALL_SIZE,
-      speedX,
-      speedY,
+      speedFactor,
+      0,
     )
   }
 }
+
+type PongMode = 'classic' | 'speedup' | 'sizedown'
 
 class Pong {
   private ball: Ball
@@ -116,11 +122,12 @@ class Pong {
   private leftScore = 0
   private rightScore = 0
   private lastUpdate = 0
-  private difficulty: CONSTANTS.PongMode
+  private mode: 'classic' | 'speedup' | 'sizedown'
   private winner: 'left' | 'right' | null = null
 
-  constructor(difficulty: CONSTANTS.PongMode) {
-    this.difficulty = difficulty
+  constructor(mode: PongMode) {
+    console.log(`mode: ${mode}`)
+    this.mode = mode
     this.resetState()
   }
 
@@ -129,7 +136,7 @@ class Pong {
   }
 
   resetState() {
-    this.ball = new Ball(this.difficulty)
+    this.ball = new Ball()
     this.leftPaddle = new Paddle(true)
     this.rightPaddle = new Paddle(false)
   }
@@ -206,6 +213,29 @@ class Pong {
         this.leftPaddle.x + this.leftPaddle.width,
       )
       this.ball.speedX = -this.ball.speedX
+      const originalSpeed = Math.sqrt(
+        this.ball.speedX * this.ball.speedX +
+          this.ball.speedY * this.ball.speedY,
+      )
+      const [newSpeedX, newSpeedY] = vectorSetLength(
+        this.ball.speedX,
+        this.ball.speedY + CONSTANTS.PADDLE_FRACTION * this.leftPaddle.speedY,
+        originalSpeed,
+      )
+      this.ball.speedX =
+        newSpeedX *
+        (this.mode === 'speedup' ? CONSTANTS.BALL_SPEED_UP_FACTOR : 1)
+      this.ball.speedY =
+        newSpeedY *
+        (this.mode === 'speedup' ? CONSTANTS.BALL_SPEED_UP_FACTOR : 1)
+
+      if (this.mode === 'sizedown') {
+        const nextHeight =
+          this.leftPaddle.height * CONSTANTS.PADDLE_SIZE_DOWN_FACTOR
+        const difference = this.leftPaddle.height - nextHeight
+        this.leftPaddle.y += difference / 2
+        this.leftPaddle.height = nextHeight
+      }
     }
 
     // 오른쪽 패들 충돌 처리
@@ -215,6 +245,29 @@ class Pong {
         this.rightPaddle.x - this.rightPaddle.width,
       )
       this.ball.speedX = -this.ball.speedX
+      const originalSpeed = Math.sqrt(
+        this.ball.speedX * this.ball.speedX +
+          this.ball.speedY * this.ball.speedY,
+      )
+      const [newSpeedX, newSpeedY] = vectorSetLength(
+        this.ball.speedX,
+        this.ball.speedY + CONSTANTS.PADDLE_FRACTION * this.rightPaddle.speedY,
+        originalSpeed,
+      )
+      this.ball.speedX =
+        newSpeedX *
+        (this.mode === 'speedup' ? CONSTANTS.BALL_SPEED_UP_FACTOR : 1)
+      this.ball.speedY =
+        newSpeedY *
+        (this.mode === 'speedup' ? CONSTANTS.BALL_SPEED_UP_FACTOR : 1)
+
+      if (this.mode === 'sizedown') {
+        const nextHeight =
+          this.rightPaddle.height * CONSTANTS.PADDLE_SIZE_DOWN_FACTOR
+        const difference = this.rightPaddle.height - nextHeight
+        this.rightPaddle.y += difference / 2
+        this.rightPaddle.height = nextHeight
+      }
     }
 
     // 왼쪽 충돌 처리
@@ -397,16 +450,15 @@ export class PongService {
   createGame(
     leftUser: UserSocket,
     rightUser: UserSocket,
-    mode: 'easy' | 'medium' | 'hard' | 'ranked',
+    mode: PongMode | 'ranked',
   ) {
     const gameId = this.nextId++
-    const difficulty = mode !== 'ranked' ? mode : 'medium'
     const gameManager = new PongManager(
       mode === 'ranked',
       leftUser,
       rightUser,
       gameId,
-      new Pong(difficulty),
+      new Pong(mode !== 'ranked' ? mode : 'classic'),
       this.deleteGame.bind(this),
     )
     this.gamesByGameId.set(gameId, gameManager)

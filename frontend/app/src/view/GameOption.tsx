@@ -8,17 +8,18 @@ import Button from '@mui/material/Button'
 export const PongMatchForm = (props: {
   requestMatch: (matchData: any) => void
 }) => {
-  const [gameMode, setGameMode] = useState('easy')
+  const [gameMode, setGameMode] = useState('classic')
   const submitRanked = () => {
     props.requestMatch({
-      matchType: 'ranked',
+      mode: 'ranked',
+      isPrivate: false,
     })
   }
 
   const submitQuick = () => {
     props.requestMatch({
-      matchType: 'quick',
       mode: gameMode,
+      isPrivate: false,
     })
   }
 
@@ -47,9 +48,17 @@ export const PongMatchForm = (props: {
           setGameMode(e.target.value)
         }}
       >
-        <FormControlLabel value="easy" control={<Radio />} label="Easy" />
-        <FormControlLabel value="medium" control={<Radio />} label="Nomal" />
-        <FormControlLabel value="hard" control={<Radio />} label="Hard" />
+        <FormControlLabel value="classic" control={<Radio />} label="Classic" />
+        <FormControlLabel
+          value="speedup"
+          control={<Radio />}
+          label="Speed-up"
+        />
+        <FormControlLabel
+          value="sizedown"
+          control={<Radio />}
+          label="Size-down"
+        />
       </RadioGroup>
     </FormControl>
   )

@@ -7,15 +7,14 @@ import {
   OnGatewayConnection,
 } from '@nestjs/websockets'
 import { Socket } from 'socket.io'
-import { PongMatchType, PongMode } from 'configs/pong.config'
 import { MatchService } from './match.service'
 import { PongService } from './pong.service'
 import * as jwt from 'jsonwebtoken'
 import { jwtConstants } from 'configs/jwt-token.config'
 
 export type MatchMessage = {
-  mode?: PongMode
-  matchType: PongMatchType
+  mode: 'classic' | 'ranked' | 'speedup' | 'sizedown'
+  isPrivate: boolean
   matchTarget?: number
 }
 
@@ -37,22 +36,23 @@ export class MatchGateWay implements OnGatewayDisconnect, OnGatewayConnection {
     @MessageBody() message: MatchMessage,
     @ConnectedSocket() client: UserSocket,
   ) {
-    let match: { left: UserSocket; right: UserSocket; mode?: PongMode } | null =
-      null
-    if (message.matchType === 'quick') {
-      match = this.matchService.matchQuick(client, message.mode)
-    } else if (message.matchType === 'ranked') {
-      message.mode = 'ranked'
-      match = this.matchService.matchRanked(client)
-    } else if (message.matchType === 'private') {
+    let match: {
+      left: UserSocket
+      right: UserSocket
+    } | null = null
+    if (message.isPrivate) {
+      if (message.mode === 'ranked') {
+        return
+      }
       match = this.matchService.matchPrivate(
         client,
         message.mode,
         message.matchTarget,
       )
-      if (match) {
-        message.mode = match.mode
-      }
+    } else if (message.mode === 'ranked') {
+      match = this.matchService.matchRanked(client)
+    } else {
+      match = this.matchService.matchQuick(client, message.mode)
     }
     if (match) {
       this.pongService.createGame(match.left, match.right, message.mode)
