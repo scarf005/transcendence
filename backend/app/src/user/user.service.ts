@@ -83,7 +83,9 @@ export class UserService {
   }
 
   async findOneByNickname(nickname: string): Promise<User> {
-    const user = await this.userRepository
+    if (!nickname) return null
+    if (nickname.length == 0) return null
+    return await this.userRepository
       .createQueryBuilder('user')
       .select([
         'user.uid',
@@ -99,11 +101,6 @@ export class UserService {
       .innerJoin('user.stat', 'stat')
       .where('user.nickname = :nickname', { nickname })
       .getOne()
-      .catch(() => {
-        throw new NotFoundException('User not found')
-      })
-    if (!user) throw new NotFoundException('User not found')
-    return user
   }
 
   async update(user: User): Promise<User> {
