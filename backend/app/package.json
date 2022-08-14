@@ -51,6 +51,7 @@
     "@nestjs/testing": "^9.0.0",
     "@scarf005/eslint-config-transcendence": "^1.2.1",
     "@scarf005/prettier-config-transcendence": "^1.0.1",
+    "@types/bcryptjs": "^2.4.2",
     "@types/express": "^4.17.13",
     "@types/jest": "28.1.4",
     "@types/node": "^16.0.0",

@@ -11,13 +11,10 @@ import { JwtService } from '@nestjs/jwt'
 import { UserPayload } from 'configs/jwt-token.config'
 import { RegisterUserDto } from 'dto/register-user.dto'
 import { Stat } from './stat.entity'
-import { Match } from 'pong/match.entity'
-import { MatchService } from 'pong/match.service'
 
 @Injectable()
 export class UserService {
   constructor(
-    private readonly matchService: MatchService,
     private readonly jwtService: JwtService,
     @InjectRepository(User)
     private userRepository: Repository<User>,
@@ -199,28 +196,6 @@ export class UserService {
       throw new InternalServerErrorException('database error')
     })
     return `${user.nickname} is no longer blocked with ${block.nickname}`
-  }
-
-  async matchTest(): Promise<Match> {
-    const user1 = await this.userRepository.findOne({
-      where: { uid: 1 },
-      relations: ['stat'],
-    })
-    const user2 = await this.userRepository.findOne({
-      where: { uid: 2 },
-      relations: ['stat'],
-    })
-    ++user1.stat.win
-    ++user2.stat.lose
-    user1.stat.rating += 20
-    user2.stat.rating -= 20
-    await this.userRepository.save(user1)
-    await this.userRepository.save(user2)
-    return this.matchService.endMatch(user1, user2)
-  }
-
-  async matchAll(): Promise<Match[]> {
-    return await this.matchService.findAll()
   }
 
   async findBlockedByUid(uid: number): Promise<number[]> {

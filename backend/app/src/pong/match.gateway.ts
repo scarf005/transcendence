@@ -42,7 +42,7 @@ export class MatchGateWay implements OnGatewayDisconnect, OnGatewayConnection {
     if (message.matchType === 'quick') {
       match = this.matchService.matchQuick(client, message.mode)
     } else if (message.matchType === 'ranked') {
-      message.mode = 'medium'
+      message.mode = 'ranked'
       match = this.matchService.matchRanked(client)
     } else if (message.matchType === 'private') {
       match = this.matchService.matchPrivate(

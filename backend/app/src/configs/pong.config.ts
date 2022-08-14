@@ -1,4 +1,4 @@
-export type PongMode = 'easy' | 'medium' | 'hard'
+export type PongMode = 'easy' | 'medium' | 'hard' | 'ranked'
 export type PongMatchType = 'quick' | 'ranked' | 'private'
 
 export const PADDLE_WIDTH = 0.017

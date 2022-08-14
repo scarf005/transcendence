@@ -10,7 +10,7 @@ export const withPongProfile = selectorFamily({
       return {
         avatar: user.avatar,
         nickname: user.nickname,
-        rating: 0,
+        rating: user.stat.rating,
       }
     },
 })

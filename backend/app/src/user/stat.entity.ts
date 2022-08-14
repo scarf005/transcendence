@@ -11,6 +11,6 @@ export class Stat {
   @Column({ default: 0 })
   lose: number
 
-  @Column({ default: 0 })
+  @Column({ default: 1000 })
   rating: number
 }

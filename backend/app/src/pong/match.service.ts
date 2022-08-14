@@ -97,7 +97,7 @@ export class MatchService {
       .getMany()
   }
 
-  endMatch(winner: User, loser: User): Promise<Match> {
+  addMatchResult(winner: User, loser: User): Promise<Match> {
     const newMatch = new Match()
     newMatch.winner = winner
     newMatch.loser = loser

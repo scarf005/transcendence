@@ -174,8 +174,6 @@ const Pong = (props: PongProps) => {
     return () => cancelAnimationFrame(req)
   }, [props])
 
-  console.log(props)
-
   return (
     <PongGrid>
       <Modal open={remainTime > 0}>

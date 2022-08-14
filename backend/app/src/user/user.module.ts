@@ -6,11 +6,9 @@ import { User } from './user.entity'
 import { jwtConstants } from 'configs/jwt-token.config'
 import { UserController } from './user.controller'
 import { Stat } from './stat.entity'
-import { PongModule } from 'pong/pong.module'
 
 @Module({
   imports: [
-    PongModule,
     TypeOrmModule.forFeature([User, Stat]),
     JwtModule.register({
       secret: jwtConstants.secret,
