@@ -35,6 +35,7 @@ export class MatchService {
   matchRanked(
     player: UserSocket,
   ): { left: UserSocket; right: UserSocket } | null {
+    this.removeFromQueue(player)
     this.rankedQueue.push(player)
     return this.match(this.rankedQueue)
   }
@@ -43,6 +44,7 @@ export class MatchService {
     player: UserSocket,
     mode: PongMode,
   ): { left: UserSocket; right: UserSocket } | null {
+    this.removeFromQueue(player)
     this.quickQueue[mode].push(player)
     return this.match(this.quickQueue[mode])
   }
@@ -52,6 +54,7 @@ export class MatchService {
     mode?: PongMode,
     opponent?: number,
   ): { left: UserSocket; right: UserSocket; mode: PongMode } | null {
+    this.removeFromQueue(player)
     if (opponent && this.privateMap.has(opponent)) {
       const owner = this.privateMap.get(opponent)
       this.privateMap.delete(opponent)
@@ -62,17 +65,18 @@ export class MatchService {
     }
   }
 
+  eraseIf<T>(queue: Array<T>, pred: (value: T) => boolean): void {
+    const index = queue.findIndex(pred)
+    if (index !== -1) {
+      queue.splice(index, 1)
+    }
+  }
+
   removeFromQueue(player: UserSocket) {
     for (const queue of Object.values(this.quickQueue)) {
-      queue.splice(
-        queue.findIndex((p) => p.id === player.id),
-        1,
-      )
+      this.eraseIf(queue, (p) => p.id === player.id)
     }
-    this.rankedQueue.splice(
-      this.rankedQueue.findIndex((p) => p.id === player.id),
-      1,
-    )
+    this.eraseIf(this.rankedQueue, (p) => p.id === player.id)
     this.privateMap.delete(player.uid)
   }
 

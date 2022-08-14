@@ -1,188 +1,207 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useRef, useEffect, useState } from 'react'
+import Avatar from '@mui/material/Avatar'
+import { RecoilRoot, useRecoilValue } from 'recoil'
+import { Grid, Stack, Typography, Box, Modal } from '@mui/material'
+import { withPongProfile } from 'state/pong'
 import styled from 'styled-components'
 
-const Canvas = styled.canvas`
-  display: block;
-  margin: 0px auto;
-  background: black;
-`
+export type Rect = {
+  x: number
+  y: number
+  width: number
+  height: number
+}
 
-const Ball = (
-  ballPosition: number[],
-  score: number[],
-  xVel: number,
-  yVel: number,
-  context: any,
-  leftY: number,
-  rightY: number,
+export type PongProps = {
+  leftPaddle: Rect
+  rightPaddle: Rect
+  ball: Rect
+  leftScore: number
+  rightScore: number
+  leftUser: number
+  rightUser: number
+  winner: string
+  window: {
+    ratio: number
+    height: number
+  }
+}
+
+const drawRect = (
+  ctx: CanvasRenderingContext2D,
+  window: { ratio: number; height: number },
+  rect: Rect,
 ) => {
-  const speed = 5
-  const cavansH = 400
-  const canvasW = 700
-  const ballSize = 10
-  const w = ballSize
-  const h = ballSize
-  const paddleH = 60
-
-  if (ballPosition[1] <= 10) {
-    yVel = 1
-  }
-  if (ballPosition[1] + h >= cavansH - 10) {
-    yVel = -1
-  }
-  if (ballPosition[0] <= 0) {
-    ballPosition[0] = canvasW / 2 - w / 2
-    score[1] += 1
-  }
-  if (ballPosition[0] + w >= canvasW) {
-    ballPosition[0] = canvasW / 2 - w / 2
-    score[0] += 1
-  }
-  if (ballPosition[0] <= 40) {
-    if (ballPosition[1] >= leftY && ballPosition[1] + h <= leftY + paddleH) {
-      xVel = 1
-    }
-  }
-  if (ballPosition[0] + w >= canvasW - 40) {
-    if (ballPosition[1] >= rightY && ballPosition[1] + h <= rightY + paddleH) {
-      xVel = -1
-    }
-  }
-  ballPosition[0] += xVel * speed
-  ballPosition[1] += yVel * speed
-  context.fillStyle = '#fff'
-  context.fillRect(ballPosition[0], ballPosition[1], ballSize, ballSize)
-  return [ballPosition[0], ballPosition[1], score[0], score[1], xVel, yVel]
+  ctx.fillRect(
+    rect.x * window.height,
+    rect.y * window.height,
+    rect.width * window.height,
+    rect.height * window.height,
+  )
 }
 
-const leftPaddle = (arr: boolean[], context: any, y: number) => {
-  const speed = 10
-  const canvasHeight = 400 // 하드코딩
-  const paddleWidth = 20
-  const paddleHeight = 60
-  const x = 20 // walloffset
-  let yVel = 0
-  if (arr[1] === true) {
-    yVel = -1
-    if (y <= 20) {
-      yVel = 0
-    }
-  } else if (arr[0] === true) {
-    yVel = 1
-    if (y + paddleHeight >= canvasHeight - 20) {
-      yVel = 0
-    }
-  } else {
-    yVel = 0
-  }
-  y += yVel * speed
-  context.fillStyle = '#fff'
-  context.fillRect(x, y, paddleWidth, paddleHeight)
-  return y
+const PongUser = (props: { uid: number }) => {
+  const profile = useRecoilValue(withPongProfile(props.uid))
+
+  return (
+    <Stack justifyContent="center" alignItems="center">
+      <Typography>{profile.nickname}</Typography>
+      <Avatar src={profile.avatar} />
+      <Typography>RATING: {profile.rating}</Typography>
+    </Stack>
+  )
 }
 
-const rightPaddle = (arr: boolean[], context: any, y: number) => {
-  const speed = 10
-  const canvasHeight = 400 // 하드코딩
-  const canvasWidth = 700
-  const paddleWidth = 20
-  const paddleHeight = 60
-  const wallOffset = 20
-  const x = canvasWidth - (wallOffset + paddleWidth)
-  let yVel = 0
-  if (arr[3] === true) {
-    yVel = -1
-    if (y <= 20) {
-      yVel = 0
-    }
-  } else if (arr[2] === true) {
-    yVel = 1
-    if (y + paddleHeight >= canvasHeight - 20) {
-      yVel = 0
-    }
-  } else {
-    yVel = 0
-  }
-  y = y + yVel * speed
-  context.fillStyle = '#fff'
-  context.fillRect(x, y, paddleWidth, paddleHeight)
-  return y
-}
-
-const Pong = () => {
-  const canvasRef = useRef<HTMLCanvasElement>(null)
-  const keysPressed = [false, false, false, false]
-  const keys = ['ArrowDown', 'ArrowUp', 's', 'w']
-  const requestAnimationRef = useRef<number>(0)
-  let canvas: HTMLCanvasElement | null
-  let gameContext: CanvasRenderingContext2D | null | undefined
-  const canvasWidth = 700
-  const canvasHeight = 400
-  let leftY = canvasHeight / 2 - 20 / 2
-  let rightY = canvasHeight / 2 - 20 / 2
-  const ballSize = 10
-  const ballPosition = [
-    canvasWidth / 2 - ballSize / 2,
-    canvasHeight / 2 - ballSize / 2,
-  ]
-  const score = [0, 0]
-  let arr = [...ballPosition, ...score, -1, 1]
-
-  useEffect(() => {
-    canvas = canvasRef.current
-    gameContext = canvas?.getContext('2d')
-    let idx
-    window.addEventListener('keydown', (e) => {
-      if ((idx = keys.indexOf(e.key)) >= 0) keysPressed[idx] = true
-    })
-    window.addEventListener('keyup', (e) => {
-      if ((idx = keys.indexOf(e.key)) >= 0) keysPressed[idx] = false
-    })
-    requestAnimationRef.current = requestAnimationFrame(render)
-    return () => cancelAnimationFrame(requestAnimationRef.current)
-  }, [])
-  const drawBoardDetails = (context: any) => {
-    context.strokeStyle = '#fff'
-    context.lineWidth = 5
-    context.strokeRect(10, 10, canvasWidth - 20, canvasHeight - 20)
-    for (let i = 0; i + 30 < canvasHeight; i += 30) {
-      context.fillStyle = '#fff'
-      context.fillRect(canvasWidth / 2 - 10, i + 10, 15, 20)
-    }
-    context.fillText(arr[2], 280, 50)
-    context.fillText(arr[3], 390, 50)
-  }
-  const update = () => {
-    if (!gameContext) return
-    gameContext.font = '30px Orbitron'
-    gameContext.fillStyle = '#000'
-    gameContext.fillRect(0, 0, 700, 400)
-    leftY = leftPaddle(keysPressed, gameContext, leftY)
-    rightY = rightPaddle(keysPressed, gameContext, rightY)
-    arr = Ball(
-      [arr[0], arr[1]],
-      [arr[2], arr[3]],
-      arr[4],
-      arr[5],
-      gameContext,
-      leftY,
-      rightY,
-    )
-    drawBoardDetails(gameContext)
-  }
-  const render = () => {
-    update()
-    if (arr[2] > 0 || arr[3] > 0) {
-      gameContext?.fillText('Game Over', 280, 200)
-      cancelAnimationFrame(requestAnimationRef.current)
-      return
-    }
-    requestAnimationFrame(render)
-  }
+const ScoreBoard = (props: { leftScore: number; rightScore: number }) => {
   return (
     <>
-      <Canvas width="600" height="600" ref={canvasRef} />
+      <Grid item xs={12} textAlign="center">
+        <Typography>SCORE</Typography>
+      </Grid>
+      <Grid item xs={2} />
+      <Grid item xs={3} textAlign="center">
+        <Typography>{props.rightScore}</Typography>
+      </Grid>
+      <Grid item xs={2} textAlign="center">
+        <Typography>VS</Typography>
+      </Grid>
+      <Grid item xs={3} textAlign="center">
+        <Typography>{props.leftScore}</Typography>
+      </Grid>
+      <Grid item xs={2} />
     </>
   )
 }
+
+const remainTimeModalStyle = {
+  position: 'absolute',
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%, -50%)',
+  width: 400,
+  height: 400,
+  bgcolor: 'background.paper',
+  border: '2px solid black',
+
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  flexDirection: 'column',
+}
+const PongGrid = styled.div`
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -60%);
+  display: grid;
+
+  grid-template-columns: 400px 400px;
+  grid-template-rows: 100px 450px;
+
+  align-items: center;
+  justify-items: center;
+`
+
+const PongLeftProfile = styled.div`
+  grid-column: 1 / 2;
+  grid-row: 1 / 2;
+`
+
+const PongCanvas = styled.canvas`
+  grid-column: 1 / 3;
+  grid-row: 2 / 3;
+  border: 1px solid black;
+`
+
+const PongRightProfile = styled.div`
+  grid-column: 2 / 3;
+  grid-row: 1 / 2;
+`
+
+const Pong = (props: PongProps) => {
+  const pongCanvas = useRef<HTMLCanvasElement>(null)
+  const [remainTime, setRemainTime] = useState(3)
+
+  useEffect(() => {
+    if (remainTime > 0) {
+      const timer = setTimeout(() => {
+        setRemainTime((value) => value - 1)
+      }, 1000)
+      return () => clearTimeout(timer)
+    }
+  }, [remainTime])
+
+  useEffect(() => {
+    const req = requestAnimationFrame(() => {
+      const ctx = (pongCanvas.current as HTMLCanvasElement).getContext(
+        '2d',
+      ) as CanvasRenderingContext2D
+      ctx.fillStyle = 'black'
+      ctx.fillRect(
+        0,
+        0,
+        props.window.height * props.window.ratio,
+        props.window.height,
+      )
+      ctx.fillStyle = 'white'
+      drawRect(ctx, props.window, props.leftPaddle)
+      drawRect(ctx, props.window, props.rightPaddle)
+      drawRect(ctx, props.window, props.ball)
+      const fontSize = props.window.height * 0.1
+      ctx.font = `${fontSize}px monospace`
+      ctx.textBaseline = 'top'
+      ctx.textAlign = 'center'
+      ctx.fillText(
+        props.leftScore.toLocaleString(undefined, { minimumIntegerDigits: 2 }),
+        (props.window.height * props.window.ratio) / 2 - fontSize,
+        0,
+      )
+      ctx.fillText(
+        props.rightScore.toLocaleString(undefined, { minimumIntegerDigits: 2 }),
+        (props.window.height * props.window.ratio) / 2 + fontSize,
+        0,
+      )
+      const rectWidth = props.window.height * 0.025
+      for (let i = 0; i < 20; i++) {
+        ctx.fillRect(
+          (props.window.height * props.window.ratio) / 2 - rectWidth / 2,
+          (props.window.height / 20) * i + rectWidth * 0.5,
+          rectWidth,
+          rectWidth,
+        )
+      }
+    })
+    return () => cancelAnimationFrame(req)
+  }, [props])
+
+  console.log(props)
+
+  return (
+    <PongGrid>
+      <Modal open={remainTime > 0}>
+        <Box sx={remainTimeModalStyle}>
+          <Typography variant="h1">{remainTime}</Typography>
+        </Box>
+      </Modal>
+      <Modal open={!!props.winner}>
+        <Box sx={remainTimeModalStyle}>
+          <Typography variant="h2">Winner is</Typography>
+          {props.winner === 'left' ? (
+            <PongUser uid={props.leftUser} />
+          ) : (
+            <PongUser uid={props.rightUser} />
+          )}
+        </Box>
+      </Modal>
+      <PongLeftProfile>
+        <PongUser uid={props.leftUser} />
+      </PongLeftProfile>
+      <PongRightProfile>
+        <PongUser uid={props.rightUser} />
+      </PongRightProfile>
+      <PongCanvas width={800} height={450} ref={pongCanvas} />
+    </PongGrid>
+  )
+}
+
 export default Pong

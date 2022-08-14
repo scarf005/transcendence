@@ -1,10 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react'
 import styled from 'styled-components'
-import Pong from './Pong'
+import Pong, { PongProps } from './Pong'
 import { createTheme, ThemeProvider } from '@mui/material/styles'
 import { io } from 'socket.io-client'
 import { Socket } from 'socket.io-client'
 import GameGrid from './GameGrid'
+import { withLocalStorage } from 'state/auth'
+import { useRecoilValue } from 'recoil'
+import { useAuthSocket } from 'hook/useAuthSocket'
 
 const Flex = styled.div`
   display: flex;
@@ -38,50 +41,34 @@ const MatchingView = () => {
 
 export const GameView = () => {
   const [state, setState] = useState('selecting')
-  const pongCanvas = useRef<HTMLCanvasElement>(null)
   const [keyState, setKeyState] = useState({ up: false, down: false })
-  const [socket, setSocket] = useState<Socket>()
+  const [pongState, setPongState] = useState<PongProps>()
+  const [socket, isReady] = useAuthSocket('/api/pong')
 
   useEffect(() => {
-    const token = window.localStorage.getItem('access_token')
-    const socket = io('/api/pong', { auth: { token } })
-    socket.on('gameStart', (msg: any) => {
+    socket?.on('gameInfo', (msg: any) => {
+      setPongState(msg)
       setState('playing')
     })
-    socket.on('gameEnd', (msg: any) => {
-      setState('waiting')
+    socket?.on('gameEnd', (msg: any) => {
+      setPongState((value) => {
+        return { ...value, ...msg }
+      })
+      setTimeout(() => {
+        setState('waiting')
+      }, 3000)
     })
-    socket.on('render', (msg: any) => {
-      if (pongCanvas.current === null) {
-        return
-      }
-      const ctx = pongCanvas.current.getContext(
-        '2d',
-      ) as CanvasRenderingContext2D
-
-      ctx.clearRect(0, 0, 600, 600)
-      ctx.fillRect(msg.ball.x, msg.ball.y, msg.ball.width, msg.ball.height)
-      ctx.fillRect(
-        msg.leftPaddle.x,
-        msg.leftPaddle.y,
-        msg.leftPaddle.width,
-        msg.leftPaddle.height,
-      )
-      ctx.fillRect(
-        msg.rightPaddle.x,
-        msg.rightPaddle.y,
-        msg.rightPaddle.width,
-        msg.rightPaddle.height,
-      )
+    socket?.on('render', (msg: any) => {
+      setPongState((value) => {
+        return { ...value, ...msg }
+      })
     })
-    setSocket(socket)
-  }, [])
+  }, [socket])
 
   useEffect(() => {
-    if (socket === undefined) {
+    if (socket === undefined || !isReady) {
       return
     }
-
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'ArrowUp') {
         setKeyState((value) => {
@@ -115,26 +102,25 @@ export const GameView = () => {
       window.removeEventListener('keydown', handleKeyDown)
       window.removeEventListener('keyup', handleKeyUp)
     }
-  }, [socket])
+  }, [keyState, socket, isReady])
 
-  if (socket !== undefined) {
-    return (
-      <ThemeProvider theme={theme}>
-        {state === 'playing' ? (
-          <canvas width="600" height="600" ref={pongCanvas} />
-        ) : (
-          <GamePannel
-            requestMatch={(matchData: any) => {
-              socket.emit('match', matchData)
-            }}
-            state={state}
-          />
-        )}
-      </ThemeProvider>
-    )
-  } else {
-    return null
-  }
+  return (
+    <ThemeProvider theme={theme}>
+      {state === 'playing' ? (
+        <Pong
+          {...(pongState as PongProps)}
+          window={{ ratio: 16 / 9, height: 450 }}
+        />
+      ) : (
+        <GamePannel
+          requestMatch={(matchData: any) => {
+            socket?.emit('match', matchData)
+          }}
+          state={state}
+        />
+      )}
+    </ThemeProvider>
+  )
 }
 
 // {state === 'watching' ? (

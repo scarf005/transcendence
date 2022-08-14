@@ -65,7 +65,7 @@ export class UserController {
   @UseGuards(JwtAfterTwoFactorUserGuard)
   @ApiOperation({
     summary: 'Get User data API',
-    description: 'qurry string: uid',
+    description: 'query string: uid',
   })
   @ApiCreatedResponse({ description: 'FindUserDto', type: FindUserDto })
   async getUserByUid(@Param('uid') uid: number): Promise<FindUserDto> {

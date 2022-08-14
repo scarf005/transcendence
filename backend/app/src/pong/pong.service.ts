@@ -72,16 +72,16 @@ function reflect(dot: number, mirror: number) {
 
 class Ball extends MoveableRect {
   constructor(difficulty: CONSTANTS.PongMode) {
-    let speedFactor: number
+    let speedFactor = 1
     switch (difficulty) {
       case 'easy':
-        speedFactor = CONSTANTS.EASY_SPEED
+        speedFactor /= CONSTANTS.EASY_SPEED
         break
       case 'medium':
-        speedFactor = CONSTANTS.MEDIUM_SPEED
+        speedFactor /= CONSTANTS.MEDIUM_SPEED
         break
       case 'hard':
-        speedFactor = CONSTANTS.HARD_SPEED
+        speedFactor /= CONSTANTS.HARD_SPEED
         break
     }
 
@@ -156,13 +156,13 @@ class Pong {
     target: 'left' | 'right',
     direction: 'up' | 'down' | 'stop',
   ) {
-    let velocity: number
+    let velocity = 1
     switch (direction) {
       case 'up':
-        velocity = -CONSTANTS.PADDLE_SPEED
+        velocity /= -CONSTANTS.PADDLE_SPEED
         break
       case 'down':
-        velocity = CONSTANTS.PADDLE_SPEED
+        velocity /= CONSTANTS.PADDLE_SPEED
         break
       case 'stop':
         velocity = 0
@@ -292,26 +292,30 @@ class PongManager {
   }
 
   startGame() {
-    this.leftUser.emit('gameStart', {
-      left: this.leftUser.uid,
-      right: this.rightUser.uid,
+    this.leftUser.emit('gameInfo', {
+      leftUser: this.leftUser.uid,
+      rightUser: this.rightUser.uid,
       gameId: this.gameId,
+      ...this.game,
     })
-    this.rightUser.emit('gameStart', {
-      left: this.leftUser.uid,
-      right: this.rightUser.uid,
+    this.rightUser.emit('gameInfo', {
+      leftUser: this.leftUser.uid,
+      rightUser: this.rightUser.uid,
       gameId: this.gameId,
+      ...this.game,
     })
-    this.game.start()
-    this.leftTimer = setInterval(() => {
-      this.leftUser.emit('render', this.game)
-    }, CONSTANTS.UPDATE_INTERVAL)
-    this.rightTimer = setInterval(() => {
-      this.rightUser.emit('render', this.game)
-    }, CONSTANTS.UPDATE_INTERVAL)
-    this.gameTimer = setInterval(() => {
-      this.updateGame(Date.now())
-    }, CONSTANTS.UPDATE_INTERVAL)
+    setTimeout(() => {
+      this.game.start()
+      this.leftTimer = setInterval(() => {
+        this.leftUser.emit('render', this.game)
+      }, CONSTANTS.UPDATE_INTERVAL)
+      this.rightTimer = setInterval(() => {
+        this.rightUser.emit('render', this.game)
+      }, CONSTANTS.UPDATE_INTERVAL)
+      this.gameTimer = setInterval(() => {
+        this.updateGame(Date.now())
+      }, CONSTANTS.UPDATE_INTERVAL)
+    }, CONSTANTS.GAME_START_DELAY * 1000)
   }
 
   stopGame(winner: { side: 'left' | 'right'; uid: number }) {
@@ -325,11 +329,7 @@ class PongManager {
     this.rightUser.emit('gameEnd', winner)
     this.spectators.forEach((elem) => {
       elem.socket.emit('gameEnd', winner)
-      elem.socket.disconnect()
     })
-    this.leftUser.disconnect()
-    this.rightUser.disconnect()
-
     this.gameEndCallback(this.gameId)
   }
 
@@ -345,7 +345,7 @@ class PongManager {
   }
 
   addSpectator(socket: UserSocket) {
-    socket.emit('gameStart', {
+    socket.emit('gameInfo', {
       left: this.leftUser.uid,
       right: this.rightUser.uid,
       gameId: this.gameId,
