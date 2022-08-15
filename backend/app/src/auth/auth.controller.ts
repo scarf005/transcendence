@@ -15,6 +15,7 @@ import {
   JwtAfterTwoFactorUserGuard,
   JwtBeforeTwoFactorUserGuard,
 } from './jwt.strategy'
+import { VerifyTokenDto } from 'dto/verifyToken.dto'
 
 @Controller('api/auth')
 export class AuthController {
@@ -43,10 +44,10 @@ export class AuthController {
 
   @Get('/2fa')
   @UseGuards(JwtBeforeTwoFactorUserGuard)
-  async verify(@Req() req: any, @Query('token') token: string) {
+  async verify(@Req() req: any, @Query() query: VerifyTokenDto) {
     const { uid } = req.user
 
-    const verified = await this.twoFactorService.verify(uid, token)
+    const verified = await this.twoFactorService.verify(uid, query.token)
 
     if (verified) {
       const user = await this.userService.findOneByUid(uid)

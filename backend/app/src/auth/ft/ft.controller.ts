@@ -5,7 +5,7 @@ import { FtOauthService } from './ft-oauth.service'
 import { UseGuards } from '@nestjs/common'
 import { FtGuard } from './ft.strategy'
 import { JwtFtGuard } from './jwt-ft.strategy'
-import { RegisterUserDto } from 'dto/register-user.dto'
+import { RegisterUserDto } from 'dto/registerUser.dto'
 
 @Controller('api/auth/ft')
 export class FtController {

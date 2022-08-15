@@ -2,7 +2,6 @@ import {
   Body,
   Controller,
   Get,
-  NotFoundException,
   Param,
   Query,
   Req,
@@ -11,10 +10,11 @@ import {
   Delete,
 } from '@nestjs/common'
 import { JwtAfterTwoFactorUserGuard } from 'auth/jwt.strategy'
-import { Match } from 'pong/match.entity'
 import { FindUserDto } from 'dto/findUser.dto'
 import { UserService } from './user.service'
 import { ApiTags, ApiOperation, ApiCreatedResponse } from '@nestjs/swagger'
+import { CheckInputDto } from 'dto/checkInput.dto'
+import { FindInputDto } from 'dto/findInput.dto'
 
 @Controller('api/user')
 @ApiTags('유저 API')
@@ -27,8 +27,8 @@ export class UserController {
     description: '중복이면 true, 아니면 false',
     type: Boolean,
   })
-  async checkNickname(@Query('nickname') nickname: string) {
-    return (await this.userService.findOneByNickname(nickname)) === null
+  async checkNickname(@Query() query: CheckInputDto) {
+    return (await this.userService.findOneByNickname(query.nickname)) === null
   }
 
   @Get('/me')
@@ -40,11 +40,7 @@ export class UserController {
   @ApiCreatedResponse({ description: 'FindUserDto', type: FindUserDto })
   async getMyData(@Req() req: any): Promise<FindUserDto> {
     const { uid } = req.user
-    const user = await this.userService.findOneByUid(uid)
-    if (!user) {
-      throw new NotFoundException()
-    }
-    return user
+    return await this.userService.findOneByUid(uid)
   }
 
   @Get('/:uid')
@@ -54,12 +50,8 @@ export class UserController {
     description: 'query string: uid',
   })
   @ApiCreatedResponse({ description: 'FindUserDto', type: FindUserDto })
-  async getUserByUid(@Param('uid') uid: number): Promise<FindUserDto> {
-    const user = await this.userService.findOneByUid(uid)
-    if (!user) {
-      throw new NotFoundException()
-    }
-    return user
+  async getUserByUid(@Param() param: FindInputDto): Promise<FindUserDto> {
+    return await this.userService.findOneByUid(param.targetUid)
   }
 
   @Get()
@@ -83,12 +75,9 @@ export class UserController {
     description: 'ok : 추가됐다, no : exception',
     type: String,
   })
-  async addFreind(@Req() req: any, @Body('friendUid') friendUid: string) {
+  async addFreind(@Req() req: any, @Body() body: FindInputDto) {
     const { uid } = req.user
-    if (!friendUid) {
-      throw new NotFoundException('friendUid is required')
-    }
-    return this.userService.addFriend(uid, +friendUid)
+    return this.userService.addFriend(uid, body.targetUid)
   }
 
   @Post('/block')
@@ -101,12 +90,9 @@ export class UserController {
     description: 'ok : 추가됐다, no : exception',
     type: String,
   })
-  async addBlock(@Req() req: any, @Body('blockUid') blockUid: string) {
+  async addBlock(@Req() req: any, @Body() body: FindInputDto) {
     const { uid } = req.user
-    if (!blockUid) {
-      throw new NotFoundException('blockUid is required')
-    }
-    return this.userService.addBlock(uid, +blockUid)
+    return this.userService.addBlock(uid, body.targetUid)
   }
 
   @Delete('/friend')
@@ -119,12 +105,9 @@ export class UserController {
     description: 'ok : 제거됐다, no : exception',
     type: String,
   })
-  async deleteFriend(@Req() req: any, @Body('friendUid') friendUid: string) {
+  async deleteFriend(@Req() req: any, @Body() body: FindInputDto) {
     const { uid } = req.user
-    if (!friendUid) {
-      throw new NotFoundException('friendUid is required')
-    }
-    return this.userService.deleteFriend(uid, +friendUid)
+    return this.userService.deleteFriend(uid, body.targetUid)
   }
 
   @Delete('/block')
@@ -137,11 +120,8 @@ export class UserController {
     description: 'ok : 추가됐다, no : exception',
     type: String,
   })
-  async deleteBlock(@Req() req: any, @Body('blockUid') blockUid: string) {
+  async deleteBlock(@Req() req: any, @Body() body: FindInputDto) {
     const { uid } = req.user
-    if (!blockUid) {
-      throw new NotFoundException('blockUid is required')
-    }
-    return this.userService.deleteBlock(uid, +blockUid)
+    return this.userService.deleteBlock(uid, body.targetUid)
   }
 }
