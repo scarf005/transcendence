@@ -1,13 +1,13 @@
-import { Avatar, ListItem, ListItemAvatar, ListItemText } from '@mui/material'
+import { ListItem, ListItemAvatar, ListItemText } from '@mui/material'
 import { User } from 'data'
-import { AvatarWithStatus } from './Profile'
+import { AvatarWithStatus } from 'components'
 
 interface Props {
   user: User
   onClick?: () => void
 }
 export const ProfileListItem = ({ user, onClick }: Props) => {
-  const { uid: id, avatar, nickname: name, status, stat } = user
+  const { avatar, nickname: name, status, stat } = user
   const rankScore = `Ladder Score : ${stat.rating}`
   return (
     <ListItem button onClick={onClick}>

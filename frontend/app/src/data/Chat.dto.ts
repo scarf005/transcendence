@@ -1,8 +1,9 @@
 export interface Message {
   senderUid: number
   msgContent: string
-  roomId: string
+  roomId: number
 }
+export type Chat = Omit<Message, 'roomId'>
 export type MessageHandler = (message: Message) => void
 
 export interface ClientToServerEvents {

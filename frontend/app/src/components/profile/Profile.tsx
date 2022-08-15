@@ -1,9 +1,9 @@
-import { Avatar, Grid, Typography } from '@mui/material'
+import { Grid, Typography } from '@mui/material'
 import { Stat, User } from 'data'
-import { UserStatus } from '../utils/UserStatus'
 import { ButtonGroup } from '@mui/material'
 import { ChangeAvatarButton, ChangeNickNameButton } from './userActions'
 import { ReactNode } from 'react'
+import { AvatarWithStatus } from 'components'
 
 const StatDisplay = ({ stat }: { stat: Stat }) => {
   return (
@@ -17,28 +17,6 @@ const StatDisplay = ({ stat }: { stat: Stat }) => {
         </Grid>
       ))}
     </>
-  )
-}
-interface AvatarWithStatusProps extends Pick<User, 'status' | 'avatar'> {
-  radius?: number
-}
-
-export const AvatarWithStatus = ({
-  status,
-  avatar,
-  radius,
-}: AvatarWithStatusProps) => {
-  return (
-    <UserStatus
-      status={status}
-      avatar={
-        <Avatar
-          src={avatar}
-          sx={radius ? { width: radius, height: radius } : null}
-        />
-      }
-      big={radius ? radius > 50 : false}
-    />
   )
 }
 
