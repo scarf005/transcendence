@@ -9,7 +9,7 @@ import { User } from './user.entity'
 import { Repository } from 'typeorm'
 import { JwtService } from '@nestjs/jwt'
 import { UserPayload } from 'configs/jwt-token.config'
-import { RegisterUserDto } from 'dto/register-user.dto'
+import { RegisterUserDto } from 'dto/registeruser.dto'
 import { Stat } from './stat.entity'
 
 @Injectable()
