@@ -10,7 +10,7 @@ env:
   PROJECT_ID: 1
   triage: Triage
   todo: Todo
-  in_progress: In progress
+  in_progress: In Progress
   done: Done
 
   event_name: ${{ github.event_name }}

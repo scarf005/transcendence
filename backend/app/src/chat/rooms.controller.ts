@@ -1,5 +1,5 @@
 import { Controller, Get, UseGuards, Req } from '@nestjs/common'
-import { ChatRoomStatusDto } from './chat.dto'
+import { ChatRoomStatusDto } from 'dto/chat.dto'
 import { ChatService } from './chat.service'
 import { ApiTags, ApiOkResponse } from '@nestjs/swagger'
 import { JwtAfterTwoFactorUserGuard } from 'auth/jwt.strategy'

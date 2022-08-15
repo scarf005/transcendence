@@ -5,6 +5,7 @@ services:
     build:
       context: frontend
       dockerfile: Dockerfile.dev
+    restart: always
     volumes:
       - "./frontend/app:/app"
     expose:
@@ -16,6 +17,7 @@ services:
     build:
       context: frontend
       dockerfile: Dockerfile.dev.storybook
+    restart: always
     volumes:
       - "./frontend/app:/app"
     expose:
@@ -27,6 +29,7 @@ services:
 
   reverse_proxy:
     build: reverse_proxy
+    restart: always
     ports:
       - "3000:3000"
     networks:
@@ -40,6 +43,7 @@ services:
       context: backend
       dockerfile: Dockerfile.dev
 
+    restart: always
     volumes:
       - "./backend/app:/app"
 
@@ -64,6 +68,8 @@ services:
     build:
       context: db
       dockerfile: Dockerfile
+
+    restart: always
 
     expose:
       - 5432

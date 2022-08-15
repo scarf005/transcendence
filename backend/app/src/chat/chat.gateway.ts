@@ -8,7 +8,7 @@ import {
 import { AsyncApiPub, AsyncApiService, AsyncApiSub } from 'nestjs-asyncapi'
 import { Server, Socket } from 'socket.io'
 import { chatEvent } from 'configs/chat-event.constants'
-import { ChatMessageDto, UserInRoomDto } from './chat.dto'
+import { ChatMessageDto, UserInRoomDto } from 'dto/chat.dto'
 import { ChatService } from './chat.service'
 import * as jwt from 'jsonwebtoken'
 import { jwtConstants } from 'configs/jwt-token.config'
