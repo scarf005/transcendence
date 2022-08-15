@@ -12,6 +12,7 @@ import { ChatMessageDto, UserInRoomDto } from 'dto/chat.dto'
 import { ChatService } from './chat.service'
 import * as jwt from 'jsonwebtoken'
 import { jwtConstants } from 'configs/jwt-token.config'
+import { ChatRoom } from './chatroom.entity'
 
 @AsyncApiService()
 @WebSocketGateway({ namespace: 'api/chat', cors: true })
@@ -20,27 +21,34 @@ export class ChatGateway {
   @WebSocketServer()
   server: Server
 
-  clients = []
-
-  handleConnection(client: Socket) {
+  async handleConnection(client: Socket) {
     const { token } = client.handshake.auth
     // FIXME: prod에선 쿼리로부터 uid를 확인할 필요 없음
     if (token === undefined) {
       const uid = Number(client.handshake.query.uid)
       if (uid !== undefined) {
         client.data.uid = Number(client.handshake.query.uid)
-        console.log(`chat: uid ${client.data.uid} connected.`)
-        return
       } else return client.disconnect()
-    }
-    try {
-      const decoded = jwt.verify(token, jwtConstants.secret) as jwt.JwtPayload
-      if (decoded.uidType !== 'user' || decoded.twoFactorPassed !== true) {
+    } else {
+      try {
+        const decoded = jwt.verify(token, jwtConstants.secret) as jwt.JwtPayload
+        if (decoded.uidType !== 'user' || decoded.twoFactorPassed !== true) {
+          return client.disconnect()
+        }
+        client.data.uid = decoded.uid
+      } catch {
         return client.disconnect()
       }
-      client.data.uid = decoded.uid
-    } catch {
-      return client.disconnect()
+    }
+
+    try {
+      const rooms = await this.chatService.findRoomsByUserId(client.data.uid)
+      rooms.forEach((el) => {
+        client.join(el.id.toString())
+        console.log(`${client.data.uid} was joined to ${el.id}`)
+      })
+    } catch (error) {
+      return error
     }
     // TODO: change user status to online
     console.log(`chat: uid ${client.data.uid} connected.`)
@@ -61,9 +69,20 @@ export class ChatGateway {
     @ConnectedSocket() client: Socket,
     @MessageBody() data: ChatMessageDto,
   ) {
-    // TODO: sender가 mute상태인지 확인
-    console.log(`chat: ${client.data.uid} sent ${data.msgContent}`)
-    this.broadcastMessage(client, data)
+    let isMuted: boolean
+    try {
+      isMuted = await this.chatService.isMuted(client.data.uid, data.roomId)
+    } catch (error) {
+      return error
+    }
+    if (!isMuted) {
+      console.log(`chat: ${client.data.uid} sent ${data.msgContent}`)
+      this.broadcastMessage(client, data)
+    } else {
+      console.log(
+        `chat: ${client.data.uid} sent message but is muted in ${data.roomId}`,
+      )
+    }
   }
 
   @AsyncApiSub({
@@ -88,9 +107,11 @@ export class ChatGateway {
     @ConnectedSocket() client: Socket,
     @MessageBody() roomId: number,
   ) {
-    // TODO: 유효한 roomId인지 확인
-    // TODO: banned 여부 확인
-    this.chatService.addUserToRoom(client.data.uid, roomId)
+    try {
+      await this.chatService.addUserToRoom(client.data.uid, roomId)
+    } catch (error) {
+      return error
+    }
     client.join(roomId.toString())
     console.log(`chat: ${client.data.uid} has entered to ${roomId}`)
     this.emitNotice(client, roomId, 'join')
@@ -107,7 +128,11 @@ export class ChatGateway {
     @ConnectedSocket() client: Socket,
     @MessageBody() roomId: number,
   ) {
-    this.chatService.removeUserFromRoom(client.data.uid, roomId)
+    try {
+      await this.chatService.removeUserFromRoom(client.data.uid, roomId)
+    } catch (error) {
+      return error
+    }
     client.leave(roomId.toString())
     console.log(`chat: ${client.data.uid} leaved ${roomId}`)
     this.emitNotice(client, roomId, 'leave')
@@ -138,10 +163,12 @@ export class ChatGateway {
     @ConnectedSocket() client: Socket,
     @MessageBody() title: string,
   ) {
-    const newRoom = await this.chatService.createChatroom(
-      client.data.uid,
-      title,
-    )
+    let newRoom: ChatRoom
+    try {
+      newRoom = await this.chatService.createChatroom(client.data.uid, title)
+    } catch (error) {
+      return error
+    }
     this.onJoinRoom(client, newRoom.id)
   }
 
@@ -155,9 +182,13 @@ export class ChatGateway {
     @ConnectedSocket() client: Socket,
     @MessageBody() data: UserInRoomDto,
   ) {
-    // client가 현재 admin이고, 새 admin이 현재 chatroom의 참가자라면
     if (this.chatService.isAdmin(client.data.uid, data.roomId))
-      this.chatService.addUserAsAdmin(data.uid, data.roomId)
+      return 'You are not admin'
+    try {
+      await this.chatService.addUserAsAdmin(data.uid, data.roomId)
+    } catch (error) {
+      return error
+    }
   }
 
   @AsyncApiPub({
@@ -170,8 +201,12 @@ export class ChatGateway {
     @ConnectedSocket() client: Socket,
     @MessageBody() data: UserInRoomDto,
   ) {
-    // client가 현재 admin이고, 새 admin이 현재 chatroom의 참가자라면
     if (this.chatService.isAdmin(client.data.uid, data.roomId))
-      this.chatService.removeUserAsAdmin(data.uid, data.roomId)
+      return 'You are not admin'
+    try {
+      await this.chatService.removeUserAsAdmin(data.uid, data.roomId)
+    } catch (error) {
+      return error
+    }
   }
 }
