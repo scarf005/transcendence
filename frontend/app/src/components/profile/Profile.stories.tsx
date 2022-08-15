@@ -4,7 +4,7 @@ import { ComponentStory, ComponentMeta } from '@storybook/react'
 
 import { mockUser } from 'mock/mockUser'
 import { Profile } from './Profile'
-import { User } from 'data/User.dto'
+import { User } from 'data'
 
 export default {
   title: 'Profile/Profile',
@@ -18,5 +18,3 @@ Default.args = { user: mockUser }
 
 export const Playing = Template.bind({})
 Playing.args = { user: { ...mockUser, status: 'GAME' } as User }
-
-// FIXME: 이름 Profile로 변경

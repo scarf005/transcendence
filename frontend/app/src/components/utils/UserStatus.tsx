@@ -1,5 +1,5 @@
 import { Badge, BadgeProps, Tooltip } from '@mui/material'
-import { UserStatusType } from 'data/User.dto'
+import { UserStatusType } from 'data'
 import VideogameAssetIcon from '@mui/icons-material/VideogameAsset'
 
 const getData = (

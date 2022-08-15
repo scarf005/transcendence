@@ -2,4 +2,4 @@ FROM node:lts-alpine3.15
 
 WORKDIR /app
 
-ENTRYPOINT [ "npm", "run", "storybook:container" ]
+ENTRYPOINT [ "npm", "run", "storybook" ]

@@ -1,5 +1,5 @@
 import { Avatar, ListItem, ListItemAvatar, ListItemText } from '@mui/material'
-import { User } from 'data/User.dto'
+import { User } from 'data'
 import { AvatarWithStatus } from './Profile'
 
 interface Props {

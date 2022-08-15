@@ -1,9 +1,6 @@
 import { Route, Routes } from 'react-router-dom'
 import Nav from './Nav'
-import { GameView, FriendView } from 'view'
-import { Profile } from 'components/profile/Profile'
-
-import { mockUser } from 'mock/mockUser'
+import { GameView, FriendView, ChatView, ProfileView } from 'view'
 
 export const MainRouter = () => {
   return (
@@ -13,7 +10,8 @@ export const MainRouter = () => {
         <Route path="/" element={<></>} />
         <Route path="/game" element={<GameView />} />
         <Route path="/friend" element={<FriendView />} />
-        <Route path="/profile" element={<Profile user={mockUser} />} />
+        <Route path="/profile" element={<ProfileView />} />
+        <Route path="/chat" element={<ChatView />} />
       </Routes>
     </div>
   )

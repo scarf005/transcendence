@@ -6,7 +6,7 @@ import {
   Grid,
   Typography,
 } from '@mui/material'
-import { User } from 'data/User.dto'
+import { User } from 'data'
 import { Profile } from './Profile'
 import {
   AddFriendButton,
@@ -62,20 +62,5 @@ export const OtherProfile = ({ user, refUser }: Props) => {
         <Actions status={status} />
       </Grid>
     </>
-  )
-}
-export const OtherProfileCard = ({ user, refUser }: Props) => {
-  const status = getStatus(user, refUser)
-
-  return (
-    <Card sx={{ maxWidth: 400 }}>
-      <Profile user={user} />
-      <Typography align="center">{`status: ${status}`}</Typography>
-      <CardActionArea>
-        <Grid container justifyContent="right">
-          <Actions status={status} />
-        </Grid>
-      </CardActionArea>
-    </Card>
   )
 }

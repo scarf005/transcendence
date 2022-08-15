@@ -1,6 +1,8 @@
 import { IconButtonWrap } from '../utils/IconButtonWrap'
 import {
+  AddAPhoto,
   Block,
+  DriveFileRenameOutline,
   LocalPostOffice,
   PersonAdd,
   PersonRemove,
@@ -10,6 +12,7 @@ interface OnClickProps {
   onClick: (...args: unknown[]) => void
 }
 
+// TODO: reducer로 변경
 export const AddFriendButton = ({ onClick }: OnClickProps) => (
   <IconButtonWrap
     title="add to friend"
@@ -41,6 +44,26 @@ export const MessageButton = ({ onClick }: OnClickProps) => {
     <IconButtonWrap
       title="Send Direct Message"
       icon={<LocalPostOffice />}
+      onClick={onClick}
+    />
+  )
+}
+
+export const ChangeNickNameButton = ({ onClick }: OnClickProps) => {
+  return (
+    <IconButtonWrap
+      title="Change Nickname"
+      icon={<DriveFileRenameOutline />}
+      onClick={onClick}
+    />
+  )
+}
+
+export const ChangeAvatarButton = ({ onClick }: OnClickProps) => {
+  return (
+    <IconButtonWrap
+      title="Change Avatar"
+      icon={<AddAPhoto />}
       onClick={onClick}
     />
   )
