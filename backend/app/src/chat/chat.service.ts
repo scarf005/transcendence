@@ -148,7 +148,7 @@ export class ChatService {
       .select([
         'chatRoom.id',
         'chatRoom.name',
-        'chatRoom.type',
+        'chatRoom.roomtype',
         'chatUser.isAdmin',
         'chatUser.isOwner',
         'user.uid',
@@ -162,13 +162,13 @@ export class ChatService {
     return room
   }
 
-  async findRoomsByUserId(id: number): Promise<ChatRoom[]> {
+  async findRoomsByUserId(uid: number): Promise<ChatRoom[]> {
     const rooms = await this.chatRoomRepository
       .createQueryBuilder('chatRoom')
-      .select(['chatRoom.id', 'chatRoom.name', 'chatRoom.type'])
+      .select(['chatRoom.id', 'chatRoom.name', 'chatRoom.roomtype'])
       .leftJoin('chatRoom.chatUser', 'chatUser')
       .leftJoin('chatUser.user', 'user')
-      .where('user.id = :id', { id })
+      .where('user.uid = :uid', { uid })
       .getMany()
     if (!rooms) throw new NotFoundException('Room not found')
     return rooms
