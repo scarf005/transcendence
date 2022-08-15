@@ -8,8 +8,7 @@ import {
 } from 'components'
 import { User } from 'data'
 import fuzzysort from 'fuzzysort'
-import { withMe, withOtherUsers } from 'state/user'
-import { useRecoilValueLoadable } from 'recoil'
+import { useUserRequest } from 'hook/useUser'
 
 const findUser = (users: User[], text: string) => {
   return fuzzysort.go(text, users, { key: 'nickname' }).map((r) => r.obj)
@@ -74,14 +73,13 @@ const FriendPanel = ({ users, refUser }: Props) => {
 }
 
 export const FriendView = () => {
-  const refUser = useRecoilValueLoadable(withMe)
-  const otherUsers = useRecoilValueLoadable(withOtherUsers)
+  const refUser = useUserRequest<User>('me')
+  const users = useUserRequest<User[]>('')
 
-  if (refUser.state === 'hasValue' && otherUsers.state === 'hasValue') {
-    return (
-      <FriendPanel users={otherUsers.contents} refUser={refUser.contents} />
-    )
-  } else {
+  if (!(refUser && users)) {
     return <div>Loading...</div>
   }
+
+  const otherUsers = users.filter((u) => u.uid !== refUser.uid)
+  return <FriendPanel users={otherUsers} refUser={refUser} />
 }
