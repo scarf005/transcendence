@@ -18,3 +18,19 @@ export interface ServerToClientEvents {
   LEAVE: (chatRoomId: number) => void
   NOTICE: MessageHandler
 }
+
+export interface JoinedRoom {
+  id: number
+  name: string
+  roomtype: string
+}
+
+export interface Room {
+  id: number
+  name: string
+  roomtype: string
+  password: string
+  bannedIds: number[]
+  mutedIds: number[]
+  chatUser: any[]
+}
