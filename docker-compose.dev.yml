@@ -7,7 +7,7 @@ services:
       dockerfile: Dockerfile.dev
     restart: always
     volumes:
-      - "./frontend/app:/app"
+      - "./frontend/app/src:/app/src"
     expose:
       - 3000
     networks:
@@ -45,7 +45,7 @@ services:
 
     restart: always
     volumes:
-      - "./backend/app:/app"
+      - "./backend/app/src:/app/src"
 
     environment:
       DB_PASSWORD: ${DB_PASSWORD}

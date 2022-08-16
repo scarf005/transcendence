@@ -9,7 +9,7 @@ export class RegisterUserDto {
   @IsNotEmpty()
   nickname: string
 
-  @IsUrl()
+  @IsUrl({ require_host: true })
   @IsNotEmpty()
   avatar: string
 }

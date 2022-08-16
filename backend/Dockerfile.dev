@@ -1,7 +1,13 @@
 FROM node:lts-alpine3.15
 
+RUN apk add chromium
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD true
+
 COPY avatar /srv/uploads/avatar
+COPY app /app
 
 WORKDIR /app
+
+RUN  npm install
 
 ENTRYPOINT [ "npm", "run", "start:dev" ]
