@@ -2,7 +2,7 @@ import { List } from '@mui/material'
 import { Chat } from 'data'
 import { ChatListItem } from './ChatListItem'
 import { useUser } from 'hook/useUser'
-import { groupBySerial } from 'utility/groupBySerial'
+import { groupBySerial } from 'utility'
 
 interface Props<T extends Chat> {
   chats: T[]

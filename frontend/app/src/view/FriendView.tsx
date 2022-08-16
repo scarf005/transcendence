@@ -1,33 +1,20 @@
 import React, { useState } from 'react'
-import { Grid, List, Divider, Input, Typography } from '@mui/material'
-import {
-  MyProfile,
-  OtherProfile,
-  ProfileListItem,
-  VerticalDivider,
-} from 'components'
-import { User } from 'data'
 import fuzzysort from 'fuzzysort'
-import { useUserRequest } from 'hook/useUser'
+import { Grid, List, Divider, Input, Typography } from '@mui/material'
+
+import { ProfileListItem, VerticalDivider } from 'components'
+import { User } from 'data'
+import { useUserRequest } from 'hook'
+import { ProfileDisplay } from 'components'
 
 const findUser = (users: User[], text: string) => {
   return fuzzysort.go(text, users, { key: 'nickname' }).map((r) => r.obj)
 }
 
-interface DisplayProps extends Props {
-  uid: number
-}
-const ProfileDisplay = ({ users, refUser, uid }: DisplayProps) => {
-  const currentUser = users.find((user) => user.uid === uid)
-
-  if (currentUser) {
-    return <OtherProfile user={currentUser} refUser={refUser} />
-  } else {
-    return <MyProfile user={refUser} />
-  }
-}
-interface Props {
+export interface Props {
+  /** refUser를 제외한 모든 사용자 */
   users: User[]
+  /** 로그인한 사용자 */
   refUser: User
 }
 const FriendPanel = ({ users, refUser }: Props) => {
