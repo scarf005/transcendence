@@ -1,7 +1,9 @@
+/** {@link backend/src/data/Chat.dto} */
 export interface Message {
   senderUid: number
   msgContent: string
   roomId: number
+  createdAt: Date
 }
 export type Chat = Omit<Message, 'roomId'>
 export type MessageHandler = (message: Message) => void

@@ -11,13 +11,18 @@ export const ChatList = <T extends Chat>({ chats }: Props<T>) => {
   const groupedChats = groupBySerial(chats, (chat) => chat.senderUid)
   return (
     <List>
-      {groupedChats.map((chats, i) => (
-        <ChatListItem
-          key={i} // FIXME: createdAt이 구현되면 이걸로 바꾸기
-          user={useUser(chats[0].senderUid)} // TODO: cache user
-          messages={chats.map((chat) => chat.msgContent)}
-        />
-      ))}
+      {groupedChats.map((chats) => {
+        const first = chats[0]
+        const { createdAt, senderUid } = first
+
+        return (
+          <ChatListItem
+            key={createdAt.toISOString() + first.msgContent}
+            // FIXME: useUser 언젠가는 쓰기 (지금은 백엔드 에러로 storybook에서 실행 안됨)
+            messages={chats.map((chat) => chat.msgContent)}
+          />
+        )
+      })}
     </List>
   )
 }

@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger'
-import { IsNumber, IsString } from 'class-validator'
+import { IsDate, IsNumber, IsString } from 'class-validator'
 
 export class ChatMessageDto {
   @ApiProperty({
@@ -17,4 +17,7 @@ export class ChatMessageDto {
   @ApiProperty({ description: '채팅방id' })
   @IsNumber()
   roomId: number
+
+  @IsDate()
+  createdAt: Date
 }

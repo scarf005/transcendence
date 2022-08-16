@@ -16,26 +16,32 @@ Default.args = {
     {
       senderUid: 4,
       msgContent: 'Hello',
+      createdAt: new Date(),
     },
     {
       senderUid: 4,
       msgContent: 'Hi',
+      createdAt: new Date(),
     },
     {
       senderUid: 4,
       msgContent: 'How are you?',
+      createdAt: new Date(),
     },
     {
       senderUid: 2,
       msgContent: 'asdf',
+      createdAt: new Date(),
     },
     {
       senderUid: 2,
       msgContent: 'lorem ipsum',
+      createdAt: new Date(),
     },
     {
       senderUid: 4,
       msgContent: 'what do you say?',
+      createdAt: new Date(),
     },
   ],
 }

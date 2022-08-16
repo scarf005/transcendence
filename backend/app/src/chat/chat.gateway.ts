@@ -94,6 +94,7 @@ export class ChatGateway {
   async broadcastMessage(client, data: ChatMessageDto) {
     // TODO: block 여부 확인
     data.senderUid = client.data.uid
+    data.createdAt ??= new Date()
     client.broadcast.to(data.roomId.toString()).emit(chatEvent.RECEIVE, data)
   }
 
@@ -150,6 +151,7 @@ export class ChatGateway {
       roomId: roomId,
       senderUid: client.data.uid,
       msgContent: msg,
+      createdAt: new Date(),
     }
     this.server.to(roomId.toString()).emit(chatEvent.NOTICE, data)
   }
