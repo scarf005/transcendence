@@ -11,6 +11,7 @@ import { JwtService } from '@nestjs/jwt'
 import { UserPayload } from 'configs/jwt-token.config'
 import { RegisterUserDto } from 'dto/registerUser.dto'
 import { Stat } from './stat.entity'
+import * as fs from 'fs'
 
 @Injectable()
 export class UserService {
@@ -206,5 +207,17 @@ export class UserService {
       .where(':uid = ANY(user.blocks)', { uid: uid })
       .getMany()
     return users.map((user) => user.uid)
+  }
+
+  async changeAvatar(file: Express.Multer.File, uid: number) {
+    const avatarPath = `${process.env.AVATAR_API}${file.filename}`
+    let user = await this.userRepository.findOneBy({ uid })
+    const currentPath = user.avatar.slice(user.avatar.lastIndexOf('/') + 1)
+    user.avatar = avatarPath
+    user = await this.userRepository.save(user)
+    if (currentPath !== 'default.jpg') {
+      fs.unlinkSync(`/srv/uploads/avatar/${currentPath}`)
+    }
+    return user
   }
 }

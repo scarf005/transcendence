@@ -30,6 +30,8 @@ services:
       - 3000
     networks:
       - internal
+    volumes:
+      - "avatar:/srv/uploads/avatar"
     restart: always
     environment:
       DB_PASSWORD: ${DB_PASSWORD}
@@ -38,6 +40,8 @@ services:
       FT_CLIENT_SECRET: ${FT_CLIENT_SECRET}
       FT_REDIRECT_URL: ${FT_REDIRECT_URL}
       BASE_URL: ${BASE_URL}
+      AVATAR_API: ${AVATAR_API}
+      AVATAR_SAVE: ${AVATAR_SAVE}
 
   database:
     build:
@@ -57,6 +61,7 @@ services:
 
 volumes:
   database:
+  avatar:
 
 
 networks:
