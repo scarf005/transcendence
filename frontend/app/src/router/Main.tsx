@@ -7,7 +7,12 @@ import { mockUser } from 'mock/mockUser'
 import { useEffect, createContext, useState } from 'react'
 import { io, Socket } from 'socket.io-client'
 
-import { Message, ClientToServerEvents, ServerToClientEvents } from 'data'
+import {
+  Message,
+  ClientToServerEvents,
+  ServerToClientEvents,
+  JoinedRoom,
+} from 'data'
 
 export const MainRouter = () => {
   const [socket, setSocket] = useState<Socket>()
@@ -25,10 +30,7 @@ export const MainRouter = () => {
     socket.on('disconnect', () => {
       console.log('socket server disconnected.')
     })
-    socket.on('NOTICE', (res: Message) => {
-      console.log(`NOTICE EVENT: ${res.msgContent}`)
-    })
-    socket.on('RECEIVE', (res) => console.log(res))
+
     return () => {
       socket.disconnect()
     }

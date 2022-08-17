@@ -11,12 +11,18 @@ const Item = styled(Paper)(({ theme }) => ({
   color: theme.palette.text.secondary,
 }))
 
-export const JoinedRoomList = (prop: { room: JoinedRoom[] }) => {
+export const JoinedRoomList = (prop: {
+  room: JoinedRoom[]
+  setShowChat: any
+}) => {
+  const changeView = (id: number) => {
+    prop.setShowChat({ bool: true, roomId: id })
+  }
   return (
     <Box sx={{ width: '100%' }}>
       <Stack spacing={2}>
         {prop.room.map((chatRoom: JoinedRoom) => (
-          <Item>{chatRoom.name}</Item>
+          <Item onClick={() => changeView(chatRoom.id)}>{chatRoom.name}</Item>
         ))}
       </Stack>
     </Box>

@@ -12,9 +12,14 @@ const Item = styled(Paper)(({ theme }) => ({
   color: theme.palette.text.secondary,
 }))
 
-export const ChatList = (prop: { list: Room[]; socket: any }) => {
-  const joinRoom = (id: number) => {
-    prop.socket.emit('JOIN', { name: { id } })
+export const ChatRoomList = (prop: {
+  list: Room[]
+  socket: any
+  setShowChat: any
+}) => {
+  const joinRoom = (room: number) => {
+    prop.socket.emit('JOIN', { roomId: room} )
+    prop.setShowChat({ bool: true, roomId: room })
   }
   return (
     <Box sx={{ width: '100%' }}>

@@ -142,8 +142,9 @@ export function RegisterUser(props: {
           navigate('/')
         }
       })
-      .catch((_) => {
+      .catch((err) => {
         navigate('/')
+        console.log(err.json())
       })
   }
 
