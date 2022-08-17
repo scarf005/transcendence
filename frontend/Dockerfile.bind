@@ -1,9 +1,5 @@
 FROM node:lts-alpine3.15
 
-COPY app /app
-
 WORKDIR /app
-
-RUN  npm ci
 
 ENTRYPOINT [ "npm", "run", "start" ]

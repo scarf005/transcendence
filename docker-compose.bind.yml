@@ -1,0 +1,88 @@
+version: '3.3'
+
+services:
+  frontend:
+    build:
+      context: frontend
+      dockerfile: Dockerfile.bind
+    restart: always
+    volumes:
+      - "./frontend/app:/app"
+    expose:
+      - 3000
+    networks:
+      - internal
+
+  storybook:
+    build:
+      context: frontend
+      dockerfile: Dockerfile.dev.storybook
+    restart: always
+    volumes:
+      - "./frontend/app:/app"
+    expose:
+      - 6006
+    networks:
+      - internal
+    logging:
+      driver: none
+
+  reverse_proxy:
+    build: reverse_proxy
+    restart: always
+    ports:
+      - "3000:3000"
+    networks:
+      - internal
+    depends_on:
+      - frontend
+      - backend
+
+  backend:
+    build:
+      context: backend
+      dockerfile: Dockerfile.bind
+
+    restart: always
+    volumes:
+      - "./backend/app:/app"
+      - "avatar:/srv/uploads/avatar"
+
+    env_file: .env
+
+    expose:
+      - 3000
+
+    depends_on:
+      - database
+
+    networks:
+      - internal
+
+  database:
+    build:
+      context: db
+      dockerfile: Dockerfile
+
+    restart: always
+
+    expose:
+      - 5432
+
+    volumes:
+      - "database:/var/lib/postgresql/data"
+
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_PASSWORD: ${DB_PASSWORD}
+
+    networks:
+      - internal
+
+volumes:
+  database:
+  avatar:
+
+
+networks:
+  internal:
