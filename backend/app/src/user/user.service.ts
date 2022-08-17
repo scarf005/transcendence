@@ -220,4 +220,28 @@ export class UserService {
     }
     return user
   }
+
+  async changeNickname(uid: number, nickname: string) {
+    const is_dup = await this.userRepository.findOneBy({ nickname })
+    if (is_dup) throw new BadRequestException('Nickname already exists')
+    const user = await this.userRepository
+      .createQueryBuilder('user')
+      .select([
+        'user.uid',
+        'user.nickname',
+        'user.avatar',
+        'user.status',
+        'user.friends',
+        'user.blocks',
+        'stat.win',
+        'stat.lose',
+        'stat.rating',
+      ])
+      .innerJoin('user.stat', 'stat')
+      .where('user.uid = :uid', { uid })
+      .getOne()
+    if (!user) throw new NotFoundException('User not found')
+    user.nickname = nickname
+    return this.userRepository.save(user)
+  }
 }

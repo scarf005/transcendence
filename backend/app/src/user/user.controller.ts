@@ -15,6 +15,7 @@ import { UserService } from './user.service'
 import { ApiTags, ApiOperation, ApiCreatedResponse } from '@nestjs/swagger'
 import { CheckInputDto } from 'dto/checkInput.dto'
 import { FindInputDto } from 'dto/findInput.dto'
+import { ChangeNicknameDto } from 'dto/changeNickname.dto'
 
 @Controller('api/user')
 @ApiTags('유저 API')
@@ -63,6 +64,21 @@ export class UserController {
   })
   async getAllUser(): Promise<FindUserDto[]> {
     return await this.userService.findAll()
+  }
+
+  @Post('/nickname')
+  @UseGuards(JwtAfterTwoFactorUserGuard)
+  @ApiOperation({
+    summary: 'Post nickname API',
+    description: 'nickname 변경',
+  })
+  @ApiCreatedResponse({
+    description: 'ok : 추가됐다, no : exception',
+    type: String,
+  })
+  async changeNickname(@Req() req: any, @Body() body: ChangeNicknameDto) {
+    const { uid } = req.user
+    return this.userService.changeNickname(uid, body.nickname)
   }
 
   @Post('/friend')
