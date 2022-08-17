@@ -10,11 +10,14 @@ export class ChatMessageDto {
   @IsNumber()
   senderUid?: number
 
-  @ApiProperty({ description: '메시지 본문' })
+  @ApiProperty({
+    description: '메시지 본문',
+    examples: ['this is sample message'],
+  })
   @IsString()
   msgContent: string
 
-  @ApiProperty({ description: '채팅방id' })
+  @ApiProperty({ description: '채팅방id', examples: [1] })
   @IsNumber()
   roomId: number
 

@@ -1,5 +1,5 @@
 import { Controller, Get, UseGuards, Req } from '@nestjs/common'
-import { ChatRoomStatusDto } from 'dto/chatRoomStatus.dto'
+import { ChatRoomDto } from 'dto/chatRoom.dto'
 import { ChatService } from './chat.service'
 import { ApiTags, ApiOkResponse } from '@nestjs/swagger'
 import { JwtAfterTwoFactorUserGuard } from 'auth/jwt.strategy'
@@ -11,14 +11,14 @@ export class RoomsController {
 
   @Get('/list')
   @UseGuards(JwtAfterTwoFactorUserGuard)
-  @ApiOkResponse({ type: ChatRoomStatusDto, isArray: true })
+  @ApiOkResponse({ type: ChatRoomDto, isArray: true })
   getChatroomList() {
     return this.chatService.getAllChatrooms()
   }
 
   @Get('/me')
   @UseGuards(JwtAfterTwoFactorUserGuard)
-  @ApiOkResponse({ type: ChatRoomStatusDto, isArray: true })
+  @ApiOkResponse({ type: ChatRoomDto, isArray: true })
   getMyChatroomList(@Req() req: any) {
     const { uid } = req.user
     return this.chatService.findRoomsByUserId(uid)

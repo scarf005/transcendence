@@ -5,7 +5,7 @@ import { ChatRoomDto } from './chatRoom.dto'
 export class ChatRoomStatusDto extends ChatRoomDto {
   @ApiProperty()
   @IsNumber()
-  roomId: number
+  ownerUid: number
 
   @ApiProperty()
   @IsArray()

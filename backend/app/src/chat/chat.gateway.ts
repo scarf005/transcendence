@@ -10,6 +10,7 @@ import { Server, Socket } from 'socket.io'
 import { chatEvent } from 'configs/chat-event.constants'
 import { ChatMessageDto } from 'dto/chatMessage.dto'
 import { UserInRoomDto } from 'dto/userInRoom.dto'
+import { ChatRoomDto } from 'dto/chatRoom.dto'
 import { ChatService } from './chat.service'
 import * as jwt from 'jsonwebtoken'
 import { jwtConstants } from 'configs/jwt-token.config'
@@ -64,7 +65,7 @@ export class ChatGateway {
   @AsyncApiPub({
     channel: chatEvent.SEND,
     summary: '클라이언트->서버로 메시지 전송',
-    message: { name: 'data', payload: { type: ChatMessageDto } },
+    message: { name: 'ChatMessageDto', payload: { type: ChatMessageDto } },
   })
   async onSendMessage(
     @ConnectedSocket() client: Socket,
@@ -89,7 +90,7 @@ export class ChatGateway {
   @AsyncApiSub({
     channel: chatEvent.RECEIVE,
     summary: '다른 사용자의 메시지를 서버->클라이언트로 전송',
-    message: { name: 'data', payload: { type: ChatMessageDto } },
+    message: { name: 'ChatMessageDto', payload: { type: ChatMessageDto } },
   })
   async broadcastMessage(client, data: ChatMessageDto) {
     // TODO: block 여부 확인
@@ -103,20 +104,24 @@ export class ChatGateway {
     channel: chatEvent.JOIN,
     summary: '채팅방에 참가',
     description: 'user가 채팅방에 새로 입장. 알림메시지를 모든 구성원에게 전송',
-    message: { name: 'roomId', payload: { type: Number } },
+    message: { name: 'ChatRoomDto', payload: { type: ChatRoomDto } },
   })
   async onJoinRoom(
     @ConnectedSocket() client: Socket,
-    @MessageBody() roomId: number,
+    @MessageBody() room: ChatRoomDto,
   ) {
     try {
-      await this.chatService.addUserToRoom(client.data.uid, roomId)
+      await this.chatService.addUserToRoom(
+        client.data.uid,
+        room.roomId,
+        room.roomPassword,
+      )
     } catch (error) {
       return error
     }
-    client.join(roomId.toString())
-    console.log(`chat: ${client.data.uid} has entered to ${roomId}`)
-    this.emitNotice(client, roomId, 'join')
+    client.join(room.roomId.toString())
+    console.log(`chat: ${client.data.uid} has entered to ${room.roomId}`)
+    this.emitNotice(client, room.roomId, 'join')
   }
 
   @SubscribeMessage(chatEvent.LEAVE)
@@ -135,6 +140,7 @@ export class ChatGateway {
     } catch (error) {
       return error
     }
+    // TODO: 마지막 유저가 나가면 채팅방 삭제
     client.leave(roomId.toString())
     console.log(`chat: ${client.data.uid} leaved ${roomId}`)
     this.emitNotice(client, roomId, 'leave')
@@ -143,8 +149,8 @@ export class ChatGateway {
   @AsyncApiSub({
     channel: chatEvent.NOTICE,
     summary: '공지msg',
-    description: 'user 입장, 퇴장 등의 메시지',
-    message: { name: 'data', payload: { type: ChatMessageDto } },
+    description: "user 입장시 mscContent='join', 퇴장시 'leave'",
+    message: { name: 'ChatMessageDto', payload: { type: ChatMessageDto } },
   })
   async emitNotice(client, roomId: number, msg: string) {
     const data: ChatMessageDto = {
@@ -159,20 +165,27 @@ export class ChatGateway {
   @AsyncApiPub({
     channel: chatEvent.CREATE,
     summary: '새로운 채팅방 생성',
-    message: { name: 'room_title', payload: { type: String } },
+    message: { name: 'ChatRoomDto', payload: { type: ChatRoomDto } },
   })
   @SubscribeMessage(chatEvent.CREATE)
   async onCreateRoom(
     @ConnectedSocket() client: Socket,
-    @MessageBody() title: string,
+    @MessageBody() data: ChatRoomDto,
   ) {
     let newRoom: ChatRoom
     try {
-      newRoom = await this.chatService.createChatroom(client.data.uid, title)
+      newRoom = await this.chatService.createChatroom(
+        client.data.uid,
+        data.roomName,
+        data.roomType,
+        data.roomPassword,
+      )
     } catch (error) {
       return error
     }
-    this.onJoinRoom(client, newRoom.id)
+    client.join(newRoom.id.toString())
+    console.log(`chat: ${client.data.uid} has entered to ${newRoom.id}`)
+    this.emitNotice(client, newRoom.id, 'join')
   }
 
   @AsyncApiPub({
