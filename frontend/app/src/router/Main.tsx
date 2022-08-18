@@ -7,7 +7,7 @@ import { mockUser } from 'mock/mockUser'
 import { useEffect, createContext, useState } from 'react'
 import { io, Socket } from 'socket.io-client'
 
-import { Message, ChatSocket, JoinedRoom } from 'data'
+import { ChatSocket } from 'data'
 
 export const MainRouter = () => {
   const [socket, setSocket] = useState<Socket>()
@@ -35,7 +35,10 @@ export const MainRouter = () => {
         <Route path="/game" element={<GameView />} />
         <Route path="/friend" element={<FriendView />} />
         <Route path="/profile" element={<Profile user={mockUser} />} />
-        <Route path="/Chat" element={<ChatView socket={socket} />} />
+        <Route
+          path="/Chat"
+          element={<ChatView socket={socket as ChatSocket} />}
+        />
       </Routes>
     </div>
   )
