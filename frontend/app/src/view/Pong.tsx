@@ -1,8 +1,9 @@
 import { useRef, useEffect, useState } from 'react'
 import Avatar from '@mui/material/Avatar'
-import { Stack, Typography, Box, Modal } from '@mui/material'
+import { Stack, Typography, Box, Modal, Button } from '@mui/material'
 import styled from 'styled-components'
 import { useUser } from 'hook/useUser'
+import { useAvatar } from 'hook/useAvatar'
 
 export type Rect = {
   x: number
@@ -41,6 +42,15 @@ const drawRect = (
 
 const PongUser = (props: { uid: number }) => {
   const profile = useUser(props.uid)
+  const [_avatarFile, avatar, setAvatarFile] = useAvatar(
+    '/api/avatar/default.jpg',
+  )
+
+  useEffect(() => {
+    if (profile !== undefined) {
+      setAvatarFile(profile.avatar)
+    }
+  }, [profile])
 
   if (profile === undefined) {
     return null
@@ -48,7 +58,7 @@ const PongUser = (props: { uid: number }) => {
     return (
       <Stack justifyContent="center" alignItems="center">
         <Typography>{profile.nickname}</Typography>
-        <Avatar src={profile.avatar} />
+        <Avatar src={avatar} />
         <Typography>RATING: {profile.stat.rating}</Typography>
       </Stack>
     )
@@ -101,8 +111,7 @@ const PongRightProfile = styled.div`
   grid-row: 1 / 2;
 `
 
-const Pong = (props: PongProps) => {
-  const pongCanvas = useRef<HTMLCanvasElement>(null)
+export const PongStartCounter = () => {
   const [remainTime, setRemainTime] = useState(3)
 
   useEffect(() => {
@@ -113,6 +122,42 @@ const Pong = (props: PongProps) => {
       return () => clearTimeout(timer)
     }
   }, [remainTime])
+
+  return (
+    <Modal open={remainTime > 0}>
+      <Box sx={remainTimeModalStyle}>
+        <Typography variant="h1">{remainTime}</Typography>
+      </Box>
+    </Modal>
+  )
+}
+
+export const PongResult = ({
+  uid,
+  closeHandler,
+}: {
+  uid: number
+  closeHandler: () => void
+}) => {
+  return (
+    <Modal open={true}>
+      <Box sx={remainTimeModalStyle}>
+        <Typography variant="h2">Winner is</Typography>
+        <PongUser uid={uid} />
+        <Button
+          onClick={() => {
+            closeHandler()
+          }}
+        >
+          CLOSE
+        </Button>
+      </Box>
+    </Modal>
+  )
+}
+
+const Pong = (props: PongProps) => {
+  const pongCanvas = useRef<HTMLCanvasElement>(null)
 
   useEffect(() => {
     const req = requestAnimationFrame(() => {
@@ -159,21 +204,6 @@ const Pong = (props: PongProps) => {
 
   return (
     <PongGrid>
-      <Modal open={remainTime > 0}>
-        <Box sx={remainTimeModalStyle}>
-          <Typography variant="h1">{remainTime}</Typography>
-        </Box>
-      </Modal>
-      <Modal open={!!props.winner}>
-        <Box sx={remainTimeModalStyle}>
-          <Typography variant="h2">Winner is</Typography>
-          {props.winner === 'left' ? (
-            <PongUser uid={props.leftUser} />
-          ) : (
-            <PongUser uid={props.rightUser} />
-          )}
-        </Box>
-      </Modal>
       <PongLeftProfile>
         <PongUser uid={props.leftUser} />
       </PongLeftProfile>

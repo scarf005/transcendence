@@ -145,10 +145,7 @@ export function RegisterUser(props: {
           navigate('/')
         }
       })
-      .catch(async (err) => {
-        console.log(err)
-        console.log(err.status)
-        console.log(await err.json())
+      .catch(() => {
         navigate('/')
       })
   }

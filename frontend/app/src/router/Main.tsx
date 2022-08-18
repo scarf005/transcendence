@@ -7,12 +7,16 @@ import { mockUser } from 'mock/mockUser'
 import { useEffect, createContext, useState } from 'react'
 import { io, Socket } from 'socket.io-client'
 
+import { usePongSocket } from 'hook/usePongSocket'
+
 import {
   Message,
   ClientToServerEvents,
   ServerToClientEvents,
   JoinedRoom,
 } from 'data'
+
+export const PongSocketContext = createContext<Socket | undefined>(undefined)
 
 export const MainRouter = () => {
   const [socket, setSocket] = useState<Socket>()
@@ -35,16 +39,21 @@ export const MainRouter = () => {
       socket.disconnect()
     }
   }, [])
+
+  const pongData = usePongSocket()
+
   return (
     <div>
       <Nav />
-      <Routes>
-        <Route path="/" element={<></>} />
-        <Route path="/game" element={<GameView />} />
-        <Route path="/friend" element={<FriendView />} />
-        <Route path="/profile" element={<Profile user={mockUser} />} />
-        <Route path="/Chat" element={<ChatView socket={socket} />} />
-      </Routes>
+      <PongSocketContext.Provider value={pongData.socket}>
+        <Routes>
+          <Route path="/" element={<></>} />
+          <Route path="/game" element={<GameView {...pongData} />} />
+          <Route path="/friend" element={<FriendView />} />
+          <Route path="/profile" element={<Profile user={mockUser} />} />
+          <Route path="/Chat" element={<ChatView socket={socket} />} />
+        </Routes>
+      </PongSocketContext.Provider>
     </div>
   )
 }

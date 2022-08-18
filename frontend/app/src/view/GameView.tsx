@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react'
 import styled from 'styled-components'
-import Pong, { PongProps } from './Pong'
+import Pong, { PongStartCounter, PongResult } from './Pong'
 import { createTheme, ThemeProvider } from '@mui/material/styles'
 import GameGrid from './GameGrid'
 import { useAuthSocket } from 'hook/useAuthSocket'
+import { Socket } from 'socket.io-client'
 
 const theme = createTheme({
   palette: {
@@ -13,51 +14,40 @@ const theme = createTheme({
   },
 })
 
-const GamePannel = (props: {
-  requestMatch: (matchData: any) => void
-  state: string
-}) => {
-  if (props.state === 'matching') {
-    return <MatchingView />
-  } else {
-    return <GameGrid requestMatch={props.requestMatch} />
-  }
+const GamePannel = (props: { requestMatch: (matchData: any) => void }) => {
+  return <GameGrid requestMatch={props.requestMatch} />
 }
 
 const MatchingView = () => {
   return <h2>대충 매칭중 표시...</h2>
 }
 
-export const GameView = () => {
-  const [state, setState] = useState('selecting')
+type PongData = {
+  socket: any
+  gameState: any
+  setGameState: any
+  gameMode: any
+  player: any
+  gameInfo: any
+  winner: any
+}
+
+export const GameView = ({
+  socket,
+  gameState,
+  setGameState,
+  gameMode,
+  player,
+  gameInfo,
+  winner,
+}: PongData) => {
   const [keyState, setKeyState] = useState({ up: false, down: false })
-  const [pongState, setPongState] = useState<PongProps>()
-  const socket = useAuthSocket('/api/pong')
 
   useEffect(() => {
-    socket?.on('gameInfo', (msg: any) => {
-      setPongState(msg)
-      setState('playing')
-    })
-    socket?.on('gameEnd', (msg: any) => {
-      setPongState((value) => {
-        return { ...value, ...msg }
-      })
-      setTimeout(() => {
-        setState('waiting')
-      }, 3000)
-    })
-    socket?.on('render', (msg: any) => {
-      setPongState((value) => {
-        return { ...value, ...msg }
-      })
-    })
-  }, [socket])
-
-  useEffect(() => {
-    if (socket === undefined) {
+    if (socket === undefined || gameState !== 'play') {
       return
     }
+
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'ArrowUp') {
         setKeyState((value) => {
@@ -91,23 +81,45 @@ export const GameView = () => {
       window.removeEventListener('keydown', handleKeyDown)
       window.removeEventListener('keyup', handleKeyUp)
     }
-  }, [keyState, socket])
+  }, [keyState, socket, gameState])
 
-  return (
-    <ThemeProvider theme={theme}>
-      {state === 'playing' ? (
-        <Pong
-          {...(pongState as PongProps)}
-          window={{ ratio: 16 / 9, height: 450 }}
-        />
-      ) : (
+  switch (gameState) {
+    case 'selectMode':
+      return (
         <GamePannel
           requestMatch={(matchData: any) => {
             socket?.emit('match', matchData)
+            setGameState('findMatch')
           }}
-          state={state}
         />
-      )}
-    </ThemeProvider>
-  )
+      )
+
+    case 'findMatch':
+      return <MatchingView />
+
+    case 'gameInfo':
+      return <PongStartCounter />
+
+    case 'play':
+      return (
+        <Pong
+          {...gameInfo}
+          {...player}
+          window={{ ratio: 16 / 9, height: 450 }}
+        />
+      )
+
+    case 'gameEnd':
+      return (
+        <PongResult
+          uid={winner.uid}
+          closeHandler={() => {
+            setGameState('selectMode')
+          }}
+        />
+      )
+
+    default:
+      return null
+  }
 }

@@ -6,6 +6,7 @@ import {
   LocalPostOffice,
   PersonAdd,
   PersonRemove,
+  Visibility,
 } from '@mui/icons-material'
 
 interface OnClickProps {
@@ -54,6 +55,16 @@ export const ChangeNickNameButton = ({ onClick }: OnClickProps) => {
     <IconButtonWrap
       title="Change Nickname"
       icon={<DriveFileRenameOutline />}
+      onClick={onClick}
+    />
+  )
+}
+
+export const JoinGameAsSpectatorButton = ({ onClick }: OnClickProps) => {
+  return (
+    <IconButtonWrap
+      title="join game as sepctator"
+      icon={<Visibility />}
       onClick={onClick}
     />
   )
