@@ -108,10 +108,19 @@ export class ChatGateway {
     message: { name: 'ChatMessageDto', payload: { type: ChatMessageDto } },
   })
   async broadcastMessage(client, data: ChatMessageDto) {
-    // TODO: block 여부 확인
     data.senderUid = client.data.uid
     data.createdAt ??= new Date()
-    client.broadcast.to(data.roomId.toString()).emit(chatEvent.RECEIVE, data)
+    // sender를 블록하지 않은 모든 사람에게 전송 (sender자신 포함)
+    const sockets = await this.server.in(data.roomId.toString()).fetchSockets()
+    const excludeList = await this.chatService.findBlockedMeUsers(
+      data.senderUid,
+    )
+    sockets.forEach((soc) => {
+      const participant = soc.data.uid
+      // if (participant === data.senderUid) return
+      if (excludeList.includes(participant)) return
+      soc.emit(chatEvent.RECEIVE, data)
+    })
   }
 
   @AsyncApiPub({
@@ -156,7 +165,7 @@ export class ChatGateway {
     } catch (error) {
       return error
     }
-    // TODO: 마지막 유저가 나가면 채팅방 삭제
+    // TODO: owner가 나가면 채팅방 삭제
     client.leave(roomId.toString())
     console.log(`chat: ${client.data.uid} leaved ${roomId}`)
     this.emitNotice(client, roomId, 'leave')
