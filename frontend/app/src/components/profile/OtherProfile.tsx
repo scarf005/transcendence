@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useContext } from 'react'
 import {
   ButtonGroup,
   Card,
@@ -14,7 +14,11 @@ import {
   BlockButton,
   UnblockButton,
   MessageButton,
+  JoinGameAsSpectatorButton,
 } from './userActions'
+
+import { PongSocketContext } from 'router/Main'
+import { useNavigate } from 'react-router-dom'
 
 type userStatus = 'DEFAULT' | 'BLOCKED' | 'FRIEND'
 const getStatus = (user: User, refUser: User): userStatus => {
@@ -27,7 +31,18 @@ const getStatus = (user: User, refUser: User): userStatus => {
   }
 }
 
-const Actions = ({ status }: { status: userStatus }) => {
+const Actions = ({
+  status,
+  selfUid,
+  isInGame,
+}: {
+  status: userStatus
+  selfUid: number
+  isInGame: boolean
+}) => {
+  const pongSocket = useContext(PongSocketContext)
+  const navigate = useNavigate()
+
   if (status === 'BLOCKED') {
     return <UnblockButton onClick={() => alert('pressed unblock button')} />
   }
@@ -43,6 +58,18 @@ const Actions = ({ status }: { status: userStatus }) => {
       )}
       <BlockButton onClick={() => alert('pressed block button')} />
       <MessageButton onClick={() => alert('pressed direct message button')} />
+      {isInGame ? (
+        <JoinGameAsSpectatorButton
+          onClick={() => {
+            if (pongSocket !== undefined) {
+              pongSocket.emit('spectator', {
+                uid: selfUid,
+              })
+              navigate('/game')
+            }
+          }}
+        />
+      ) : null}
     </ButtonGroup>
   )
 }
@@ -59,7 +86,11 @@ export const OtherProfile = ({ user, refUser }: Props) => {
       <Profile user={user} />
       <Typography align="center">{`status: ${status}`}</Typography>
       <Grid container justifyContent="right">
-        <Actions status={status} />
+        <Actions
+          status={status}
+          isInGame={user.status === 'GAME'}
+          selfUid={user.uid}
+        />
       </Grid>
     </>
   )

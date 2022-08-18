@@ -82,7 +82,7 @@ export const BasicModal = (prop: {
   const createRoom = () => {
     const roomName = input.current?.value
     console.log(roomName)
-    prop.socket.emit('CREATE', roomName)
+    prop.socket.emit('CREATE', { title: roomName, type: 'PUBLIC' })
     handleClose()
   }
   return (

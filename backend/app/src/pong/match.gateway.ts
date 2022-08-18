@@ -75,11 +75,11 @@ export class MatchGateWay implements OnGatewayDisconnect, OnGatewayConnection {
 
   @SubscribeMessage('spectator')
   handleSpectator(
-    @MessageBody() message: { gameId: number },
+    @MessageBody() message: { uid: number },
     @ConnectedSocket() client: UserSocket,
   ) {
-    const manager = this.pongService.getGameByGameId(Number(message.gameId))
-    manager?.addSpectator(client)
+    const game = this.pongService.getGameByUser(Number(message.uid))
+    game?.manager.addSpectator(client)
   }
 
   handleDisconnect(client: UserSocket) {

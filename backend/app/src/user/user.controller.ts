@@ -51,8 +51,8 @@ export class UserController {
     description: 'query string: uid',
   })
   @ApiCreatedResponse({ description: 'FindUserDto', type: FindUserDto })
-  async getUserByUid(@Param() param: FindInputDto): Promise<FindUserDto> {
-    return await this.userService.findOneByUid(param.targetUid)
+  async getUserByUid(@Param('uid') uid: number): Promise<FindUserDto> {
+    return await this.userService.findOneByUid(uid)
   }
 
   @Get()

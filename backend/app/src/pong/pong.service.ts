@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { Socket } from 'socket.io'
+import { Status } from 'user/status.enum'
 import { User } from 'user/user.entity'
 import { UserService } from 'user/user.service'
 import * as CONSTANTS from '../configs/pong.config'
@@ -126,7 +127,6 @@ class Pong {
   private winner: 'left' | 'right' | null = null
 
   constructor(mode: PongMode) {
-    console.log(`mode: ${mode}`)
     this.mode = mode
     this.resetState()
   }
@@ -367,12 +367,14 @@ class PongManager {
 
   startGame() {
     this.leftUser.emit('gameInfo', {
+      mode: 'play',
       leftUser: this.leftUser.uid,
       rightUser: this.rightUser.uid,
       gameId: this.gameId,
       ...this.game,
     })
     this.rightUser.emit('gameInfo', {
+      mode: 'play',
       leftUser: this.leftUser.uid,
       rightUser: this.rightUser.uid,
       gameId: this.gameId,
@@ -402,6 +404,7 @@ class PongManager {
     this.leftUser.emit('gameEnd', winner)
     this.rightUser.emit('gameEnd', winner)
     this.spectators.forEach((elem) => {
+      clearInterval(elem.timer)
       elem.socket.emit('gameEnd', winner)
     })
     this.gameEndCallback(this.gameId)
@@ -420,9 +423,11 @@ class PongManager {
 
   addSpectator(socket: UserSocket) {
     socket.emit('gameInfo', {
-      left: this.leftUser.uid,
-      right: this.rightUser.uid,
+      mode: 'spectate',
+      leftUser: this.leftUser.uid,
+      rightUser: this.rightUser.uid,
       gameId: this.gameId,
+      ...this.game,
     })
     this.spectators.push({
       socket,
@@ -447,7 +452,7 @@ export class PongService {
     { manager: PongManager; side: 'left' | 'right' }
   > = new Map()
 
-  createGame(
+  async createGame(
     leftUser: UserSocket,
     rightUser: UserSocket,
     mode: PongMode | 'ranked',
@@ -464,6 +469,15 @@ export class PongService {
     this.gamesByGameId.set(gameId, gameManager)
     this.gamesByUser.set(leftUser.uid, { manager: gameManager, side: 'left' })
     this.gamesByUser.set(rightUser.uid, { manager: gameManager, side: 'right' })
+
+    let user = await this.userService.findOneByUid(leftUser.uid)
+    user.status = Status.GAME
+    this.userService.update(user)
+
+    user = await this.userService.findOneByUid(rightUser.uid)
+    user.status = Status.GAME
+    this.userService.update(user)
+
     gameManager.startGame()
   }
 
@@ -505,6 +519,18 @@ export class PongService {
       this.gamesByGameId.delete(gameId)
       this.gamesByUser.delete(gameManager.leftUser.uid)
       this.gamesByUser.delete(gameManager.rightUser.uid)
+
+      let user = await this.userService.findOneByUid(gameManager.leftUser.uid)
+      if (user.status === Status.GAME) {
+        user.status = Status.ONLINE
+        this.userService.update(user)
+      }
+
+      user = await this.userService.findOneByUid(gameManager.rightUser.uid)
+      if (user.status === Status.GAME) {
+        user.status = Status.ONLINE
+        this.userService.update(user)
+      }
     }
   }
 
