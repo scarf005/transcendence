@@ -66,12 +66,12 @@ export class ChatGateway {
     console.log(`chat: uid ${client.data.uid} disconnected`)
   }
 
-  @SubscribeMessage(chatEvent.SEND)
   @AsyncApiPub({
     channel: chatEvent.SEND,
     summary: '클라이언트->서버로 메시지 전송',
     message: { name: 'ChatMessageDto', payload: { type: ChatMessageDto } },
   })
+  @SubscribeMessage(chatEvent.SEND)
   async onSendMessage(
     @ConnectedSocket() client: Socket,
     @MessageBody() data: ChatMessageDto,
@@ -104,13 +104,13 @@ export class ChatGateway {
     client.broadcast.to(data.roomId.toString()).emit(chatEvent.RECEIVE, data)
   }
 
-  @SubscribeMessage(chatEvent.JOIN)
   @AsyncApiPub({
     channel: chatEvent.JOIN,
     summary: '채팅방에 참가',
     description: 'user가 채팅방에 새로 입장. 알림메시지를 모든 구성원에게 전송',
     message: { name: 'ChatJoinRoomDto', payload: { type: ChatJoinRoomDto } },
   })
+  @SubscribeMessage(chatEvent.JOIN)
   async onJoinRoom(
     @ConnectedSocket() client: Socket,
     @MessageBody() room: ChatJoinRoomDto,
@@ -129,13 +129,13 @@ export class ChatGateway {
     this.emitNotice(client, room.roomId, 'join')
   }
 
-  @SubscribeMessage(chatEvent.LEAVE)
   @AsyncApiPub({
     channel: chatEvent.LEAVE,
     summary: '채팅방에서 나가기',
     description: 'user가 채팅방에서 나감. 알림메시지를 모든 구성원에게 전송',
     message: { name: 'roomId', payload: { type: Number } },
   })
+  @SubscribeMessage(chatEvent.LEAVE)
   async onLeaveRoom(
     @ConnectedSocket() client: Socket,
     @MessageBody() roomId: number,

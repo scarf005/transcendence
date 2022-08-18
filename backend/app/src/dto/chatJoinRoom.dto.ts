@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger'
-import { IsNumber, IsString } from 'class-validator'
+import { IsNumber, IsOptional, IsString } from 'class-validator'
 
 export class ChatJoinRoomDto {
   @ApiProperty({
@@ -10,5 +10,6 @@ export class ChatJoinRoomDto {
 
   @ApiProperty({ description: 'bcrypted string', required: false })
   @IsString()
+  @IsOptional()
   password?: string
 }

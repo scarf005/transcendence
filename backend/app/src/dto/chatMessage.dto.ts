@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger'
-import { IsDate, IsNumber, IsString } from 'class-validator'
+import { Type } from 'class-transformer'
+import { IsDate, IsNumber, IsOptional, IsString } from 'class-validator'
 
 export class ChatMessageDto {
   @ApiProperty({
@@ -8,6 +9,7 @@ export class ChatMessageDto {
     required: false,
   })
   @IsNumber()
+  @IsOptional()
   senderUid?: number
 
   @ApiProperty({
@@ -21,6 +23,8 @@ export class ChatMessageDto {
   @IsNumber()
   roomId: number
 
+  @Type(() => Date)
   @IsDate()
-  createdAt: Date
+  @IsOptional()
+  createdAt?: Date
 }

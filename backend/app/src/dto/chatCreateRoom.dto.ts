@@ -1,13 +1,16 @@
 import { ApiProperty } from '@nestjs/swagger'
 import { RoomType } from 'chat/roomtype.enum'
-import { IsEnum, IsString, ValidateIf } from 'class-validator'
+import { IsEnum, IsString, Length, ValidateIf } from 'class-validator'
 
 export class ChatCreateRoomDto {
   @ApiProperty({
-    description: '새 채팅방 이름',
+    description: '새 채팅방 이름(최소1글자 ~ 최대30글자)',
     examples: ['test_title'],
+    minLength: 1,
+    maxLength: 30,
   })
   @IsString()
+  @Length(1, 30)
   title: string
 
   @ApiProperty({
