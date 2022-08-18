@@ -1,15 +1,14 @@
 import { List } from '@mui/material'
-import { Chat } from 'data'
+import { Chat, ChatSocket, Message } from 'data'
 import { ChatListItem } from './ChatListItem'
 import { useUser } from 'hook/useUser'
 import { groupBySerial } from 'utility/groupBySerial'
-import { io, Socket } from 'socket.io-client'
 import { useState } from 'react'
 import { ChatInput } from './ChatInput'
 
 interface Props<T extends Chat> {
   chats: T[]
-  socket: Socket
+  socket: ChatSocket
   roomId: number
 }
 
@@ -24,7 +23,7 @@ export const ChatList = <T extends Chat>({
       roomId: roomId,
       msgContent: msg,
       createdAt: new Date(),
-    })
+    } as Message)
   }
   return (
     <>
