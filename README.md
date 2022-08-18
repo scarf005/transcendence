@@ -9,7 +9,7 @@
 - 환경 변수는 `transcendence/dotenv` 서브모듈에 있습니다
 
 ```bash
-git config -g submodule.recurse true
+git config --global submodule.recurse true # 중첩 pull 옵션
 git submodule update --init --recursive
 ```
 

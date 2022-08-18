@@ -19,6 +19,8 @@ import {
 
 import { PongSocketContext } from 'router/Main'
 import { useNavigate } from 'react-router-dom'
+import { useAuthHeader } from 'hook/useAuthHeader'
+import axios from 'axios'
 
 type userStatus = 'DEFAULT' | 'BLOCKED' | 'FRIEND'
 const getStatus = (user: User, refUser: User): userStatus => {
@@ -42,21 +44,44 @@ const Actions = ({
 }) => {
   const pongSocket = useContext(PongSocketContext)
   const navigate = useNavigate()
+  const { headers } = useAuthHeader()
 
   if (status === 'BLOCKED') {
-    return <UnblockButton onClick={() => alert('pressed unblock button')} />
+    return (
+      <UnblockButton
+        onClick={() =>
+          axios.delete('/api/user/block', {
+            headers,
+            data: { targetUid: selfUid },
+          })
+        }
+      />
+    )
   }
 
   return (
     <ButtonGroup>
       {status === 'FRIEND' ? (
         <RemoveFriendButton
-          onClick={() => alert('pressed remove friend button')}
+          onClick={() =>
+            axios.delete('/api/user/friend', {
+              headers,
+              data: { targetUid: selfUid },
+            })
+          }
         />
       ) : (
-        <AddFriendButton onClick={() => alert('pressed add friend button')} />
+        <AddFriendButton
+          onClick={() =>
+            axios.post('/api/user/friend', { targetUid: selfUid }, { headers })
+          }
+        />
       )}
-      <BlockButton onClick={() => alert('pressed block button')} />
+      <BlockButton
+        onClick={() =>
+          axios.post('/api/user/block', { targetUid: selfUid }, { headers })
+        }
+      />
       <MessageButton onClick={() => alert('pressed direct message button')} />
       {isInGame ? (
         <JoinGameAsSpectatorButton
