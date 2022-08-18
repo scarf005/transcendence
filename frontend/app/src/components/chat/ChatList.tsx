@@ -19,10 +19,10 @@ export const ChatList = <T extends Chat>({
   roomId,
 }: Props<T>) => {
   const groupedChats = groupBySerial(chats, (chat) => chat.senderUid)
-  const onSend = () => {
+  const onSend = (msg: string) => {
     socket.emit('SEND', {
       roomId: roomId,
-      msgContent: 'what do you say?',
+      msgContent: msg,
       createdAt: new Date(),
     })
   }

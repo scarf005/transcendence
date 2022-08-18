@@ -3,7 +3,7 @@ import { Button, TextField } from '@mui/material'
 import { useState } from 'react'
 
 interface Props {
-  onSend: () => void
+  onSend: (msg: string) => void
 }
 export const ChatInput = ({ onSend }: Props) => {
   const [text, setText] = useState('')
@@ -14,7 +14,7 @@ export const ChatInput = ({ onSend }: Props) => {
       onChange={(e) => setText(e.target.value)}
       InputProps={{
         endAdornment: (
-          <Button onClick={onSend}>
+          <Button onClick={() => onSend(text)}>
             <Send />
           </Button>
         ),
