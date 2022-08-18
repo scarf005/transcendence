@@ -10,13 +10,18 @@ import { Server, Socket } from 'socket.io'
 import { chatEvent } from 'configs/chat-event.constants'
 import { ChatMessageDto } from 'dto/chatMessage.dto'
 import { UserInRoomDto } from 'dto/userInRoom.dto'
+import { ChatCreateRoomDto } from 'dto/chatCreateRoom.dto'
+import { ChatJoinRoomDto } from 'dto/chatJoinRoom.dto'
 import { ChatRoomDto } from 'dto/chatRoom.dto'
 import { ChatService } from './chat.service'
 import * as jwt from 'jsonwebtoken'
 import { jwtConstants } from 'configs/jwt-token.config'
 import { ChatRoom } from './chatroom.entity'
+import { UsePipes } from '@nestjs/common'
+import { WSValidationPipe } from 'utils/WSValidationPipe'
 
 @AsyncApiService()
+@UsePipes(new WSValidationPipe())
 @WebSocketGateway({ namespace: 'api/chat', cors: true })
 export class ChatGateway {
   constructor(private readonly chatService: ChatService) {}
@@ -104,17 +109,17 @@ export class ChatGateway {
     channel: chatEvent.JOIN,
     summary: '채팅방에 참가',
     description: 'user가 채팅방에 새로 입장. 알림메시지를 모든 구성원에게 전송',
-    message: { name: 'ChatRoomDto', payload: { type: ChatRoomDto } },
+    message: { name: 'ChatJoinRoomDto', payload: { type: ChatJoinRoomDto } },
   })
   async onJoinRoom(
     @ConnectedSocket() client: Socket,
-    @MessageBody() room: ChatRoomDto,
+    @MessageBody() room: ChatJoinRoomDto,
   ) {
     try {
       await this.chatService.addUserToRoom(
         client.data.uid,
         room.roomId,
-        room.roomPassword,
+        room.password,
       )
     } catch (error) {
       return error
@@ -165,20 +170,23 @@ export class ChatGateway {
   @AsyncApiPub({
     channel: chatEvent.CREATE,
     summary: '새로운 채팅방 생성',
-    message: { name: 'ChatRoomDto', payload: { type: ChatRoomDto } },
+    message: {
+      name: 'ChatCreateRoomDto',
+      payload: { type: ChatCreateRoomDto },
+    },
   })
   @SubscribeMessage(chatEvent.CREATE)
   async onCreateRoom(
     @ConnectedSocket() client: Socket,
-    @MessageBody() data: ChatRoomDto,
+    @MessageBody() data: ChatCreateRoomDto,
   ) {
     let newRoom: ChatRoom
     try {
       newRoom = await this.chatService.createChatroom(
         client.data.uid,
-        data.roomName,
-        data.roomType,
-        data.roomPassword,
+        data.title,
+        data.type,
+        data.password,
       )
     } catch (error) {
       return error
