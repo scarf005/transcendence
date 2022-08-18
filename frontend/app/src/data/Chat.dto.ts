@@ -9,17 +9,17 @@ export interface Message {
 }
 export type Chat = Omit<Message, 'roomId'>
 export type MessageHandler = (message: Message) => void
-
+export type ChatRoomHandler = (chatRoomId: number) => void
 interface ClientToServerEvents {
   SEND: MessageHandler
-  JOIN: (chatRoomId: number) => void
+  JOIN: ChatRoomHandler
+  LEAVE: ChatRoomHandler
   CREATE: (name: string) => void
   ADD_ADMIN: (uid: number) => void
   REMOVE_ADMIN: (uid: number) => void
 }
 interface ServerToClientEvents {
   RECEIVE: MessageHandler
-  LEAVE: (chatRoomId: number) => void
   NOTICE: MessageHandler
 }
 

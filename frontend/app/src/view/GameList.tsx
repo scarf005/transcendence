@@ -52,6 +52,7 @@ const Item = styled(Paper)(({ theme }) => ({
   color: theme.palette.text.secondary,
 }))
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export default function GameList({ games }: any) {
   return (
     <Box sx={{ width: '100%' }}>

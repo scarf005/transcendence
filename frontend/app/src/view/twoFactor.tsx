@@ -1,13 +1,11 @@
 import { QRCodeSVG } from 'qrcode.react'
-import React, { useEffect, useRef, useState } from 'react'
-import axios from 'axios'
+import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
 import Box from '@mui/material/Box'
 import TextField from '@mui/material/TextField'
 import Button from '@mui/material/Button'
 import { createTheme, ThemeProvider } from '@mui/material/styles'
-import { ConstructionOutlined } from '@mui/icons-material'
 
 const theme = createTheme({
   palette: {

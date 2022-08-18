@@ -32,7 +32,7 @@ const List = styled.div`
 `
 
 const GameGrid = (props: { requestMatch: (matchData: any) => void }) => {
-  const [games, setGames] = useState({})
+  const [games, _setGames] = useState({})
   const refreshGameList = () => {
     // axios.get('/game').then((res) => setGames(res))
   }

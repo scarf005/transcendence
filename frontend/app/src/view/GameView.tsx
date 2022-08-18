@@ -1,12 +1,9 @@
 import { useState, useEffect } from 'react'
-import styled from 'styled-components'
 import Pong, { PongStartCounter, PongResult } from './Pong'
-import { createTheme, ThemeProvider } from '@mui/material/styles'
+import { createTheme } from '@mui/material/styles'
 import GameGrid from './GameGrid'
-import { useAuthSocket } from 'hook/useAuthSocket'
-import { Socket } from 'socket.io-client'
 
-const theme = createTheme({
+const _theme = createTheme({
   palette: {
     primary: {
       main: '#000000',
@@ -36,7 +33,7 @@ export const GameView = ({
   socket,
   gameState,
   setGameState,
-  gameMode,
+  // gameMode,
   player,
   gameInfo,
   winner,

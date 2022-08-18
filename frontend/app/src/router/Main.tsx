@@ -9,7 +9,7 @@ import { io, Socket } from 'socket.io-client'
 
 import { usePongSocket } from 'hook/usePongSocket'
 
-import { Message, JoinedRoom, ChatSocket } from 'data'
+import { ChatSocket } from 'data'
 
 export const PongSocketContext = createContext<Socket | undefined>(undefined)
 

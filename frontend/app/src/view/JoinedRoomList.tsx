@@ -1,4 +1,3 @@
-import { useState, useCallback, useEffect, useRef, useContext } from 'react'
 import { Box, Paper, Stack } from '@mui/material'
 import { styled } from '@mui/material/styles'
 import { JoinedRoom } from 'data'
@@ -22,7 +21,9 @@ export const JoinedRoomList = (prop: {
     <Box sx={{ width: '100%' }}>
       <Stack spacing={2}>
         {prop.room.map((chatRoom: JoinedRoom) => (
-          <Item onClick={() => changeView(chatRoom.id)}>{chatRoom.name}</Item>
+          <Item key={chatRoom.id} onClick={() => changeView(chatRoom.id)}>
+            {chatRoom.name}
+          </Item>
         ))}
       </Stack>
     </Box>

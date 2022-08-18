@@ -1,5 +1,3 @@
-import { Socket } from 'dgram'
-import { useState, useCallback, useEffect, useRef, useContext } from 'react'
 import { Box, Paper, Stack } from '@mui/material'
 import { styled } from '@mui/material/styles'
 import { Room } from 'data'
@@ -25,7 +23,9 @@ export const ChatRoomList = (prop: {
     <Box sx={{ width: '100%' }}>
       <Stack spacing={2}>
         {prop.list.map((chatRoom: Room) => (
-          <Item onClick={() => joinRoom(chatRoom.id)}>{chatRoom.name}</Item>
+          <Item key={chatRoom.id} onClick={() => joinRoom(chatRoom.id)}>
+            {chatRoom.name}
+          </Item>
         ))}
       </Stack>
     </Box>

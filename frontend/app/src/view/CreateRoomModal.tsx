@@ -9,8 +9,8 @@ import {
   Typography,
   Modal,
 } from '@mui/material'
-import { Socket } from 'socket.io-client'
-import { Message } from 'data'
+// import { Socket } from 'socket.io-client'
+// import { Message } from 'data'
 
 const style = {
   position: 'absolute',
@@ -75,7 +75,7 @@ export const BasicModal = (prop: {
   socket: any
 }) => {
   const [roomType, setRoomType] = useState('Public')
-  const [password, setPassword] = useState('')
+  const [_password, setPassword] = useState('')
   const input = useRef<HTMLInputElement>()
   const handleClose = () => prop.setModal(false)
 

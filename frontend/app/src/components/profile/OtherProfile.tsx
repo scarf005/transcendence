@@ -1,11 +1,5 @@
 import React, { useContext } from 'react'
-import {
-  ButtonGroup,
-  Card,
-  CardActionArea,
-  Grid,
-  Typography,
-} from '@mui/material'
+import { ButtonGroup, Grid, Typography } from '@mui/material'
 import { User } from 'data'
 import { Profile } from './Profile'
 import {

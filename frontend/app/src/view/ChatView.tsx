@@ -1,17 +1,13 @@
-import { mapArgsToTypes } from '@storybook/store'
 import axios from 'axios'
-import { useState, useCallback, useEffect, useRef, useContext } from 'react'
+import { useState, useEffect } from 'react'
 import { ChatRoomList } from './ChatRoomList'
 import { JoinedRoomList } from './JoinedRoomList'
-import { Grid, List, Divider, Input, Typography, Button } from '@mui/material'
+import { Grid, Divider, Typography, Button } from '@mui/material'
 import { BasicModal } from './CreateRoomModal'
 import { JoinedRoom, Room, Message, ChatSocket } from 'data'
-import { ChatList } from 'components/chat/ChatList'
-import { User } from 'data'
-import { convertToObject } from 'typescript'
-import { array } from 'prop-types'
+import { ChatPanel } from './ChatPanel'
 
-const RoomList: Room[] = [
+const _RoomList: Room[] = [
   {
     id: 1,
     name: '방 이름1',
@@ -40,31 +36,9 @@ const RoomList: Room[] = [
     chatUser: [],
   },
 ]
-const myRoomDummy: JoinedRoom[] = [
-  {
-    id: 1,
-    name: '방 이름1',
-    roomtype: '1',
-  },
-  {
-    id: 2,
-    name: '방 이름2',
-    roomtype: '1',
-  },
-  {
-    id: 3,
-    name: '방 이름3',
-    roomtype: '1',
-  },
-]
 
-type messages = {
-  [roomId: number]: {
-    senderUid: number
-    msgContent: string
-    roomId: number
-    createdAt: Date
-  }[]
+type Messages = {
+  [roomId: number]: Message[]
 }
 
 export const ChatView = ({ socket }: { socket: ChatSocket }) => {
@@ -72,7 +46,7 @@ export const ChatView = ({ socket }: { socket: ChatSocket }) => {
   const [joinedRoomList, setJoinedRoomList] = useState<JoinedRoom[]>([])
   const token = window.localStorage.getItem('access_token')
   const [modal, setModal] = useState(false)
-  const [messages, setMessages] = useState<messages>({})
+  const [messages, setMessages] = useState<Messages>({})
   const [showChat, setShowChat] = useState({ bool: false, roomId: 0 })
   const [myUid, setMyUid] = useState<number>()
   const updateRoom = () => {
@@ -159,7 +133,7 @@ export const ChatView = ({ socket }: { socket: ChatSocket }) => {
         />
         <Grid item xs={9} padding="100px">
           {showChat.bool ? (
-            <ChatList
+            <ChatPanel
               chats={messages[showChat.roomId] ? messages[showChat.roomId] : []}
               socket={socket}
               roomId={showChat.roomId}

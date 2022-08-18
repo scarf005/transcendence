@@ -11,5 +11,5 @@ const Template: ComponentStory<typeof ChatInput> = (args) => (
 )
 export const Default = Template.bind({})
 Default.args = {
-  onSend: () => alert('send'),
+  sendMsg: () => alert('send'),
 }
