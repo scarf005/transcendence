@@ -54,8 +54,6 @@ export const ProfileActions = ({ actions }: ActionsProps) => {
 }
 
 export const MyProfile = ({ user }: Props) => {
-  // const { uid } = user
-
   return (
     <>
       <Profile user={user} />

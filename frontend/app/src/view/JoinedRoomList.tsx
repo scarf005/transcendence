@@ -22,7 +22,7 @@ export const JoinedRoomList = (prop: {
       <Stack spacing={2}>
         {prop.room.map((chatRoom: JoinedRoom) => (
           <Item key={chatRoom.id} onClick={() => changeView(chatRoom.id)}>
-            {chatRoom.name}
+            {`${chatRoom.name}#${chatRoom.id}`}
           </Item>
         ))}
       </Stack>

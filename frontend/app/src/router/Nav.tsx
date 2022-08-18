@@ -31,7 +31,7 @@ const theme = createTheme({
 })
 
 const drawerWidth = 240
-const navItems = ['Game', 'Friend', 'Chat', 'Profile']
+const navItems = ['Game', 'Friend', 'Chat', 'Profile', 'Find']
 
 export default function DrawerAppBar(props: Props) {
   const { window } = props

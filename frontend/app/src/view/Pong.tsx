@@ -2,8 +2,9 @@ import { useRef, useEffect, useState } from 'react'
 import Avatar from '@mui/material/Avatar'
 import { Stack, Typography, Box, Modal, Button } from '@mui/material'
 import styled from 'styled-components'
-import { useUser } from 'hook/useUser'
+import { useUserQuery } from 'hook'
 import { useAvatar } from 'hook/useAvatar'
+import { User } from 'data'
 
 export type Rect = {
   x: number
@@ -40,21 +41,16 @@ const drawRect = (
   )
 }
 
-const PongUser = (props: { uid: number }) => {
-  const profile = useUser(props.uid)
-  const [_avatarFile, avatar, setAvatarFile] = useAvatar(
-    '/api/avatar/default.jpg',
-  )
+const PongUser = ({ uid }: { uid: number }) => {
+  const { data: profile, isSuccess } = useUserQuery<User>(`/${uid}`)
 
-  useEffect(() => {
-    if (profile !== undefined) {
-      setAvatarFile(profile.avatar)
-    }
-  }, [profile])
+  if (isSuccess) {
+    const [_avatarFile, avatar, setAvatarFile] = useAvatar(
+      '/api/avatar/default.jpg',
+    )
 
-  if (profile === undefined) {
-    return null
-  } else {
+    setAvatarFile(profile.avatar)
+
     return (
       <Stack justifyContent="center" alignItems="center">
         <Typography>{profile.nickname}</Typography>
@@ -63,6 +59,7 @@ const PongUser = (props: { uid: number }) => {
       </Stack>
     )
   }
+  return null
 }
 
 const remainTimeModalStyle = {

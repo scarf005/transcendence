@@ -1,16 +1,13 @@
 import { List } from '@mui/material'
-import { Chat, ChatSocket, Message } from 'data'
+import { Message, User } from 'data'
 import { ChatListItem } from './ChatListItem'
-import { useUser } from 'hook/useUser'
-import { groupBySerial } from 'utility/groupBySerial'
-import { useState } from 'react'
-import { ChatInput } from './ChatInput'
+import { groupBySerial } from 'utility'
+import { useUserQuery } from 'hook'
 
-interface Props<T extends Chat> {
+interface Props {
   chats: Message[]
 }
-
-export const ChatList = <T extends Chat>({ chats }: Props<T>) => {
+export const ChatList = ({ chats }: Props) => {
   const groupedChats = groupBySerial(chats, (chat) => chat.senderUid)
 
   return (
@@ -18,11 +15,12 @@ export const ChatList = <T extends Chat>({ chats }: Props<T>) => {
       <List>
         {groupedChats.map((chats) => {
           const first = chats[0]
-          const { createdAt, senderUid } = first
+          const { createdAt, senderUid: uid } = first
+          const { data, isSuccess } = useUserQuery<User>(uid) // TODO: 외부에서 전달
           return (
             <ChatListItem
+              user={isSuccess ? data : undefined}
               key={createdAt.toISOString() + first.msgContent}
-              // FIXME: useUser 언젠가는 쓰기 (지금은 백엔드 에러로 storybook에서 실행 안됨)
               messages={chats.map((chat) => chat.msgContent)}
             />
           )

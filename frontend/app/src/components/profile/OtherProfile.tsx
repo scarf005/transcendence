@@ -13,8 +13,16 @@ import {
 
 import { PongSocketContext } from 'router/Main'
 import { useNavigate } from 'react-router-dom'
-import { useAuthHeader } from 'hook/useAuthHeader'
+import { getAuthHeader } from 'hook/getAuthHeader'
 import axios from 'axios'
+import { useMutation } from '@tanstack/react-query'
+import {
+  addFriendMutation,
+  blockMutation,
+  refreshUserMe,
+  removeFriendMutation,
+  unblockMutation,
+} from 'hook'
 
 type userStatus = 'DEFAULT' | 'BLOCKED' | 'FRIEND'
 const getStatus = (user: User, refUser: User): userStatus => {
@@ -38,44 +46,25 @@ const Actions = ({
 }) => {
   const pongSocket = useContext(PongSocketContext)
   const navigate = useNavigate()
-  const { headers } = useAuthHeader()
+  const { headers } = getAuthHeader()
+  const [block, unblock, addFriend, removeFriend] = [
+    blockMutation(),
+    unblockMutation(),
+    addFriendMutation(),
+    removeFriendMutation(),
+  ]
 
   if (status === 'BLOCKED') {
-    return (
-      <UnblockButton
-        onClick={() =>
-          axios.delete('/api/user/block', {
-            headers,
-            data: { targetUid: selfUid },
-          })
-        }
-      />
-    )
+    return <UnblockButton onClick={() => unblock.mutate(selfUid)} />
   }
-
   return (
     <ButtonGroup>
       {status === 'FRIEND' ? (
-        <RemoveFriendButton
-          onClick={() =>
-            axios.delete('/api/user/friend', {
-              headers,
-              data: { targetUid: selfUid },
-            })
-          }
-        />
+        <RemoveFriendButton onClick={() => removeFriend.mutate(selfUid)} />
       ) : (
-        <AddFriendButton
-          onClick={() =>
-            axios.post('/api/user/friend', { targetUid: selfUid }, { headers })
-          }
-        />
+        <AddFriendButton onClick={() => addFriend.mutate(selfUid)} />
       )}
-      <BlockButton
-        onClick={() =>
-          axios.post('/api/user/block', { targetUid: selfUid }, { headers })
-        }
-      />
+      <BlockButton onClick={() => block.mutate(selfUid)} />
       <MessageButton onClick={() => alert('pressed direct message button')} />
       {isInGame ? (
         <JoinGameAsSpectatorButton

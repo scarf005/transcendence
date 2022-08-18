@@ -1,18 +1,18 @@
-import { Card, List, ListSubheader, Modal, Container } from '@mui/material'
-import { ProfileListItem } from 'components'
+import { Card, List, Modal, Container } from '@mui/material'
 import { User } from 'data'
-import { useToggles, useUserRequest } from 'hook'
-
+import { useToggles } from 'hook'
 import { partition } from 'utility'
 import { ProfileDisplay } from 'components'
 import { useState } from 'react'
+import { ListSubheader } from '@mui/material'
+import { ProfileListItem } from 'components'
 
 interface SectionProps {
   title: string
   users: User[]
   onClick: (uid: number) => void
 }
-const Section = ({ title, users, onClick }: SectionProps) => (
+export const Section = ({ title, users, onClick }: SectionProps) => (
   <>
     <ListSubheader>{title}</ListSubheader>
     {users.map((user) =>
@@ -20,8 +20,6 @@ const Section = ({ title, users, onClick }: SectionProps) => (
     )}
   </>
 )
-
-// TODO: interface/ 모듈로 분리, users와 otherUsers 구분
 interface Props {
   /** 모든 사용자 */
   users: User[]
@@ -63,15 +61,4 @@ export const MemberList = ({ users, refUser }: Props) => {
       />
     </List>
   )
-}
-export const MemberView = () => {
-  // TODO: chat api로 변경
-  const refUser = useUserRequest<User>('me')
-  const users = useUserRequest<User[]>('')
-
-  if (!(refUser && users)) {
-    return <div>Loading...</div>
-  }
-
-  return <MemberList users={users} refUser={refUser} />
 }

@@ -1,15 +1,13 @@
 import { Route, Routes } from 'react-router-dom'
 import Nav from './Nav'
-import { GameView, FriendView, ChatView } from 'view'
-import { Profile } from 'components/profile/Profile'
-
-import { mockUser } from 'mock/mockUser'
+import { GameView, FriendView, ChatView, ProfileView } from 'view'
 import { useEffect, createContext, useState } from 'react'
 import { io, Socket } from 'socket.io-client'
 
 import { usePongSocket } from 'hook/usePongSocket'
 
 import { ChatSocket } from 'data'
+import { FindFriendView } from 'view'
 
 export const PongSocketContext = createContext<Socket | undefined>(undefined)
 
@@ -42,9 +40,10 @@ export const MainRouter = () => {
           <Route path="/" element={<></>} />
           <Route path="/game" element={<GameView {...pongData} />} />
           <Route path="/friend" element={<FriendView />} />
-          <Route path="/profile" element={<Profile user={mockUser} />} />
+          <Route path="/profile" element={<ProfileView />} />
+          <Route path="/find" element={<FindFriendView />} />
           <Route
-            path="/Chat"
+            path="/chat"
             element={<ChatView socket={socket as ChatSocket} />}
           />
         </Routes>

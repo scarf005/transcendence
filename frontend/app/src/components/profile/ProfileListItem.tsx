@@ -10,7 +10,7 @@ export const ProfileListItem = ({ user, onClick }: Props) => {
   const { avatar, nickname: name, status, stat } = user
   const rankScore = `Ladder Score : ${stat.rating}`
   return (
-    <ListItem button onClick={onClick}>
+    <ListItem button onClick={onClick} key={user.uid}>
       <ListItemAvatar>
         <AvatarWithStatus status={status} avatar={avatar} />
       </ListItemAvatar>

@@ -1,7 +1,7 @@
-import { Grid, Button, Tooltip } from '@mui/material'
+import { Grid, Button, Tooltip, Typography } from '@mui/material'
 import { Message, ChatSocket, User } from 'data'
 import { ChatInput, ChatList, MemberList } from 'components'
-import { useUserRequest } from 'hook'
+import { useUserQuery } from 'hook'
 import { Logout } from '@mui/icons-material'
 
 // TODO: 나가기 누를 때 한 번 더 확인하기
@@ -22,8 +22,8 @@ interface PanelProps {
   leaveRoom: (roomId: number) => void
 }
 export const ChatPanel = ({ chats, socket, roomId, leaveRoom }: PanelProps) => {
-  const users = useUserRequest<User[]>('') // TODO: 채팅방 참여중인 목록 가져오기
-  const refUser = useUserRequest<User>('me')
+  const { data: me, isSuccess: ok1 } = useUserQuery<User>('me')
+  const { data: users, isSuccess: ok2 } = useUserQuery<User[]>('') // TODO: 채팅방 참여중인 목록 가져오기
 
   const sendMsg = (msg: string) => {
     socket.emit('SEND', {
@@ -31,6 +31,7 @@ export const ChatPanel = ({ chats, socket, roomId, leaveRoom }: PanelProps) => {
       msgContent: msg,
       createdAt: new Date(),
     } as Message)
+    console.log(`sent msg: ${msg}`)
   }
 
   return (
@@ -39,9 +40,11 @@ export const ChatPanel = ({ chats, socket, roomId, leaveRoom }: PanelProps) => {
         <ChatList chats={chats} />
       </Grid>
       <Grid item xs={4}>
-        {users && refUser ? (
-          <MemberList users={users} refUser={refUser} />
-        ) : null}
+        {ok1 && ok2 ? (
+          <MemberList users={users} refUser={me} />
+        ) : (
+          <Typography>Loading...</Typography>
+        )}
       </Grid>
       <ChatInput sendMsg={sendMsg} />
       <LeaveButton onClick={() => leaveRoom(roomId)} />

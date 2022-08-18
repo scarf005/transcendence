@@ -1,6 +1,6 @@
 import React from 'react'
 import { MyProfile, OtherProfile } from 'components'
-import { Props } from 'view/FriendView'
+import { Props } from 'view/UsersPanel'
 
 interface DisplayProps extends Props {
   uid: number
