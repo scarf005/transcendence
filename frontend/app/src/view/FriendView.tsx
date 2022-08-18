@@ -61,7 +61,7 @@ const FriendPanel = ({ users, refUser }: Props) => {
 
 export const FriendView = () => {
   const refUser = useUserRequest<User>('me')
-  const users = useUserRequest<User[]>('')
+  const users = useUserRequest<User[]>('me/friend')
 
   if (!(refUser && users)) {
     return <div>Loading...</div>
