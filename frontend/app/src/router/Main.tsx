@@ -7,22 +7,14 @@ import { mockUser } from 'mock/mockUser'
 import { useEffect, createContext, useState } from 'react'
 import { io, Socket } from 'socket.io-client'
 
-import {
-  Message,
-  ClientToServerEvents,
-  ServerToClientEvents,
-  JoinedRoom,
-} from 'data'
+import { Message, ChatSocket, JoinedRoom } from 'data'
 
 export const MainRouter = () => {
   const [socket, setSocket] = useState<Socket>()
   useEffect(() => {
-    const socket: Socket<ServerToClientEvents, ClientToServerEvents> = io(
-      '/api/chat',
-      {
-        auth: { token: window.localStorage.getItem('access_token') },
-      },
-    )
+    const socket: ChatSocket = io('/api/chat', {
+      auth: { token: window.localStorage.getItem('access_token') },
+    })
     setSocket(socket)
     socket.on('connect', () => {
       console.log('socket server connected.')
