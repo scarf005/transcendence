@@ -19,8 +19,9 @@ interface PanelProps {
   chats: Message[]
   socket: ChatSocket
   roomId: number
+  leaveRoom: (roomId: number) => void
 }
-export const ChatPanel = ({ chats, socket, roomId }: PanelProps) => {
+export const ChatPanel = ({ chats, socket, roomId, leaveRoom }: PanelProps) => {
   const users = useUserRequest<User[]>('') // TODO: 채팅방 참여중인 목록 가져오기
   const refUser = useUserRequest<User>('me')
 
@@ -43,7 +44,7 @@ export const ChatPanel = ({ chats, socket, roomId }: PanelProps) => {
         ) : null}
       </Grid>
       <ChatInput sendMsg={sendMsg} />
-      <LeaveButton onClick={() => socket.emit('LEAVE', roomId)} />
+      <LeaveButton onClick={() => leaveRoom(roomId)} />
     </Grid>
   )
 }

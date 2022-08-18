@@ -114,6 +114,16 @@ export const ChatView = ({ socket }: { socket: ChatSocket }) => {
     updateMyRoom()
     updateRoom()
   }, [])
+
+  const leaveRoom = (roomId: number) => {
+    socket.emit('LEAVE', roomId)
+    const newJoinedRoom = joinedRoomList.filter((el) => el.id !== roomId)
+    setJoinedRoomList(newJoinedRoom)
+    setShowChat((showChat) => {
+      return { ...showChat, bool: false }
+    })
+  }
+
   return (
     <>
       <Grid container justifyContent="space-between">
@@ -142,6 +152,7 @@ export const ChatView = ({ socket }: { socket: ChatSocket }) => {
               chats={messages[showChat.roomId] ? messages[showChat.roomId] : []}
               socket={socket}
               roomId={showChat.roomId}
+              leaveRoom={leaveRoom}
             />
           ) : (
             <div>
