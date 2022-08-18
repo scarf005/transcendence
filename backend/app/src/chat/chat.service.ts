@@ -13,6 +13,7 @@ import { UserService } from 'user/user.service'
 import { RoomType } from './roomtype.enum'
 import { User } from 'user/user.entity'
 import * as bcrypt from 'bcryptjs'
+import { Status } from 'user/status.enum'
 
 @Injectable()
 export class ChatService {
@@ -270,5 +271,9 @@ export class ChatService {
     room.password = await bcrypt.hash(password, 10)
     room.roomtype = RoomType.PROTECTED
     return this.chatRoomRepository.save(room)
+  }
+
+  async changeStatus(uid: number, status: Status) {
+    return await this.userService.changeStatus(uid, status)
   }
 }

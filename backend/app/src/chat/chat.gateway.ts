@@ -19,6 +19,7 @@ import { jwtConstants } from 'configs/jwt-token.config'
 import { ChatRoom } from './chatroom.entity'
 import { UsePipes } from '@nestjs/common'
 import { WSValidationPipe } from 'utils/WSValidationPipe'
+import { Status } from 'user/status.enum'
 
 @AsyncApiService()
 @UsePipes(new WSValidationPipe())
@@ -49,6 +50,11 @@ export class ChatGateway {
     }
 
     try {
+      await this.chatService.changeStatus(client.data.uid, Status.ONLINE)
+    } catch (error) {
+      return error
+    }
+    try {
       const rooms = await this.chatService.findRoomsByUserId(client.data.uid)
       rooms.forEach((el) => {
         client.join(el.id.toString())
@@ -57,12 +63,15 @@ export class ChatGateway {
     } catch (error) {
       return error
     }
-    // TODO: change user status to online
     console.log(`chat: uid ${client.data.uid} connected.`)
   }
 
-  handleDisconnect(client: Socket) {
-    // TODO: change user status to offline
+  async handleDisconnect(client: Socket) {
+    try {
+      await this.chatService.changeStatus(client.data.uid, Status.OFFLINE)
+    } catch (error) {
+      return error
+    }
     console.log(`chat: uid ${client.data.uid} disconnected`)
   }
 

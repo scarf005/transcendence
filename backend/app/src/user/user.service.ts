@@ -12,6 +12,7 @@ import { UserPayload } from 'configs/jwt-token.config'
 import { RegisterUserDto } from 'dto/registerUser.dto'
 import { Stat } from './stat.entity'
 import * as fs from 'fs'
+import { Status } from './status.enum'
 
 @Injectable()
 export class UserService {
@@ -263,5 +264,23 @@ export class UserService {
       .where('user.uid = ANY(:friends)', { friends: user.friends })
       .getMany()
     return users
+  }
+
+  async changeStatus(uid: number, status: Status) {
+    const user = await this.findOneByUid(uid)
+    user.status = status
+    this.userRepository.save(user).catch(() => {
+      throw new InternalServerErrorException('database error')
+    })
+  }
+
+  async restoreStatusAfterGameEnded(uid: number) {
+    const user = await this.findOneByUid(uid)
+    if (user.status === Status.GAME) {
+      user.status = Status.ONLINE
+    }
+    this.userRepository.save(user).catch(() => {
+      throw new InternalServerErrorException('database error')
+    })
   }
 }

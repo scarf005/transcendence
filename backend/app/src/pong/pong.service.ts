@@ -470,13 +470,8 @@ export class PongService {
     this.gamesByUser.set(leftUser.uid, { manager: gameManager, side: 'left' })
     this.gamesByUser.set(rightUser.uid, { manager: gameManager, side: 'right' })
 
-    let user = await this.userService.findOneByUid(leftUser.uid)
-    user.status = Status.GAME
-    this.userService.update(user)
-
-    user = await this.userService.findOneByUid(rightUser.uid)
-    user.status = Status.GAME
-    this.userService.update(user)
+    this.userService.changeStatus(leftUser.uid, Status.GAME)
+    this.userService.changeStatus(rightUser.uid, Status.GAME)
 
     gameManager.startGame()
   }
@@ -520,17 +515,8 @@ export class PongService {
       this.gamesByUser.delete(gameManager.leftUser.uid)
       this.gamesByUser.delete(gameManager.rightUser.uid)
 
-      let user = await this.userService.findOneByUid(gameManager.leftUser.uid)
-      if (user.status === Status.GAME) {
-        user.status = Status.ONLINE
-        this.userService.update(user)
-      }
-
-      user = await this.userService.findOneByUid(gameManager.rightUser.uid)
-      if (user.status === Status.GAME) {
-        user.status = Status.ONLINE
-        this.userService.update(user)
-      }
+      this.userService.restoreStatusAfterGameEnded(gameManager.leftUser.uid)
+      this.userService.restoreStatusAfterGameEnded(gameManager.rightUser.uid)
     }
   }
 
