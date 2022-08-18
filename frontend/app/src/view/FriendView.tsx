@@ -7,7 +7,8 @@ import { User } from 'data'
 import { useUserRequest } from 'hook'
 import { ProfileDisplay } from 'components'
 
-const findUser = (users: User[], text: string) => {
+const findUser = (users: User[] | undefined, text: string) => {
+  if (!users) return []
   return fuzzysort.go(text, users, { key: 'nickname' }).map((r) => r.obj)
 }
 
@@ -16,11 +17,14 @@ export interface Props {
   users: User[]
   /** 로그인한 사용자 */
   refUser: User
+  /** 전체 사용자 */
+  allUsers?: User[]
 }
-const FriendPanel = ({ users, refUser }: Props) => {
+const FriendPanel = ({ users, refUser, allUsers }: Props) => {
   const [id, setId] = useState(refUser.uid)
   const [text, setText] = useState('')
-  const seenUsers = text ? findUser(users, text) : users
+  const seenUsers = text ? findUser(allUsers, text) : users
+  const searchHeadText = text ? '유저 검색 결과' : '친구 목록'
 
   return (
     <Grid container justifyContent="space-between">
@@ -31,7 +35,7 @@ const FriendPanel = ({ users, refUser }: Props) => {
         <ProfileListItem user={refUser} onClick={() => setId(refUser.uid)} />
         <Divider />
         <Typography variant="h5" padding="1rem">
-          Friends
+          {searchHeadText}
         </Typography>
         <Input
           placeholder="인트라 아이디를 입력하세요"
@@ -53,7 +57,7 @@ const FriendPanel = ({ users, refUser }: Props) => {
       </Grid>
       <VerticalDivider />
       <Grid item xs={8} padding="100px">
-        <ProfileDisplay users={users} refUser={refUser} uid={id} />
+        <ProfileDisplay users={seenUsers} refUser={refUser} uid={id} />
       </Grid>
     </Grid>
   )
@@ -62,11 +66,14 @@ const FriendPanel = ({ users, refUser }: Props) => {
 export const FriendView = () => {
   const refUser = useUserRequest<User>('me')
   const users = useUserRequest<User[]>('me/friend')
+  const allUsers = useUserRequest<User[]>('')
 
   if (!(refUser && users)) {
     return <div>Loading...</div>
   }
 
   const otherUsers = users.filter((u) => u.uid !== refUser.uid)
-  return <FriendPanel users={otherUsers} refUser={refUser} />
+  return (
+    <FriendPanel users={otherUsers} refUser={refUser} allUsers={allUsers} />
+  )
 }

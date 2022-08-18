@@ -9,8 +9,8 @@ import {
   Typography,
   Modal,
 } from '@mui/material'
-// import { Socket } from 'socket.io-client'
-// import { Message } from 'data'
+import { Socket } from 'socket.io-client'
+import { Message } from 'data'
 
 const style = {
   position: 'absolute',
@@ -29,7 +29,7 @@ export const RoomOptionSecond = (prop: {
   roomType: string
 }) => {
   const [pwd, setPwd] = useState('false')
-  if (prop.roomType === 'Public') {
+  if (prop.roomType === 'PUBLIC') {
     return (
       <RadioGroup
         row
@@ -74,15 +74,25 @@ export const BasicModal = (prop: {
   setModal: (value: boolean) => void
   socket: any
 }) => {
-  const [roomType, setRoomType] = useState('Public')
-  const [_password, setPassword] = useState('')
+  const [roomType, setRoomType] = useState<string>('PUBLIC')
+  const [password, setPassword] = useState('')
   const input = useRef<HTMLInputElement>()
   const handleClose = () => prop.setModal(false)
+  const [errMsg, setErrMsg] = useState('')
 
   const createRoom = () => {
     const roomName = input.current?.value
-    console.log(roomName)
-    prop.socket.emit('CREATE', { title: roomName, type: 'PUBLIC' })
+    if (roomName && roomName.length >= 30) {
+      setErrMsg('방 제목은 1자 이상 30자 미만입니다')
+      return
+    }
+    if (password)
+      prop.socket.emit('CREATE', {
+        title: roomName,
+        type: 'PROTECTED',
+        password: password,
+      })
+    else prop.socket.emit('CREATE', { title: roomName, type: roomType })
     handleClose()
   }
   return (
@@ -108,19 +118,19 @@ export const BasicModal = (prop: {
             }}
           >
             <FormControlLabel
-              value="Public"
+              value="PUBLIC"
               control={<Radio />}
               label="공개방"
             />
             <FormControlLabel
-              value="Private"
+              value="PRIVATE"
               control={<Radio />}
               label="비공개방"
             />
           </RadioGroup>
           <RoomOptionSecond setPassword={setPassword} roomType={roomType} />
           <Typography id="modal-modal-description" sx={{ mt: 2 }}>
-            여기 에러메시지가 출력되어야 할까요?
+            {errMsg}
           </Typography>
 
           <Button onClick={createRoom} fullWidth={true}>

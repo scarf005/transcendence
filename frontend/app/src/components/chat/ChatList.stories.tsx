@@ -17,31 +17,37 @@ Default.args = {
       senderUid: 4,
       msgContent: 'Hello',
       createdAt: new Date(),
+      roomId: 1,
     },
     {
       senderUid: 4,
       msgContent: 'Hi',
       createdAt: new Date(),
+      roomId: 1,
     },
     {
       senderUid: 4,
       msgContent: 'How are you?',
       createdAt: new Date(),
+      roomId: 1,
     },
     {
       senderUid: 2,
       msgContent: 'asdf',
       createdAt: new Date(),
+      roomId: 1,
     },
     {
       senderUid: 2,
       msgContent: 'lorem ipsum',
       createdAt: new Date(),
+      roomId: 1,
     },
     {
       senderUid: 4,
       msgContent: 'what do you say?',
       createdAt: new Date(),
+      roomId: 1,
     },
   ],
 }

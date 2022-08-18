@@ -1,10 +1,13 @@
 import { List } from '@mui/material'
-import { Chat } from 'data'
+import { Chat, ChatSocket, Message } from 'data'
 import { ChatListItem } from './ChatListItem'
+import { useUser } from 'hook/useUser'
 import { groupBySerial } from 'utility/groupBySerial'
+import { useState } from 'react'
+import { ChatInput } from './ChatInput'
 
 interface Props<T extends Chat> {
-  chats: T[]
+  chats: Message[]
 }
 
 export const ChatList = <T extends Chat>({ chats }: Props<T>) => {
@@ -15,7 +18,7 @@ export const ChatList = <T extends Chat>({ chats }: Props<T>) => {
       <List>
         {groupedChats.map((chats) => {
           const first = chats[0]
-          const { createdAt, senderUid: _ } = first
+          const { createdAt, senderUid } = first
           return (
             <ChatListItem
               key={createdAt.toISOString() + first.msgContent}
