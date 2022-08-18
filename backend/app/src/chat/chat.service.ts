@@ -32,6 +32,19 @@ export class ChatService {
     })
   }
 
+  async getJoinChatrooms(uid: number): Promise<ChatRoom[]> {
+    return await this.chatRoomRepository
+      .createQueryBuilder('chatRoom')
+      .select(['chatRoom.id', 'chatRoom.name', 'chatRoom.roomtype'])
+      .where('user.uid != (:uid)', { uid })
+      .andWhere('chatRoom.roomtype != :roomtype', {
+        roomtype: RoomType.PRIVATE,
+      })
+      .leftJoin('chatRoom.chatUser', 'chatUser')
+      .leftJoin('chatUser.user', 'user')
+      .getMany()
+  }
+
   async createChatroom(
     creatorId: number,
     roomTitle: string,

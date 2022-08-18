@@ -16,6 +16,14 @@ export class RoomsController {
     return this.chatService.getAllChatrooms()
   }
 
+  @Get('/joinlist')
+  @UseGuards(JwtAfterTwoFactorUserGuard)
+  @ApiOkResponse({ type: ChatRoomDto, isArray: true })
+  getJoinChatroomList(@Req() req: any) {
+    const { uid } = req.user
+    return this.chatService.getJoinChatrooms(uid)
+  }
+
   @Get('/me')
   @UseGuards(JwtAfterTwoFactorUserGuard)
   @ApiOkResponse({ type: ChatRoomDto, isArray: true })
