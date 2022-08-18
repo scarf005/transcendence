@@ -139,60 +139,60 @@ export class UserService {
     return this.jwtService.sign(payload)
   }
 
-  async addFriend(uid: number, friendUid: number): Promise<string> {
+  async addFriend(uid: number, targetUid: number): Promise<string> {
     const user = await this.userRepository.findOne({ where: { uid } })
     const friend = await this.userRepository.findOne({
-      where: { uid: friendUid },
+      where: { uid: targetUid },
     })
     if (!friend) throw new NotFoundException('Friend not found')
-    if (user.friends.find((id) => id === friendUid))
+    if (user.friends.find((id) => id === targetUid))
       throw new BadRequestException('Already friend')
-    user.friends.push(friendUid)
+    user.friends.push(targetUid)
     this.userRepository.save(user).catch(() => {
       throw new InternalServerErrorException('database error')
     })
     return `${user.nickname} is now friend with ${friend.nickname}`
   }
 
-  async addBlock(uid: number, blockUid: number): Promise<string> {
+  async addBlock(uid: number, targetUid: number): Promise<string> {
     const user = await this.userRepository.findOne({ where: { uid } })
     const block = await this.userRepository.findOne({
-      where: { uid: blockUid },
+      where: { uid: targetUid },
     })
     if (!block) throw new NotFoundException('Block User not found')
-    if (user.blocks.find((id) => id === blockUid))
+    if (user.blocks.find((id) => id === targetUid))
       throw new BadRequestException('Already blocked')
-    user.blocks.push(blockUid)
+    user.blocks.push(targetUid)
     this.userRepository.save(user).catch(() => {
       throw new InternalServerErrorException('database error')
     })
     return `${user.nickname} is now blocked with ${block.nickname}`
   }
 
-  async deleteFriend(uid: number, friendUid: number): Promise<string> {
+  async deleteFriend(uid: number, targetUid: number): Promise<string> {
     const user = await this.userRepository.findOne({ where: { uid } })
     const friend = await this.userRepository.findOne({
-      where: { uid: friendUid },
+      where: { uid: targetUid },
     })
     if (!friend) throw new NotFoundException('Friend not found')
-    if (!user.friends.find((id) => id === friendUid))
+    if (!user.friends.find((id) => id === targetUid))
       throw new BadRequestException('Not friend')
-    user.friends = user.friends.filter((id) => id !== friendUid)
+    user.friends = user.friends.filter((id) => id !== targetUid)
     this.userRepository.save(user).catch(() => {
       throw new InternalServerErrorException('database error')
     })
     return `${user.nickname} is no longer friend with ${friend.nickname}`
   }
 
-  async deleteBlock(uid: number, blockUid: number): Promise<string> {
+  async deleteBlock(uid: number, targetUid: number): Promise<string> {
     const user = await this.userRepository.findOne({ where: { uid } })
     const block = await this.userRepository.findOne({
-      where: { uid: blockUid },
+      where: { uid: targetUid },
     })
     if (!block) throw new NotFoundException('Blocked user not found')
-    if (!user.blocks.find((id) => id === blockUid))
+    if (!user.blocks.find((id) => id === targetUid))
       throw new BadRequestException('Not Blocked')
-    user.blocks = user.friends.filter((id) => id !== blockUid)
+    user.blocks = user.friends.filter((id) => id !== targetUid)
     this.userRepository.save(user).catch(() => {
       throw new InternalServerErrorException('database error')
     })
@@ -243,5 +243,25 @@ export class UserService {
     if (!user) throw new NotFoundException('User not found')
     user.nickname = nickname
     return this.userRepository.save(user)
+  }
+
+  async findFriendsByUid(uid: number): Promise<User[]> {
+    const user = await this.userRepository.findOne({ where: { uid } })
+    if (!user) throw new NotFoundException('User not found')
+    const users = await this.userRepository
+      .createQueryBuilder('user')
+      .select([
+        'user.uid',
+        'user.nickname',
+        'user.avatar',
+        'user.status',
+        'stat.win',
+        'stat.lose',
+        'stat.rating',
+      ])
+      .innerJoin('user.stat', 'stat')
+      .where('user.uid = ANY(:friends)', { friends: user.friends })
+      .getMany()
+    return users
   }
 }

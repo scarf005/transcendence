@@ -44,6 +44,18 @@ export class UserController {
     return await this.userService.findOneByUid(uid)
   }
 
+  @Get('/me/friend')
+  @UseGuards(JwtAfterTwoFactorUserGuard)
+  @ApiOperation({
+    summary: 'Get My User friends data API',
+    description: 'auth token 에서 uid 추출',
+  })
+  @ApiCreatedResponse({ description: 'FindUserDto', type: FindUserDto })
+  async getMyfriends(@Req() req: any): Promise<FindUserDto[]> {
+    const { uid } = req.user
+    return await this.userService.findFriendsByUid(uid)
+  }
+
   @Get('/:uid')
   @UseGuards(JwtAfterTwoFactorUserGuard)
   @ApiOperation({
@@ -85,7 +97,7 @@ export class UserController {
   @UseGuards(JwtAfterTwoFactorUserGuard)
   @ApiOperation({
     summary: 'Post friend API',
-    description: 'body의 friendUid:uid 추가할 uid',
+    description: 'body의 "targetUid":uid 추가할 uid',
   })
   @ApiCreatedResponse({
     description: 'ok : 추가됐다, no : exception',
@@ -100,7 +112,7 @@ export class UserController {
   @UseGuards(JwtAfterTwoFactorUserGuard)
   @ApiOperation({
     summary: 'Post block API',
-    description: 'body의 blockUid:uid 추가할 uid',
+    description: 'body의 "targetUid":uid 추가할 uid',
   })
   @ApiCreatedResponse({
     description: 'ok : 추가됐다, no : exception',
@@ -115,7 +127,7 @@ export class UserController {
   @UseGuards(JwtAfterTwoFactorUserGuard)
   @ApiOperation({
     summary: 'Delete friend API',
-    description: 'body의 friendUid:uid 제거할 uid',
+    description: 'body의 "targetUid":uid 제거할 uid',
   })
   @ApiCreatedResponse({
     description: 'ok : 제거됐다, no : exception',
@@ -130,7 +142,7 @@ export class UserController {
   @UseGuards(JwtAfterTwoFactorUserGuard)
   @ApiOperation({
     summary: 'delete block API',
-    description: 'body의 blockUid:uid 제거할 uid',
+    description: 'body의 "targetUid":uid 제거할 uid',
   })
   @ApiCreatedResponse({
     description: 'ok : 추가됐다, no : exception',

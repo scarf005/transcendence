@@ -25,9 +25,6 @@ export class ChatRoom {
   @Column('int', { array: true, default: [] })
   bannedIds: number[]
 
-  @Column('int', { array: true, default: [] })
-  mutedIds: number[]
-
   @ManyToMany(() => ChatUser, { cascade: true })
   @JoinTable()
   chatUser: ChatUser[]

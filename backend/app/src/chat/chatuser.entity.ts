@@ -18,7 +18,7 @@ export class ChatUser {
   @Column({ default: false })
   isOwner: boolean
 
-  @Column({ type: 'timestamptz', nullable: true })
+  @Column({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
   endOfMute: Date
 
   @ManyToOne(() => User)
