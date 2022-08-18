@@ -9,24 +9,16 @@ import { io, Socket } from 'socket.io-client'
 
 import { usePongSocket } from 'hook/usePongSocket'
 
-import {
-  Message,
-  ClientToServerEvents,
-  ServerToClientEvents,
-  JoinedRoom,
-} from 'data'
+import { Message, JoinedRoom, ChatSocket } from 'data'
 
 export const PongSocketContext = createContext<Socket | undefined>(undefined)
 
 export const MainRouter = () => {
-  const [socket, setSocket] = useState<Socket>()
+  const [socket, setSocket] = useState<ChatSocket>()
   useEffect(() => {
-    const socket: Socket<ServerToClientEvents, ClientToServerEvents> = io(
-      '/api/chat',
-      {
-        auth: { token: window.localStorage.getItem('access_token') },
-      },
-    )
+    const socket: ChatSocket = io('/api/chat', {
+      auth: { token: window.localStorage.getItem('access_token') },
+    })
     setSocket(socket)
     socket.on('connect', () => {
       console.log('socket server connected.')
@@ -51,7 +43,10 @@ export const MainRouter = () => {
           <Route path="/game" element={<GameView {...pongData} />} />
           <Route path="/friend" element={<FriendView />} />
           <Route path="/profile" element={<Profile user={mockUser} />} />
-          <Route path="/Chat" element={<ChatView socket={socket} />} />
+          <Route
+            path="/Chat"
+            element={<ChatView socket={socket as ChatSocket} />}
+          />
         </Routes>
       </PongSocketContext.Provider>
     </div>

@@ -1,14 +1,14 @@
 import { List } from '@mui/material'
-import { Chat } from 'data'
+import { Chat, ChatSocket, Message } from 'data'
 import { ChatListItem } from './ChatListItem'
 import { useUser } from 'hook/useUser'
 import { groupBySerial } from 'utility/groupBySerial'
-import { io, Socket } from 'socket.io-client'
 import { useState } from 'react'
+import { ChatInput } from './ChatInput'
 
 interface Props<T extends Chat> {
   chats: T[]
-  socket: Socket
+  socket: ChatSocket
   roomId: number
 }
 
@@ -18,12 +18,12 @@ export const ChatList = <T extends Chat>({
   roomId,
 }: Props<T>) => {
   const groupedChats = groupBySerial(chats, (chat) => chat.senderUid)
-  const sendmsg = () => {
+  const onSend = (msg: string) => {
     socket.emit('SEND', {
       roomId: roomId,
-      msgContent: 'what do you say?',
+      msgContent: msg,
       createdAt: new Date(),
-    })
+    } as Message)
   }
   return (
     <>
@@ -40,7 +40,7 @@ export const ChatList = <T extends Chat>({
           )
         })}
       </List>
-      <button onClick={sendmsg}>전송</button>
+      <ChatInput onSend={onSend} />
     </>
   )
 }

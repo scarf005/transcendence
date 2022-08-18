@@ -5,7 +5,7 @@ import { ChatRoomList } from './ChatRoomList'
 import { JoinedRoomList } from './JoinedRoomList'
 import { Grid, List, Divider, Input, Typography, Button } from '@mui/material'
 import { BasicModal } from './CreateRoomModal'
-import { JoinedRoom, Room, Message } from 'data'
+import { JoinedRoom, Room, Message, ChatSocket } from 'data'
 import { ChatList } from 'components/chat/ChatList'
 import { User } from 'data'
 import { convertToObject } from 'typescript'
@@ -67,7 +67,7 @@ type messages = {
   }[]
 }
 
-export const ChatView = (prop: { socket: any }) => {
+export const ChatView = ({ socket }: { socket: ChatSocket }) => {
   const [chatRoomList, setChatRoomList] = useState<Room[]>([])
   const [joinedRoomList, setJoinedRoomList] = useState<JoinedRoom[]>([])
   const token = window.localStorage.getItem('access_token')
@@ -111,7 +111,7 @@ export const ChatView = (prop: { socket: any }) => {
       .then((res) => {
         setMyUid(res.data.uid)
       })
-    prop.socket.on('RECEIVE', (res: Message) => {
+    socket.on('RECEIVE', (res: Message) => {
       const id = res.roomId
       const data = {
         senderUid: res.senderUid,
@@ -126,7 +126,7 @@ export const ChatView = (prop: { socket: any }) => {
         }
       })
     })
-    prop.socket.on('NOTICE', (res: Message) => {
+    socket.on('NOTICE', (res: Message) => {
       if (res.senderUid === myUid) {
         updateMyRoom()
       }
@@ -142,7 +142,7 @@ export const ChatView = (prop: { socket: any }) => {
           <Button fullWidth={true} onClick={() => setModal(true)}>
             방만들기
           </Button>
-          <BasicModal setModal={setModal} modal={modal} socket={prop.socket} />
+          <BasicModal setModal={setModal} modal={modal} socket={socket} />
           <Button fullWidth={true} onClick={updateRoom}>
             참여 가능한 방
           </Button>
@@ -161,7 +161,7 @@ export const ChatView = (prop: { socket: any }) => {
           {showChat.bool ? (
             <ChatList
               chats={messages[showChat.roomId] ? messages[showChat.roomId] : []}
-              socket={prop.socket}
+              socket={socket}
               roomId={showChat.roomId}
             />
           ) : (
@@ -171,7 +171,7 @@ export const ChatView = (prop: { socket: any }) => {
               </Typography>
               <ChatRoomList
                 list={chatRoomList}
-                socket={prop.socket}
+                socket={socket}
                 setShowChat={setShowChat}
               />
             </div>
