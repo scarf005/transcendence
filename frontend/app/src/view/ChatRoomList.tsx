@@ -18,7 +18,7 @@ export const ChatRoomList = (prop: {
   setShowChat: any
 }) => {
   const joinRoom = (room: number) => {
-    prop.socket.emit('JOIN', { roomId: room} )
+    prop.socket.emit('JOIN', { roomId: room })
     prop.setShowChat({ bool: true, roomId: room })
   }
   return (

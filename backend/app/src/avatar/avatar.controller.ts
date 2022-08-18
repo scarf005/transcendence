@@ -23,7 +23,7 @@ import { UserService } from 'user/user.service'
 export class AvatarController {
   constructor(private readonly userService: UserService) {}
   @Post()
-  // @UseGuards(JwtFtGuard)
+  @UseGuards(JwtFtGuard)
   @UseInterceptors(
     FileInterceptor('file', multerOptions('/srv/uploads/avatar')),
   )
@@ -50,7 +50,7 @@ export class AvatarController {
   }
 
   @Get(':filename')
-  // @UseGuards(JwtFtGuard)
+  @UseGuards(JwtFtGuard)
   async get(@Res() res: Response, @Param() param: FileNameDto) {
     res.download(`${process.env.AVATAR_SAVE}/${param.filename}`, param.filename)
   }

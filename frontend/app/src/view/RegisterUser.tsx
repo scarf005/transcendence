@@ -11,6 +11,7 @@ import FormControl from '@mui/material/FormControl'
 import Radio from '@mui/material/Radio'
 import FormLabel from '@mui/material/FormLabel'
 import { createTheme, ThemeProvider } from '@mui/material/styles'
+import { useAvatar } from 'hook/useAvatar'
 
 const theme = createTheme({
   palette: {
@@ -83,7 +84,9 @@ export function RegisterUser(props: {
   const imgInput = useRef<HTMLInputElement>(null)
   const [nickname, setNickname] = useState({ checked: false, name: '' })
   const [enableTwoFactor, setEnableTwoFactor] = useState(false)
-  const [avatar, setAvatar] = useState('/api/avatar/default.jpg')
+  const [avatarFilename, avatar, setAvatarFilename] = useAvatar(
+    '/api/avatar/default.jpg',
+  )
   const [nicknameLabel, setNicknameLabel] = useState('닉네임을 입력해주세요')
 
   const navigate = useNavigate()
@@ -105,7 +108,7 @@ export function RegisterUser(props: {
           return Promise.reject(res.statusText)
         } else {
           const { filename } = await res.json()
-          setAvatar(`/api/avatar/${filename}`)
+          setAvatarFilename(`/api/avatar/${filename}`)
         }
       })
       .catch((err) => {
@@ -121,7 +124,7 @@ export function RegisterUser(props: {
       body: JSON.stringify({
         nickname: nickname.name,
         twoFactor: enableTwoFactor,
-        avatar,
+        avatar: avatarFilename,
       }),
       headers: {
         'Content-Type': 'application/json',
@@ -142,9 +145,11 @@ export function RegisterUser(props: {
           navigate('/')
         }
       })
-      .catch((err) => {
+      .catch(async (err) => {
+        console.log(err)
+        console.log(err.status)
+        console.log(await err.json())
         navigate('/')
-        console.log(err.json())
       })
   }
 
@@ -189,9 +194,6 @@ export function RegisterUser(props: {
         <Button variant="outlined" onClick={handleNicknameCheck}>
           중복 확인
         </Button>
-        {/* <div style={{ textAlign: 'center' }}>
-          <Img src={avatar} />
-        </div> */}
         <div style={{ textAlign: 'center' }}>
           <Img src={avatar} />
         </div>
