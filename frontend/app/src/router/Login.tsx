@@ -2,11 +2,6 @@ import { Route, Routes, useNavigate, useSearchParams } from 'react-router-dom'
 import { useEffect } from 'react'
 import { RegisterUser } from 'view/RegisterUser'
 import styled from 'styled-components'
-// import Nav from './Nav'
-// import FriendView from 'FriendView'
-// import axios from 'axios'
-// import { Profile } from 'components/profile/Profile'
-// import { mockUser } from 'mock/mockUser'
 import QrPage from 'view/twoFactor'
 
 const CenterAlignedDiv = styled.div`

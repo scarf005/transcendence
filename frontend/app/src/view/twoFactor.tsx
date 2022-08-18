@@ -87,8 +87,12 @@ export const InputCode = (props: {
 
 const QrPage = (props: { setIsLoggedIn: (value: boolean) => void }) => {
   const [otpRegisterLink, setOtpRegisterLink] = useState('')
+  const [isQrRegistered, setIsQrRegistered] = useState(false)
 
   useEffect(() => {
+    if (isQrRegistered) {
+      return
+    }
     const jwt = window.localStorage.getItem('temp_token')
     fetch('api/auth/2fa', {
       method: 'PUT',
@@ -96,17 +100,14 @@ const QrPage = (props: { setIsLoggedIn: (value: boolean) => void }) => {
         Authorization: `Bearer ${jwt}`,
         'Content-Type': 'application/json',
       },
+    }).then(async (res) => {
+      if (res.ok) {
+        const { qr } = await res.json()
+        setOtpRegisterLink(qr)
+      }
+      setIsQrRegistered(true)
     })
-      .then(async (res) => {
-        if (res.ok) {
-          const { qr } = await res.json()
-          setOtpRegisterLink(qr)
-        } else {
-          return Promise.reject()
-        }
-      })
-      .catch((_) => undefined)
-  }, [])
+  }, [isQrRegistered])
 
   return (
     <div>
