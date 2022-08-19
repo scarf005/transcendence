@@ -2,6 +2,7 @@ export const chatEvent = {
   JOIN: 'JOIN',
   LEAVE: 'LEAVE',
   CREATE: 'CREATE',
+  DESTROYED: 'DESTROYED',
   SEND: 'SEND',
   RECEIVE: 'RECEIVE',
   NOTICE: 'NOTICE',

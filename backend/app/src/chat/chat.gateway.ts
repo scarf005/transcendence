@@ -161,15 +161,47 @@ export class ChatGateway {
     @MessageBody() roomId: number,
   ) {
     try {
+      // owner가 나가면 모두에게 DESTROYED 전송. 이후 모두 내보내고 채팅방 삭제
+      if (await this.chatService.isOwner(client.data.uid, roomId)) {
+        this.emitDestroyed(client, roomId)
+        return { status: 200 }
+      }
+    } catch (error) {
+      return error
+    }
+
+    try {
       await this.chatService.removeUserFromRoom(client.data.uid, roomId)
     } catch (error) {
       return error
     }
-    // TODO: owner가 나가면 채팅방 삭제
     client.leave(roomId.toString())
     console.log(`chat: ${client.data.uid} leaved ${roomId}`)
     this.emitNotice(client, roomId, 'leave')
     return { status: 200 }
+  }
+
+  @AsyncApiSub({
+    channel: chatEvent.DESTROYED,
+    summary: '채팅방 삭제됨',
+    description: 'owner가 채팅방을 나갔을 때, 모든 참여자에게 이벤트 전달',
+    message: { payload: { type: UserInRoomDto } },
+  })
+  async emitDestroyed(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() roomId: number,
+  ) {
+    const data: UserInRoomDto = { roomId: roomId, uid: client.data.uid }
+    // 이벤트 전달
+    this.server.to(roomId.toString()).emit(chatEvent.DESTROYED, data)
+    // room 삭제
+    this.server.in(roomId.toString()).socketsLeave(roomId.toString())
+    // DB 삭제
+    try {
+      await this.chatService.deleteChatroom(client.data.uid, roomId)
+    } catch (error) {
+      return error
+    }
   }
 
   @AsyncApiSub({

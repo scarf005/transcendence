@@ -72,6 +72,11 @@ export class ChatService {
     })
   }
 
+  async deleteChatroom(ownerId: number, roomId: number) {
+    if (!this.isOwner(ownerId, roomId)) return
+    return await this.chatRoomRepository.delete(roomId)
+  }
+
   async addUserToRoom(
     uid: number,
     roomId: number,
@@ -145,6 +150,17 @@ export class ChatService {
     return this.chatUserRepository.save(room.chatUser[0])
   }
 
+  async isOwner(uid: number, roomId: number) {
+    const room = await this.chatRoomRepository.findOne({
+      select: ['chatUser'],
+      where: { id: roomId, chatUser: { user: { uid } } },
+      relations: ['chatUser', 'chatUser.user'],
+    })
+    if (!room) throw new NotFoundException('Room not found or User not in room')
+    if (room.chatUser[0].isOwner) return true
+    return false
+  }
+
   async isAdmin(uid: number, roomId: number) {
     const room = await this.chatRoomRepository.findOne({
       select: ['chatUser'],
@@ -152,9 +168,8 @@ export class ChatService {
       relations: ['chatUser', 'chatUser.user'],
     })
     if (!room) throw new NotFoundException('Room not found or User not in room')
-    if (!room.chatUser[0].isAdmin)
-      throw new UnauthorizedException('User is not admin')
-    return true
+    if (room.chatUser[0].isAdmin) return true
+    return false
   }
 
   async findRoomByRoomid(id: number): Promise<User[]> {
