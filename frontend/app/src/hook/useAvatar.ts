@@ -11,13 +11,13 @@ export const useAvatar = (
   const [avatar, setAvatar] = useState<string>()
 
   useEffect(() => {
-    const toekn =
+    const token =
       window.localStorage.getItem('temp_token') ||
       window.localStorage.getItem('access_token') ||
       ''
     fetch(avatarFilename, {
       headers: {
-        Authorization: `Bearer ${toekn}`,
+        Authorization: `Bearer ${token}`,
       },
     }).then(async (res) => {
       const blob = await res.blob()

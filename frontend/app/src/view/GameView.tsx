@@ -86,12 +86,11 @@ export const GameView = ({
     case 'findMatch':
       return <MatchingView />
 
-    case 'gameInfo':
-      return <PongStartCounter />
-
     case 'play':
+    case 'gameInfo':
       return (
         <Pong
+          isPlaying={gameState === 'play'}
           {...gameInfo}
           {...player}
           window={{ ratio: 16 / 9, height: 450 }}

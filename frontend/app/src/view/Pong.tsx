@@ -1,10 +1,11 @@
 import { useRef, useEffect, useState } from 'react'
 import Avatar from '@mui/material/Avatar'
-import { Stack, Typography, Box, Modal, Button } from '@mui/material'
+import { Stack, Typography, Box, Modal, Button, setRef } from '@mui/material'
 import styled from 'styled-components'
 import { useApiQuery } from 'hook'
 import { useAvatar } from 'hook/useAvatar'
 import { User } from 'data'
+import { useUserQuery } from 'hook/useUserQuery'
 
 export type Rect = {
   x: number
@@ -14,6 +15,7 @@ export type Rect = {
 }
 
 export type PongProps = {
+  isPlaying: boolean
   leftPaddle: Rect
   rightPaddle: Rect
   ball: Rect
@@ -42,21 +44,16 @@ const drawRect = (
 }
 
 const PongUser = ({ uid }: { uid: number }) => {
-  const { data: profile, isSuccess } = useApiQuery<User>(['user', uid])
-  const [_avatarFile, avatar, setAvatarFile] = useAvatar(
-    '/api/avatar/default.jpg',
-  )
+  const { data: profile, isSuccess } = useUserQuery(uid)
 
   if (!isSuccess) {
     return null
   }
 
-  setAvatarFile(profile.avatar)
-
   return (
     <Stack justifyContent="center" alignItems="center">
       <Typography>{profile.nickname}</Typography>
-      <Avatar src={avatar} />
+      <Avatar src={profile.avatar} />
       <Typography>RATING: {profile.stat.rating}</Typography>
     </Stack>
   )
@@ -200,15 +197,18 @@ const Pong = (props: PongProps) => {
   }, [props])
 
   return (
-    <PongGrid>
-      <PongLeftProfile>
-        <PongUser uid={props.leftUser} />
-      </PongLeftProfile>
-      <PongRightProfile>
-        <PongUser uid={props.rightUser} />
-      </PongRightProfile>
-      <PongCanvas width={800} height={450} ref={pongCanvas} />
-    </PongGrid>
+    <>
+      {props.isPlaying ? null : <PongStartCounter />}
+      <PongGrid>
+        <PongLeftProfile>
+          <PongUser uid={props.leftUser} />
+        </PongLeftProfile>
+        <PongRightProfile>
+          <PongUser uid={props.rightUser} />
+        </PongRightProfile>
+        <PongCanvas width={800} height={450} ref={pongCanvas} />
+      </PongGrid>
+    </>
   )
 }
 

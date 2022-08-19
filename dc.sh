@@ -21,7 +21,6 @@ print_usage_and_exit() {
 setup_dependencies() {
   test -d $BACKEND_ROOT/node_modules || (cd $BACKEND_ROOT && npm ci)
   test -d $FRONT_ROOT/node_modules || (cd $FRONT_ROOT && npm ci)
-  npm ci
 }
 
 run_compose() {
