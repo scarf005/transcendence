@@ -3,6 +3,7 @@ import { Message, ChatSocket, User } from 'data'
 import { ChatInput, ChatList, MemberList } from 'components'
 import { useUserQuery } from 'hook'
 import { Logout } from '@mui/icons-material'
+import { InviteUser } from './InviteUser'
 
 // TODO: 나가기 누를 때 한 번 더 확인하기
 const LeaveButton = ({ onClick }: { onClick: () => void }) => {
@@ -18,16 +19,21 @@ const LeaveButton = ({ onClick }: { onClick: () => void }) => {
 interface PanelProps {
   chats: Message[]
   socket: ChatSocket
-  roomId: number
+  roomInfo: { bool: boolean; roomId: number; roomType: string }
   leaveRoom: (roomId: number) => void
 }
-export const ChatPanel = ({ chats, socket, roomId, leaveRoom }: PanelProps) => {
+export const ChatPanel = ({
+  chats,
+  socket,
+  roomInfo,
+  leaveRoom,
+}: PanelProps) => {
   const { data: me, isSuccess: ok1 } = useUserQuery<User>('me')
   const { data: users, isSuccess: ok2 } = useUserQuery<User[]>('') // TODO: 채팅방 참여중인 목록 가져오기
 
   const sendMsg = (msg: string) => {
     socket.emit('SEND', {
-      roomId: roomId,
+      roomId: roomInfo.roomId,
       msgContent: msg,
       createdAt: new Date(),
     } as Message)
@@ -40,6 +46,9 @@ export const ChatPanel = ({ chats, socket, roomId, leaveRoom }: PanelProps) => {
         <ChatList chats={chats} />
       </Grid>
       <Grid item xs={4}>
+        {roomInfo.roomType === 'PRIVATE' ? (
+          <InviteUser socket={socket} roomId={roomInfo.roomId} />
+        ) : null}
         {ok1 && ok2 ? (
           <MemberList users={users} refUser={me} />
         ) : (
@@ -47,7 +56,7 @@ export const ChatPanel = ({ chats, socket, roomId, leaveRoom }: PanelProps) => {
         )}
       </Grid>
       <ChatInput sendMsg={sendMsg} />
-      <LeaveButton onClick={() => leaveRoom(roomId)} />
+      <LeaveButton onClick={() => leaveRoom(roomInfo.roomId)} />
     </Grid>
   )
 }

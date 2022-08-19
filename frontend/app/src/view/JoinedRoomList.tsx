@@ -14,14 +14,17 @@ export const JoinedRoomList = (prop: {
   room: JoinedRoom[]
   setShowChat: any
 }) => {
-  const changeView = (id: number) => {
-    prop.setShowChat({ bool: true, roomId: id })
+  const changeView = (id: number, roomType: string) => {
+    prop.setShowChat({ bool: true, roomId: id, roomType: roomType })
   }
   return (
     <Box sx={{ width: '100%' }}>
       <Stack spacing={2}>
         {prop.room.map((chatRoom: JoinedRoom) => (
-          <Item key={chatRoom.id} onClick={() => changeView(chatRoom.id)}>
+          <Item
+            key={chatRoom.id}
+            onClick={() => changeView(chatRoom.id, chatRoom.roomtype)}
+          >
             {`${chatRoom.name}#${chatRoom.id}`}
           </Item>
         ))}

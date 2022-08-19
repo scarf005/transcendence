@@ -47,7 +47,11 @@ export const ChatView = ({ socket }: { socket: ChatSocket }) => {
   const token = window.localStorage.getItem('access_token')
   const [modal, setModal] = useState(false)
   const [messages, setMessages] = useState<Messages>({})
-  const [showChat, setShowChat] = useState({ bool: false, roomId: 0 })
+  const [showChat, setShowChat] = useState({
+    bool: false,
+    roomId: 0,
+    roomType: 'PUBLIC',
+  })
   const [myUid, setMyUid] = useState<number>()
 
   const updateRoom = () => {
@@ -151,7 +155,7 @@ export const ChatView = ({ socket }: { socket: ChatSocket }) => {
             <ChatPanel
               chats={messages[showChat.roomId] ? messages[showChat.roomId] : []}
               socket={socket}
-              roomId={showChat.roomId}
+              roomInfo={showChat}
               leaveRoom={leaveRoom}
             />
           ) : (

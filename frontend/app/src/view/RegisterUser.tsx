@@ -2,14 +2,17 @@ import { useState, ChangeEvent, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 //css
 import styled from 'styled-components'
-import Box from '@mui/material/Box'
-import TextField from '@mui/material/TextField'
-import Button from '@mui/material/Button'
-import RadioGroup from '@mui/material/RadioGroup'
-import FormControlLabel from '@mui/material/FormControlLabel'
-import FormControl from '@mui/material/FormControl'
-import Radio from '@mui/material/Radio'
-import FormLabel from '@mui/material/FormLabel'
+import {
+  TextField,
+  Button,
+  RadioGroup,
+  FormControlLabel,
+  FormControl,
+  Radio,
+  FormLabel,
+  Box,
+} from '@mui/material'
+
 import { createTheme, ThemeProvider } from '@mui/material/styles'
 import { useAvatar } from 'hook/useAvatar'
 
