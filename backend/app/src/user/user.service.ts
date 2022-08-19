@@ -50,31 +50,19 @@ export class UserService {
     user.isActive = true
     user.stat = stat
 
-    // tmp dummy user for testing
-    const user1 = new User()
-    const user2 = new User()
-    const user3 = new User()
-    const stat1 = new Stat()
-    const stat2 = new Stat()
-    const stat3 = new Stat()
-    user1.avatar = userData.avatar
-    user1.nickname = 'dummy1'
-    user1.twoFactor = false
-    user1.isActive = true
-    user2.avatar = userData.avatar
-    user2.nickname = 'dummy2'
-    user2.twoFactor = false
-    user2.isActive = true
-    user3.avatar = userData.avatar
-    user3.nickname = 'dummy3'
-    user3.twoFactor = false
-    user3.isActive = true
-    user1.stat = stat1
-    user2.stat = stat2
-    user3.stat = stat3
-    await this.userRepository.save(user1)
-    await this.userRepository.save(user2)
-    await this.userRepository.save(user3)
+    // 나중에 지우기!
+    const arr = [1, 2, 3]
+    await Promise.all(
+      arr.map(async (i) => {
+        const dummy = new User()
+        dummy.stat = new Stat()
+        dummy.avatar = `https://picsum.photos/seed/${Math.random()}/200/300`
+        dummy.nickname = `dummy ${userData.nickname} #${i}`
+        dummy.twoFactor = false
+        dummy.isActive = true
+        await this.userRepository.save(dummy)
+      }),
+    )
 
     return await this.userRepository.save(user).catch(() => {
       throw new InternalServerErrorException('database error')
