@@ -17,3 +17,12 @@ export interface User {
   blocks: userID[]
   stat: Stat
 }
+export type OtherUser = Omit<User, 'friends' | 'blocks' | 'stat'>
+
+export interface ChatUser {
+  id: number
+  isAdmin: boolean
+  isOwner: boolean
+  endOfMute: Date
+  user: OtherUser
+}

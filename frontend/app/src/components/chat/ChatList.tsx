@@ -4,50 +4,31 @@ import { ChatListItem } from './ChatListItem'
 import { groupBySerial } from 'utility'
 import { useApiQuery } from 'hook'
 
-interface GroupedMessage {
-  user?: User
-  createdAt: Date
-  msgs: string[]
+interface ListProps {
+  group: Message[]
 }
-interface PropsInner {
-  groupedMessages: GroupedMessage[]
-}
-export const ChatListInner = ({ groupedMessages }: PropsInner) => {
+export const WrappedChatListItem = ({ group }: ListProps) => {
+  const first = group[0]
+  const { senderUid: uid } = first
+  const { data: user } = useApiQuery<User>(['user', uid])
   return (
-    <List>
-      {groupedMessages.map((chat) => {
-        const { user, createdAt, msgs } = chat
-        return (
-          <ChatListItem
-            user={user}
-            key={createdAt.toISOString() + msgs[0]}
-            messages={msgs}
-          />
-        )
-      })}
-    </List>
+    <ChatListItem user={user} messages={group.map((msg) => msg.msgContent)} />
   )
 }
-
 interface Props {
   chats: Message[]
 }
 export const ChatList = ({ chats }: Props) => {
-  const groupChats = (chats: Message[]): GroupedMessage[] =>
-    groupBySerial(chats, (chat) => chat.senderUid).map((group) => {
-      const first = group[0]
-      const { createdAt, senderUid: uid } = first
-      const { data: user, isSuccess } = useApiQuery<User>(['user', uid])
-      return {
-        user: isSuccess ? user : undefined,
-        createdAt,
-        msgs: group.map((msg) => msg.msgContent),
-      }
-    })
+  const groupedMessages = groupBySerial(chats, (chat) => chat.senderUid)
 
   return (
     <List>
-      <ChatListInner groupedMessages={groupChats(chats)} />
+      {groupedMessages.map((group) => (
+        <WrappedChatListItem
+          key={group[0].createdAt.toISOString()}
+          group={group}
+        />
+      ))}
     </List>
   )
 }

@@ -5,7 +5,12 @@ import { User } from 'data'
 
 export const MemberView = () => {
   const { data: me, isSuccess: ok1 } = useApiQuery<User>(['user', 'me'])
-  const { data: users, isSuccess: ok2 } = useApiQuery<User[]>(['user'])
+  const { data: users, isSuccess: ok2 } = useApiQuery<User[]>(
+    ['chat', (me as User).uid, 'list'],
+    {
+      enabled: me !== undefined,
+    },
+  )
 
   if (ok1 && ok2) {
     return <MemberList users={users} refUser={me} />

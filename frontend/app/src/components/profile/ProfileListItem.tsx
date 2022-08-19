@@ -7,14 +7,14 @@ interface Props {
   onClick?: () => void
 }
 export const ProfileListItem = ({ user, onClick }: Props) => {
-  const { avatar, nickname: name, status, stat } = user
-  const rankScore = `Ladder Score : ${stat.rating}`
+  const { avatar, nickname: name, status } = user
+  // const rankScore = `Ladder Score : ${stat.rating}`
   return (
     <ListItem button onClick={onClick} key={user.uid}>
       <ListItemAvatar>
         <AvatarWithStatus status={status} avatar={avatar} />
       </ListItemAvatar>
-      <ListItemText primary={name} secondary={rankScore} />
+      <ListItemText primary={name} />
     </ListItem>
   )
 }

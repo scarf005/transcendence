@@ -1,5 +1,5 @@
 import { Card, List, Modal, Container } from '@mui/material'
-import { User } from 'data'
+import { OtherUser, User } from 'data'
 import { useToggles } from 'hook'
 import { partition } from 'utility'
 import { ProfileDisplay } from 'components'
@@ -22,7 +22,7 @@ export const Section = ({ title, users, onClick }: SectionProps) => (
 )
 interface Props {
   /** 모든 사용자 */
-  users: User[]
+  users: OtherUser[]
   /** 로그인한 사용자 */
   refUser: User
 }
@@ -44,19 +44,23 @@ export const MemberList = ({ users, refUser }: Props) => {
       <Modal open={open} onClose={off}>
         <Container>
           <Card sx={{ maxWidth: '25vw' }}>
-            <ProfileDisplay users={users} refUser={refUser} uid={id} />
+            <ProfileDisplay
+              users={users as User[]}
+              refUser={refUser}
+              uid={id}
+            />
           </Card>
         </Container>
       </Modal>
 
       <Section
         title={`온라인 - ${onlineUsers.length}`}
-        users={onlineUsers}
+        users={onlineUsers as User[]}
         onClick={openModal}
       />
       <Section
         title={`오프라인 - ${offlineUsers.length}`}
-        users={offlineUsers}
+        users={offlineUsers as User[]}
         onClick={openModal}
       />
     </List>
