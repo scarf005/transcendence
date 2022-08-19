@@ -94,7 +94,6 @@ export const BasicModal = (prop: {
         password: password,
       })
     else prop.socket.emit('CREATE', { title: roomName, type: roomType })
-    queryClient.invalidateQueries(['chat', 'me'])
     handleClose()
   }
   return (

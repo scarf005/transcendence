@@ -13,13 +13,15 @@ export interface ChatJoinRoom {
 }
 export interface ChatCreateRoom {
   title: string
-  type: 'PUBLIC' | 'PRIVATE' | 'PROTECTED'
+  type: 'PUBLIC' | 'PRIVATE' | 'PROTECTED' | 'DM'
   password?: string
 }
 export interface UserInRoom {
   uid: number
 }
-
+export interface LeaveChatRoom {
+  roomId: number
+}
 // TODO: 정리
 export interface SocketResponse {
   status: number
@@ -36,7 +38,7 @@ export type UserHandler = (user: UserInRoom) => void
 interface ClientToServerEvents {
   SEND: MessageHandler
   JOIN: (room: ChatJoinRoom, fn?: (res: any) => void) => void
-  LEAVE: UserHandler
+  LEAVE: (room: LeaveChatRoom, fn?: (res: any) => void) => void
   CREATE: (room: ChatCreateRoom) => void
   ADD_ADMIN: UserHandler
   REMOVE_ADMIN: UserHandler
@@ -44,6 +46,7 @@ interface ClientToServerEvents {
 interface ServerToClientEvents {
   RECEIVE: MessageHandler
   NOTICE: MessageHandler
+  DESTROYED: MessageHandler
 }
 
 export type ChatSocket = Socket<ServerToClientEvents, ClientToServerEvents>

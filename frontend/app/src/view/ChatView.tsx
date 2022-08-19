@@ -68,13 +68,28 @@ export const ChatView = ({ socket }: { socket: ChatSocket }) => {
     }
   }, [])
 
+  useEffect(() => {
+    socket.on('DESTROYED', () => {
+      queryClient.invalidateQueries(['chat', 'me'])
+      queryClient.invalidateQueries(['chat', 'joinlist'])
+      setShowChat((showChat) => {
+        return { ...showChat, bool: false }
+      })
+    })
+    return () => {
+      socket.removeAllListeners('DESTROYED')
+    }
+  }, [])
+
   const leaveRoom = (roomId: number) => {
-    socket.emit('LEAVE', { uid: roomId })
+    socket.emit('LEAVE', { roomId }, () => {
+      queryClient.invalidateQueries(['chat', 'me'])
+      setShowChat((showChat) => {
+        return { ...showChat, bool: false }
+      })
+    })
     // const newJoinedRoom = joinedRoomList.filter((el) => el.id !== roomId)
     // setJoinedRoomList(newJoinedRoom)
-    setShowChat((showChat) => {
-      return { ...showChat, bool: false }
-    })
   }
 
   return (

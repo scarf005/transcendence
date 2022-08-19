@@ -158,8 +158,9 @@ export class ChatGateway {
   @SubscribeMessage(chatEvent.LEAVE)
   async onLeaveRoom(
     @ConnectedSocket() client: Socket,
-    @MessageBody() roomId: number,
+    @MessageBody() room: ChatJoinRoomDto,
   ) {
+    const roomId = room.roomId
     try {
       // owner가 나가면 모두에게 DESTROYED 전송. 이후 모두 내보내고 채팅방 삭제
       if (await this.chatService.isOwner(client.data.uid, roomId)) {

@@ -16,9 +16,9 @@ export const useChatSocket = () => {
       console.log('socket server disconnected.')
     })
 
-    return () => {
-      socket.disconnect()
-    }
+    // return () => {
+    //   socket.disconnect()
+    // }
   }, [])
 
   return { socket }
