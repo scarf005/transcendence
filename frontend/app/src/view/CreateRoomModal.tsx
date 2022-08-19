@@ -11,6 +11,7 @@ import {
 } from '@mui/material'
 import { Socket } from 'socket.io-client'
 import { Message } from 'data'
+import { queryClient } from 'hook'
 
 const style = {
   position: 'absolute',
@@ -93,6 +94,7 @@ export const BasicModal = (prop: {
         password: password,
       })
     else prop.socket.emit('CREATE', { title: roomName, type: roomType })
+    queryClient.invalidateQueries(['chat', 'me'])
     handleClose()
   }
   return (

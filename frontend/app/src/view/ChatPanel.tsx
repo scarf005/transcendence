@@ -1,7 +1,7 @@
 import { Grid, Button, Tooltip, Typography } from '@mui/material'
 import { Message, ChatSocket, User } from 'data'
 import { ChatInput, ChatList, MemberList } from 'components'
-import { useUserQuery } from 'hook'
+import { useApiQuery } from 'hook'
 import { Logout } from '@mui/icons-material'
 import { InviteUser } from './InviteUser'
 
@@ -28,8 +28,8 @@ export const ChatPanel = ({
   roomInfo,
   leaveRoom,
 }: PanelProps) => {
-  const { data: me, isSuccess: ok1 } = useUserQuery<User>('me')
-  const { data: users, isSuccess: ok2 } = useUserQuery<User[]>('') // TODO: 채팅방 참여중인 목록 가져오기
+  const { data: me, isSuccess: ok1 } = useApiQuery<User>(['user', 'me'])
+  const { data: users, isSuccess: ok2 } = useApiQuery<User[]>(['user']) // TODO: 채팅방 참여중인 목록 가져오기
 
   const sendMsg = (msg: string) => {
     socket.emit('SEND', {

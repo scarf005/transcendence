@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react'
 import Pong, { PongStartCounter, PongResult } from './Pong'
 import { createTheme } from '@mui/material/styles'
 import GameGrid from './GameGrid'
+import { Socket } from 'socket.io-client'
+import { usePongSocket } from 'hook'
 
 const _theme = createTheme({
   palette: {
@@ -19,16 +21,6 @@ const MatchingView = () => {
   return <h2>대충 매칭중 표시...</h2>
 }
 
-type PongData = {
-  socket: any
-  gameState: any
-  setGameState: any
-  gameMode: any
-  player: any
-  gameInfo: any
-  winner: any
-}
-
 export const GameView = ({
   socket,
   gameState,
@@ -37,7 +29,7 @@ export const GameView = ({
   player,
   gameInfo,
   winner,
-}: PongData) => {
+}: ReturnType<typeof usePongSocket>) => {
   const [keyState, setKeyState] = useState({ up: false, down: false })
 
   useEffect(() => {

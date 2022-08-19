@@ -8,6 +8,7 @@ interface Props {
 export const ChatInput = ({ sendMsg }: Props) => {
   const [text, setText] = useState('')
   const onSend = () => {
+    if (!text) return
     sendMsg(text)
     setText('')
   }

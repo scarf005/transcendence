@@ -19,7 +19,7 @@ import { useMutation } from '@tanstack/react-query'
 import {
   addFriendMutation,
   blockMutation,
-  refreshUserMe,
+  refreshUsers,
   removeFriendMutation,
   unblockMutation,
 } from 'hook'

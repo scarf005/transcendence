@@ -3,10 +3,8 @@ import axios, { AxiosError } from 'axios'
 import { getAuthHeader } from './getAuthHeader'
 import { queryClient } from './queryClient'
 
-export const refreshUserMe = () => {
-  queryClient.invalidateQueries(['me'])
-  // FIXME: https://tanstack.com/query/v4/docs/guides/query-invalidation 방식 사용
-  queryClient.invalidateQueries(['me/friend'])
+export const refreshUsers = () => {
+  queryClient.invalidateQueries(['user'])
 }
 
 export const addFriendMutation = () => {
@@ -15,7 +13,7 @@ export const addFriendMutation = () => {
   return useMutation(
     (uid: number) =>
       axios.post('/api/user/friend', { targetUid: uid }, { headers }),
-    { onSuccess: refreshUserMe },
+    { onSuccess: refreshUsers },
   )
 }
 
@@ -25,7 +23,7 @@ export const blockMutation = () => {
   return useMutation(
     (uid: number) =>
       axios.post('/api/user/block', { targetUid: uid }, { headers }),
-    { onSuccess: refreshUserMe },
+    { onSuccess: refreshUsers },
   )
 }
 
@@ -38,7 +36,7 @@ export const unblockMutation = () => {
         headers,
         data: { targetUid: uid },
       }),
-    { onSuccess: refreshUserMe },
+    { onSuccess: refreshUsers },
   )
 }
 
@@ -51,6 +49,6 @@ export const removeFriendMutation = () => {
         headers,
         data: { targetUid: uid },
       }),
-    { onSuccess: refreshUserMe },
+    { onSuccess: refreshUsers },
   )
 }

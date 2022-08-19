@@ -7,16 +7,39 @@ export interface Message {
   roomId: number
   createdAt: Date
 }
+export interface ChatJoinRoom {
+  roomId: number
+  password?: string
+}
+export interface ChatCreateRoom {
+  title: string
+  type: 'PUBLIC' | 'PRIVATE' | 'PROTECTED'
+  password?: string
+}
+export interface UserInRoom {
+  uid: number
+}
+
+// TODO: 정리
+export interface SocketResponse {
+  status: number
+}
+export interface SocketErrorResponse {
+  statusCode: number
+  message: string
+  error: string
+}
 export type Chat = Omit<Message, 'roomId'>
 export type MessageHandler = (message: Message) => void
-export type ChatRoomHandler = (chatRoomId: number) => void
+export type UserHandler = (user: UserInRoom) => void
+// TODO: response dto 작성
 interface ClientToServerEvents {
   SEND: MessageHandler
-  JOIN: ChatRoomHandler
-  LEAVE: ChatRoomHandler
-  CREATE: (name: string) => void
-  ADD_ADMIN: (uid: number) => void
-  REMOVE_ADMIN: (uid: number) => void
+  JOIN: (room: ChatJoinRoom, fn?: (res: any) => void) => void
+  LEAVE: UserHandler
+  CREATE: (room: ChatCreateRoom) => void
+  ADD_ADMIN: UserHandler
+  REMOVE_ADMIN: UserHandler
 }
 interface ServerToClientEvents {
   RECEIVE: MessageHandler
