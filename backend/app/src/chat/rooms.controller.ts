@@ -1,4 +1,4 @@
-import { Controller, Get, UseGuards, Req } from '@nestjs/common'
+import { Controller, Get, UseGuards, Req, Param } from '@nestjs/common'
 import { ChatRoomDto } from 'dto/chatRoom.dto'
 import { ChatService } from './chat.service'
 import { ApiTags, ApiOkResponse } from '@nestjs/swagger'
@@ -30,5 +30,12 @@ export class RoomsController {
   getMyChatroomList(@Req() req: any) {
     const { uid } = req.user
     return this.chatService.findRoomsByUserId(uid)
+  }
+
+  @Get('/:id/list')
+  @UseGuards(JwtAfterTwoFactorUserGuard)
+  @ApiOkResponse({ type: ChatRoomDto, isArray: true })
+  getChatroomUserList(@Param('id') id: number) {
+    return this.chatService.findRoomByRoomid(id)
   }
 }

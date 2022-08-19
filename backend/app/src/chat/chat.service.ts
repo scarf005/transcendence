@@ -157,7 +157,7 @@ export class ChatService {
     return true
   }
 
-  async findRoomByRoomid(id: number): Promise<ChatRoom> {
+  async findRoomByRoomid(id: number): Promise<User[]> {
     const room = await this.chatRoomRepository
       .createQueryBuilder('chatRoom')
       .select([
@@ -174,7 +174,7 @@ export class ChatService {
       .where('chatRoom.id = :id', { id })
       .getOne()
     if (!room) throw new NotFoundException('Room not found')
-    return room
+    return room.chatUser.map((chatuser) => chatuser.user)
   }
 
   async findRoomsByUserId(uid: number): Promise<ChatRoom[]> {
