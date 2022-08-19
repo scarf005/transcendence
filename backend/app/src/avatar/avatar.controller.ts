@@ -67,7 +67,7 @@ export class AvatarController {
     summary: '아바타 이미지 다운로드 API',
     description: `param: filename`,
   })
-  @ApiCreatedResponse({ description: 'file', type: Response })
+  @ApiCreatedResponse({ description: 'file', type: String })
   async get(@Res() res: Response, @Param() param: FileNameDto) {
     res.download(`${process.env.AVATAR_SAVE}/${param.filename}`, param.filename)
   }

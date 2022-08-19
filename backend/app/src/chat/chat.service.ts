@@ -35,8 +35,8 @@ export class ChatService {
     return await this.chatRoomRepository
       .createQueryBuilder('chatRoom')
       .select(['chatRoom.id', 'chatRoom.name', 'chatRoom.roomtype'])
-      .where('user.uid != (:uid)', { uid })
-      .andWhere('chatRoom.roomtype != :roomtype', {
+      .where('user.uid != (:uid) and chatRoom.roomtype != :roomtype', {
+        uid: uid,
         roomtype: RoomType.PRIVATE,
       })
       .leftJoin('chatRoom.chatUser', 'chatUser')
@@ -178,7 +178,6 @@ export class ChatService {
         'chatRoom.id',
         'chatUser.isAdmin',
         'chatUser.isOwner',
-        'chatUSer.endOfMute',
         'user.uid',
         'user.nickname',
         'user.avatar',
