@@ -3,7 +3,6 @@ import {
   NotFoundException,
   InternalServerErrorException,
   BadRequestException,
-  UnauthorizedException,
 } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Not, Repository } from 'typeorm'
@@ -172,24 +171,25 @@ export class ChatService {
     return false
   }
 
-  async findRoomByRoomid(id: number): Promise<User[]> {
+  async findRoomByRoomid(id: number): Promise<ChatUser[]> {
     const room = await this.chatRoomRepository
       .createQueryBuilder('chatRoom')
       .select([
         'chatRoom.id',
-        'chatRoom.name',
-        'chatRoom.roomtype',
         'chatUser.isAdmin',
         'chatUser.isOwner',
+        'chatUSer.endOfMute',
         'user.uid',
         'user.nickname',
+        'user.avatar',
+        'user.status',
       ])
       .leftJoin('chatRoom.chatUser', 'chatUser')
       .leftJoin('chatUser.user', 'user')
       .where('chatRoom.id = :id', { id })
       .getOne()
     if (!room) throw new NotFoundException('Room not found')
-    return room.chatUser.map((chatuser) => chatuser.user)
+    return room.chatUser
   }
 
   async findRoomsByUserId(uid: number): Promise<ChatRoom[]> {
