@@ -1,18 +1,21 @@
 import { useApiQuery } from 'hook'
 
 import { MemberList } from 'components'
-import { User } from 'data'
+import { ChatUser, User } from 'data'
 
-export const MemberView = () => {
-  const { data: me, isSuccess: ok1 } = useApiQuery<User>(['user', 'me'])
-  const { data: users, isSuccess: ok2 } = useApiQuery<User[]>(
-    ['chat', (me as User).uid, 'list'],
-    {
-      enabled: me !== undefined,
-    },
+interface Props {
+  roomId: number
+}
+export const MemberView = ({ roomId }: Props) => {
+  console.log(`roomId: ${roomId}`)
+  const { data: me, isSuccess: meOk } = useApiQuery<User>(['user', 'me'])
+  const { data: chatusers, isSuccess: usersOk } = useApiQuery<ChatUser[]>(
+    ['chat', roomId, 'list'],
+    { enabled: meOk },
   )
 
-  if (ok1 && ok2) {
+  if (meOk && usersOk) {
+    const users = chatusers.map(({ user }) => user)
     return <MemberList users={users} refUser={me} />
   }
 

@@ -4,6 +4,7 @@ import { ChatInput, ChatList, MemberList } from 'components'
 import { useApiQuery } from 'hook'
 import { Logout } from '@mui/icons-material'
 import { InviteUser } from './InviteUser'
+import { MemberView } from './MemberView'
 
 // TODO: 나가기 누를 때 한 번 더 확인하기
 const LeaveButton = ({ onClick }: { onClick: () => void }) => {
@@ -28,14 +29,6 @@ export const ChatPanel = ({
   roomInfo,
   leaveRoom,
 }: PanelProps) => {
-  const { data: me, isSuccess: ok1 } = useApiQuery<User>(['user', 'me'])
-  const { data: chatusers, isSuccess: ok2 } = useApiQuery<ChatUser[]>(
-    ['chat', (me as User).uid, 'list'],
-    {
-      enabled: me !== undefined,
-    },
-  )
-  const users = chatusers ? chatusers.map((u) => u.user) : []
   const sendMsg = (msg: string) => {
     socket.emit('SEND', {
       roomId: roomInfo.roomId,
@@ -54,11 +47,7 @@ export const ChatPanel = ({
         {roomInfo.roomType === 'PRIVATE' ? (
           <InviteUser socket={socket} roomId={roomInfo.roomId} />
         ) : null}
-        {ok1 && ok2 ? (
-          <MemberList users={users} refUser={me} />
-        ) : (
-          <Typography>Loading...</Typography>
-        )}
+        {<MemberView roomId={roomInfo.roomId} />}
       </Grid>
       <ChatInput sendMsg={sendMsg} />
       <LeaveButton onClick={() => leaveRoom(roomInfo.roomId)} />

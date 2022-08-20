@@ -15,12 +15,17 @@ interface SectionProps {
 export const Section = ({ title, users, onClick }: SectionProps) => (
   <>
     <ListSubheader>{title}</ListSubheader>
-    {users.map((user) =>
-      ProfileListItem({ user, onClick: () => onClick(user.uid) }),
-    )}
+    {users.map((user) => (
+      <ProfileListItem
+        key={user.uid}
+        user={user}
+        onClick={() => onClick(user.uid)}
+      />
+    ))}
   </>
 )
 interface Props {
+  // TODO: ChatUser 배열을 받아 추가 정보 표시?
   /** 모든 사용자 */
   users: OtherUser[]
   /** 로그인한 사용자 */
