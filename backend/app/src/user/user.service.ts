@@ -113,6 +113,16 @@ export class UserService {
     return user
   }
 
+  async findUidByNickname(nickname: string): Promise<number> {
+    const user = await this.userRepository
+      .createQueryBuilder('user')
+      .select(['user.uid'])
+      .where('user.nickname = :nickname', { nickname })
+      .getOne()
+    if (!user) return null
+    return user.uid
+  }
+
   async remove(uid: number): Promise<void> {
     await this.userRepository.delete({ uid }).catch(() => {
       throw new InternalServerErrorException('database error')
