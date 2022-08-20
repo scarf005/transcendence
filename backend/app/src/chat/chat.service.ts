@@ -3,6 +3,7 @@ import {
   NotFoundException,
   InternalServerErrorException,
   BadRequestException,
+  ForbiddenException,
 } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Not, Repository } from 'typeorm'
@@ -270,37 +271,38 @@ export class ChatService {
     return await this.userService.findBlockedByUid(uid)
   }
 
-  async changeRoomPassword(
-    roomId: number,
-    password: string,
-    newPassword: string,
-  ) {
+  async changeRoomPassword(uid: number, roomId: number, password: string) {
+    if ((await this.isOwner(uid, roomId)) === false)
+      throw new ForbiddenException('User is not Owner')
     const room = await this.chatRoomRepository.findOne({
       select: ['password'],
       where: { id: roomId },
     })
     if (!room) throw new NotFoundException('Room not found')
-    if (!(await bcrypt.compare(password, room.password)))
-      throw new BadRequestException('Password is wrong')
-    room.password = await bcrypt.hash(newPassword, 10)
+    // if (!(await bcrypt.compare(password, room.password)))
+    //   throw new BadRequestException('Password is wrong')
+    room.password = await bcrypt.hash(password, 10)
     return this.chatRoomRepository.save(room)
   }
 
-  async deleteRoomPassword(roomId: number, password: string) {
+  async deleteRoomPassword(uid: number, roomId: number) {
+    if ((await this.isOwner(uid, roomId)) === false)
+      throw new ForbiddenException('User is not Owner')
     const room = await this.chatRoomRepository.findOne({
       select: ['password', 'roomtype'],
       where: { id: roomId },
     })
     if (!room) throw new NotFoundException('Room not found')
-    if (!(await bcrypt.compare(password, room.password)))
-      throw new BadRequestException('Password is wrong')
+    // if (!(await bcrypt.compare(password, room.password)))
+    //   throw new BadRequestException('Password is wrong')
     room.password = null
     room.roomtype = RoomType.PUBLIC
     return this.chatRoomRepository.save(room)
   }
 
-  async createRoomPassword(roomId: number, password: string) {
-    if (!password) throw new BadRequestException('Password is required')
+  async createRoomPassword(uid: number, roomId: number, password: string) {
+    if ((await this.isOwner(uid, roomId)) === false)
+      throw new ForbiddenException('User is not Owner')
     const room = await this.chatRoomRepository.findOne({
       select: ['password', 'roomtype'],
       where: { id: roomId },

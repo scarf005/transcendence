@@ -8,4 +8,5 @@ export const chatEvent = {
   NOTICE: 'NOTICE',
   ADD_ADMIN: 'ADD_ADMIN',
   REMOVE_ADMIN: 'REMOVE_ADMIN',
+  PASSWORD: 'PASSWORD',
 } as const

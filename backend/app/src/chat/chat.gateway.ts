@@ -20,6 +20,8 @@ import { ChatRoom } from './chatroom.entity'
 import { UsePipes } from '@nestjs/common'
 import { WSValidationPipe } from 'utils/WSValidationPipe'
 import { Status } from 'user/status.enum'
+import { ChatPasswordDto } from 'dto/chatRoomPassword.dto'
+import { RoomPasswordCommand } from './roomPasswordCommand.enum'
 
 @AsyncApiService()
 @UsePipes(new WSValidationPipe())
@@ -153,14 +155,14 @@ export class ChatGateway {
     channel: chatEvent.LEAVE,
     summary: '채팅방에서 나가기',
     description: 'user가 채팅방에서 나감. 알림메시지를 모든 구성원에게 전송',
-    message: { name: 'roomId', payload: { type: Number } },
+    message: { name: 'ChatJoinRoomDto', payload: { type: ChatJoinRoomDto } },
   })
   @SubscribeMessage(chatEvent.LEAVE)
   async onLeaveRoom(
     @ConnectedSocket() client: Socket,
     @MessageBody() room: ChatJoinRoomDto,
   ) {
-    const roomId = room.roomId
+    const { roomId } = room
     try {
       // owner가 나가면 모두에게 DESTROYED 전송. 이후 모두 내보내고 채팅방 삭제
       if (await this.chatService.isOwner(client.data.uid, roomId)) {
@@ -285,6 +287,33 @@ export class ChatGateway {
       return 'You are not admin'
     try {
       await this.chatService.removeUserAsAdmin(data.uid, data.roomId)
+    } catch (error) {
+      return error
+    }
+    return { status: 200 }
+  }
+
+  @AsyncApiPub({
+    channel: chatEvent.PASSWORD,
+    summary: 'roomId의 password를 추가/변경/삭제',
+    description: '추가하면 roomType이 PROTECTED로, 삭제하면 PUBLIC으로 바뀜',
+    message: { name: 'chatPasswordDto', payload: { type: ChatPasswordDto } },
+  })
+  @SubscribeMessage(chatEvent.PASSWORD)
+  async onPasswordCUD(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() data: ChatPasswordDto,
+  ) {
+    try {
+      const { uid } = client.data
+      const { roomId, command, password } = data
+
+      if (command === RoomPasswordCommand.ADD)
+        this.chatService.createRoomPassword(uid, roomId, password)
+      else if (command === RoomPasswordCommand.DELETE)
+        this.chatService.deleteRoomPassword(uid, roomId)
+      else if (command === RoomPasswordCommand.MODIFY)
+        this.chatService.changeRoomPassword(uid, roomId, password)
     } catch (error) {
       return error
     }
