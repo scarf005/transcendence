@@ -8,15 +8,16 @@ import { findUser } from 'utility'
 export interface Props {
   /** refUser를 제외한 모든 사용자 */
   users: User[]
+  /** 친구 목록 */
+  friends: User[]
   /** 로그인한 사용자 */
   refUser: User
-  /** 검색창 목록 이름 */
-  listname?: string
 }
-export const UsersPanel = ({ users, refUser, listname = 'Friends' }: Props) => {
+export const UsersPanel = ({ users, friends, refUser }: Props) => {
   const [id, setId] = useState(refUser.uid)
   const [text, setText] = useState('')
-  const seenUsers = text ? findUser(users, text) : users
+  const seenUsers = text ? findUser(users, text) : friends
+  const listname = text ? '검색 결과' : '친구 목록'
 
   return (
     <Grid container justifyContent="space-between">
@@ -30,7 +31,7 @@ export const UsersPanel = ({ users, refUser, listname = 'Friends' }: Props) => {
           {listname}
         </Typography>
         <Input
-          placeholder="인트라 아이디를 입력하세요"
+          placeholder="아이디로 친구 추가하기"
           onChange={(e) => setText(e.target.value)}
           value={text}
           autoFocus

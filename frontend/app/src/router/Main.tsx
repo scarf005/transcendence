@@ -7,7 +7,6 @@ import { io, Socket } from 'socket.io-client'
 import { usePongSocket, useChatSocket } from 'hook'
 
 import { ChatSocket } from 'data'
-import { FindFriendView } from 'view'
 
 export const PongSocketContext = createContext<Socket | undefined>(undefined)
 export const ChatSocketContext = createContext<ChatSocket | undefined>(
@@ -26,12 +25,10 @@ export const MainRouter = () => {
             <Route path="/" element={<FriendView />} />
             <Route path="/game" element={<GameView {...pongData} />} />
             <Route path="/friend" element={<FriendView />} />
-            <Route path="/profile" element={<ProfileView />} />
             <Route
               path="/chat"
               element={<ChatView socket={chatSocket.socket as Socket} />}
             />
-            <Route path="/find" element={<FindFriendView />} />
           </Routes>
         </ChatSocketContext.Provider>
       </PongSocketContext.Provider>
