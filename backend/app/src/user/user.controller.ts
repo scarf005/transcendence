@@ -50,7 +50,11 @@ export class UserController {
     summary: 'Get My User friends data API',
     description: 'auth token 에서 uid 추출',
   })
-  @ApiCreatedResponse({ description: 'FindUserDto', type: FindUserDto })
+  @ApiCreatedResponse({
+    description: 'FindUserDto',
+    type: FindUserDto,
+    isArray: true,
+  })
   async getMyfriends(@Req() req: any): Promise<FindUserDto[]> {
     const { uid } = req.user
     return await this.userService.findFriendsByUid(uid)
@@ -72,7 +76,8 @@ export class UserController {
   @ApiOperation({ summary: 'Get all user API', description: '' })
   @ApiCreatedResponse({
     description: 'FindUserDto[]',
-    type: Array<FindUserDto>,
+    type: FindUserDto,
+    isArray: true,
   })
   async getAllUser(): Promise<FindUserDto[]> {
     return await this.userService.findAll()

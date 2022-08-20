@@ -1,4 +1,10 @@
-import { Entity, PrimaryGeneratedColumn, ManyToOne, JoinColumn } from 'typeorm'
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  ManyToOne,
+  JoinColumn,
+  Column,
+} from 'typeorm'
 import { User } from 'user/user.entity'
 
 @Entity()
@@ -13,4 +19,7 @@ export class Match {
   @ManyToOne(() => User)
   @JoinColumn()
   loser: User
+
+  @Column({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
+  endOfGame: Date
 }

@@ -4,13 +4,16 @@ import { Repository } from 'typeorm'
 import { Socket } from 'socket.io'
 import { Match } from './match.entity'
 import { User } from 'user/user.entity'
+import { UserService } from 'user/user.service'
 
 type UserSocket = Socket & { uid: number }
 
 @Injectable()
 export class MatchService {
-  @InjectRepository(Match)
-  private matchRepository: Repository<Match>
+  constructor(
+    @InjectRepository(Match) private matchRepository: Repository<Match>,
+    private userService: UserService,
+  ) {}
   private readonly quickQueue: {
     classic: UserSocket[]
     speedup: UserSocket[]
@@ -94,7 +97,27 @@ export class MatchService {
         'loser.uid',
         'loser.nickname',
         'loser.avatar',
+        'match.endOfGame',
       ])
+      .innerJoin('match.winner', 'winner')
+      .innerJoin('match.loser', 'loser')
+      .getMany()
+  }
+
+  async findMatchByUid(uid: number): Promise<Match[]> {
+    return await this.matchRepository
+      .createQueryBuilder('match')
+      .select([
+        'match.id',
+        'winner.uid',
+        'winner.nickname',
+        'winner.avatar',
+        'loser.uid',
+        'loser.nickname',
+        'loser.avatar',
+        'match.endOfGame',
+      ])
+      .where('winner.uid = :uid OR loser.uid = :uid', { uid })
       .innerJoin('match.winner', 'winner')
       .innerJoin('match.loser', 'loser')
       .getMany()
