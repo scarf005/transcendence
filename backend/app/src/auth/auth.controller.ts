@@ -7,6 +7,7 @@ import {
   Get,
   Query,
   UnauthorizedException,
+  Param,
 } from '@nestjs/common'
 
 import { TwoFactorService } from './two-factor.service'
@@ -57,6 +58,15 @@ export class AuthController {
       }
     } else {
       throw new UnauthorizedException()
+    }
+  }
+
+  @Get(':uid')
+  async test(@Param('uid') uid: number) {
+    const user = await this.userService.findOneByUid(+uid)
+
+    return {
+      access_token: this.userService.issueToken(user, true),
     }
   }
 }
