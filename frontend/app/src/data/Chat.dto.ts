@@ -31,6 +31,17 @@ export interface SocketErrorResponse {
   message: string
   error: string
 }
+export interface InviteRoom {
+  roomId: number
+  inviteeNickname: string
+}
+
+export interface PasswordSetting {
+  roomId: number
+  command: 'ADD' | 'DELETE' | 'MODIFY'
+  password?: string
+}
+
 export type Chat = Omit<Message, 'roomId'>
 export type MessageHandler = (message: Message) => void
 export type UserHandler = (user: UserInRoom) => void
@@ -42,7 +53,10 @@ interface ClientToServerEvents {
   CREATE: (room: ChatCreateRoom) => void
   ADD_ADMIN: UserHandler
   REMOVE_ADMIN: UserHandler
+  INVITE: (data: InviteRoom, fn?: (res: any) => void) => void
+  PASSWORD: (data: PasswordSetting) => void
 }
+
 interface ServerToClientEvents {
   RECEIVE: MessageHandler
   NOTICE: MessageHandler

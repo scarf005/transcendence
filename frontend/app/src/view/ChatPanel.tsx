@@ -5,6 +5,8 @@ import { useApiQuery } from 'hook'
 import { Logout } from '@mui/icons-material'
 import { InviteUser } from './InviteUser'
 import { MemberView } from './MemberView'
+import { PwdSetOption } from './PwdSetModal'
+import { useState } from 'react'
 
 // TODO: 나가기 누를 때 한 번 더 확인하기
 const LeaveButton = ({ onClick }: { onClick: () => void }) => {
@@ -15,6 +17,33 @@ const LeaveButton = ({ onClick }: { onClick: () => void }) => {
       </Tooltip>
     </Button>
   )
+}
+
+interface ExtraOptionProps {
+  socket: ChatSocket
+  roomInfo: { bool: boolean; roomId: number; roomType: string }
+}
+
+const ExtraOptionPerRoom = ({ socket, roomInfo }: ExtraOptionProps) => {
+  const [isOwner, setIsOwner] = useState(false)
+  const { data: me, isSuccess: meOk } = useApiQuery<User>(['user', 'me'])
+  const { data: users, isSuccess: usersOk } = useApiQuery<ChatUser[]>(
+    ['chat', roomInfo.roomId, 'list'],
+    { enabled: meOk },
+  )
+  if (usersOk && meOk && isOwner === false) {
+    users.forEach((el) => {
+      if (el.user.uid === me.uid && el.isOwner) setIsOwner(true)
+    })
+  }
+  if (
+    (roomInfo.roomType === 'PUBLIC' || roomInfo.roomType === 'PROTECTED') &&
+    isOwner
+  ) {
+    return <PwdSetOption socket={socket} roomInfo={roomInfo} />
+  } else if (roomInfo.roomType === 'PRIVATE') {
+    return <InviteUser socket={socket} roomId={roomInfo.roomId} />
+  } else return null
 }
 
 interface PanelProps {
@@ -44,9 +73,7 @@ export const ChatPanel = ({
         <ChatList chats={chats} />
       </Grid>
       <Grid item xs={4}>
-        {roomInfo.roomType === 'PRIVATE' ? (
-          <InviteUser socket={socket} roomId={roomInfo.roomId} />
-        ) : null}
+        <ExtraOptionPerRoom socket={socket} roomInfo={roomInfo} />
         {<MemberView roomId={roomInfo.roomId} />}
       </Grid>
       <ChatInput sendMsg={sendMsg} />

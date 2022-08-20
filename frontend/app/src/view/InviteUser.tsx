@@ -12,13 +12,13 @@ export const InviteUser = (prop: { socket: ChatSocket; roomId: number }) => {
       return
     }
     const nickName = input.current.value
-    // prop.socket.emit(
-    //   'JOIN',
-    //   { invitedName: nickName, roomId: prop.roomId },
-    //   (res: any) => {
-    //     if (res.status === 400) setErr('일치하는 닉네임을 가진 유저가 없습니다')
-    //   },
-    // )
+    prop.socket.emit(
+      'INVITE',
+      { inviteeNickname: nickName, roomId: prop.roomId },
+      (res: any) => {
+        if (res.status === 404) setErr('일치하는 닉네임을 가진 유저가 없습니다')
+      },
+    )
   }
   return (
     <>
