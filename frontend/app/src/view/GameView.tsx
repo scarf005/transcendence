@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react'
-import Pong, { PongStartCounter, PongResult } from './Pong'
+import { useState, useEffect, useContext } from 'react'
+import Pong, { PongResult } from './Pong'
 import { createTheme } from '@mui/material/styles'
 import GameGrid from './GameGrid'
-import { Socket } from 'socket.io-client'
 import { usePongSocket } from 'hook'
+import { Button, Stack, Typography } from '@mui/material'
+import { PongSocketContext } from 'router'
 
 const _theme = createTheme({
   palette: {
@@ -17,8 +18,22 @@ const GamePannel = (props: { requestMatch: (matchData: any) => void }) => {
   return <GameGrid requestMatch={props.requestMatch} />
 }
 
-const MatchingView = () => {
-  return <h2>대충 매칭중 표시...</h2>
+const MatchingView = (props: { handleCancel: () => void }) => {
+  const socket = useContext(PongSocketContext)
+
+  return (
+    <Stack direction="row">
+      <Typography>적절한 상대를 찾는중</Typography>
+      <Button
+        onClick={() => {
+          socket?.emit('cancelMatch')
+          props.handleCancel()
+        }}
+      >
+        취소
+      </Button>
+    </Stack>
+  )
 }
 
 export const GameView = ({
@@ -84,10 +99,16 @@ export const GameView = ({
       )
 
     case 'findMatch':
-      return <MatchingView />
+      return (
+        <MatchingView
+          handleCancel={() => {
+            setGameState('selectMode')
+          }}
+        />
+      )
 
-    case 'play':
     case 'gameInfo':
+    case 'play':
       return (
         <Pong
           isPlaying={gameState === 'play'}

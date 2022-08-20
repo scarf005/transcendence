@@ -59,6 +59,11 @@ export class MatchGateWay implements OnGatewayDisconnect, OnGatewayConnection {
     }
   }
 
+  @SubscribeMessage('cancelMatch')
+  handleCancelMatch(@ConnectedSocket() client: UserSocket) {
+    this.matchService.removeFromQueue(client)
+  }
+
   @SubscribeMessage('movePaddle')
   handleMovePaddle(
     @MessageBody() message: PongKeyEvent,
