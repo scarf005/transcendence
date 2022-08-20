@@ -360,4 +360,5 @@ export class ChatGateway {
       return error
     }
     return { status: 200 }
+  }
 }
