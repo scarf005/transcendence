@@ -61,7 +61,7 @@ export class AuthController {
     }
   }
 
-  @Get(':uid')
+  @Get('/test/:uid')
   async test(@Param('uid') uid: number) {
     const user = await this.userService.findOneByUid(+uid)
 
