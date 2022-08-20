@@ -44,7 +44,6 @@ export class ChatService {
       .orderBy('chatRoom.id', 'ASC')
       .getMany()
     const roomIds = room.map((r) => r.id)
-    console.log(roomIds)
     return await this.chatRoomRepository
       .createQueryBuilder('chatRoom')
       .select(['chatRoom.id', 'chatRoom.name', 'chatRoom.roomtype'])
@@ -229,7 +228,7 @@ export class ChatService {
 
   async addBannedUser(uid: number, roomId: number) {
     const room = await this.chatRoomRepository.findOne({
-      select: ['bannedIds', 'chatUser'],
+      select: ['id', 'bannedIds', 'chatUser'],
       where: { id: roomId, chatUser: { user: { uid } } },
       relations: ['chatUser', 'chatUser.user'],
     })
@@ -242,7 +241,7 @@ export class ChatService {
 
   async deleteBannedUser(uid: number, roomId: number) {
     const room = await this.chatRoomRepository.findOne({
-      select: ['bannedIds', 'chatUser'],
+      select: ['id', 'bannedIds', 'chatUser'],
       where: { id: roomId, chatUser: { user: { uid } } },
       relations: ['chatUser', 'chatUser.user'],
     })
@@ -280,7 +279,7 @@ export class ChatService {
     if ((await this.isOwner(uid, roomId)) === false)
       throw new ForbiddenException('User is not Owner')
     const room = await this.chatRoomRepository.findOne({
-      select: ['password'],
+      select: ['id', 'password'],
       where: { id: roomId },
     })
     if (!room) throw new NotFoundException('Room not found')
@@ -294,7 +293,7 @@ export class ChatService {
     if ((await this.isOwner(uid, roomId)) === false)
       throw new ForbiddenException('User is not Owner')
     const room = await this.chatRoomRepository.findOne({
-      select: ['password', 'roomtype'],
+      select: ['id', 'password', 'roomtype'],
       where: { id: roomId },
     })
     if (!room) throw new NotFoundException('Room not found')
@@ -309,7 +308,7 @@ export class ChatService {
     if ((await this.isOwner(uid, roomId)) === false)
       throw new ForbiddenException('User is not Owner')
     const room = await this.chatRoomRepository.findOne({
-      select: ['password', 'roomtype'],
+      select: ['id', 'password', 'roomtype'],
       where: { id: roomId },
     })
     if (!room) throw new NotFoundException('Room not found')
