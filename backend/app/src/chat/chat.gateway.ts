@@ -17,7 +17,7 @@ import { ChatService } from './chat.service'
 import * as jwt from 'jsonwebtoken'
 import { jwtConstants } from 'configs/jwt-token.config'
 import { ChatRoom } from './chatroom.entity'
-import { UsePipes } from '@nestjs/common'
+import { ForbiddenException, UsePipes } from '@nestjs/common'
 import { WSValidationPipe } from 'utils/WSValidationPipe'
 import { Status } from 'user/status.enum'
 import { ChatInviteDto } from 'dto/chatInvite.dto'
@@ -212,7 +212,8 @@ export class ChatGateway {
   @AsyncApiSub({
     channel: chatEvent.NOTICE,
     summary: '공지msg',
-    description: "user 입장시 mscContent='join', 퇴장시 'leave'",
+    description:
+      "user 입장시 mscContent='join', 퇴장시 'leave'\n\n'banned'일 때 senderUid=밴된 당사자의 uid",
     message: { name: 'ChatMessageDto', payload: { type: ChatMessageDto } },
   })
   async emitNotice(uid: number, roomId: number, msg: string) {
@@ -265,8 +266,10 @@ export class ChatGateway {
     @ConnectedSocket() client: Socket,
     @MessageBody() data: UserInRoomDto,
   ) {
-    if (this.chatService.isAdmin(client.data.uid, data.roomId))
-      return 'You are not admin'
+    if (
+      (await this.chatService.isAdmin(client.data.uid, data.roomId)) === false
+    )
+      return new ForbiddenException('You are not admin')
     try {
       await this.chatService.addUserAsAdmin(data.uid, data.roomId)
     } catch (error) {
@@ -285,13 +288,84 @@ export class ChatGateway {
     @ConnectedSocket() client: Socket,
     @MessageBody() data: UserInRoomDto,
   ) {
-    if (this.chatService.isAdmin(client.data.uid, data.roomId))
-      return 'You are not admin'
+    if (
+      (await this.chatService.isAdmin(client.data.uid, data.roomId)) === false
+    )
+      return new ForbiddenException('You are not admin')
     try {
       await this.chatService.removeUserAsAdmin(data.uid, data.roomId)
     } catch (error) {
       return error
     }
+    return { status: 200 }
+  }
+
+  @AsyncApiPub({
+    channel: chatEvent.BAN,
+    summary: 'uid를 roomId의 banned 리스트에 추가',
+    description:
+      'admin이 아니거나 owner를 밴할 땐 403 리턴, uid나 roomId가 유효하지 않으면 400리턴',
+    message: { name: 'UserInRoomDto', payload: { type: UserInRoomDto } },
+  })
+  @SubscribeMessage(chatEvent.BAN)
+  async onBanUser(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() data: UserInRoomDto,
+  ) {
+    const { uid, roomId } = data
+    // check if client is admin
+    if ((await this.chatService.isAdmin(client.data.uid, roomId)) === false)
+      return new ForbiddenException('You are not admin')
+    // check if target is owner
+    if ((await this.chatService.isOwner(uid, roomId)) === false)
+      return new ForbiddenException('Owner cannot be banned')
+    // add user to banned list
+    try {
+      await this.chatService.addBannedUser(uid, roomId)
+    } catch (error) {
+      return error
+    }
+    // 모든 참여자에게 uid가 ban 됐음을 notice
+    const msg: ChatMessageDto = {
+      roomId: roomId,
+      senderUid: uid,
+      msgContent: 'banned',
+      createdAt: new Date(),
+    }
+    this.server.to(roomId.toString()).emit(chatEvent.NOTICE, msg)
+    // let user out from room
+    const sockets = await this.chatService.getSocketByUid(this.server, uid)
+    sockets.forEach(async (el) => {
+      console.log(`${el.data.uid} will be banned`)
+      // el.emit(chatEvent.NOTICE, msg)
+      el.leave(roomId.toString())
+    })
+    return { status: 200 }
+  }
+
+  @AsyncApiPub({
+    channel: chatEvent.UNBAN,
+    summary: 'uid를 roomId의 banned 리스트에서 삭제',
+    description:
+      'admin이 아닐 땐 403 리턴, uid나 roomId가 유효하지 않으면 400리턴',
+    message: { name: 'UserInRoomDto', payload: { type: UserInRoomDto } },
+  })
+  @SubscribeMessage(chatEvent.UNBAN)
+  async onUnbanUser(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() data: UserInRoomDto,
+  ) {
+    const { uid, roomId } = data
+    // check if client is admin
+    if ((await this.chatService.isAdmin(client.data.uid, roomId)) === false)
+      return new ForbiddenException('You are not admin')
+    // delete user from banned list
+    try {
+      await this.chatService.deleteBannedUser(uid, roomId)
+    } catch (error) {
+      return error
+    }
+    console.log(`chat: ${uid} is unbanned from ${roomId}`)
     return { status: 200 }
   }
 
@@ -318,19 +392,16 @@ export class ChatGateway {
     // inviter가 roomId에 속해있는지
     if (client.rooms.has(roomId.toString()) === false) return { status: 400 }
     // invitee의 소켓id 찾아서 room에 추가
-    const sockets = await this.server.fetchSockets()
-    sockets.forEach(async (soc) => {
-      if (soc.data && soc.data.uid && soc.data.uid === invitee) {
-        try {
-          await this.chatService.addUserToRoom(invitee, roomId, null, isInvite)
-        } catch (error) {
-          return error
-        }
-        soc.join(roomId.toString())
-        console.log(`chat: ${soc.data.uid} has entered to ${roomId}`)
+    const sockets = await this.chatService.getSocketByUid(this.server, invitee)
+    sockets.forEach(async (el) => {
+      try {
+        await this.chatService.addUserToRoom(invitee, roomId, null, isInvite)
+      } catch (error) {
+        return error
       }
+      el.join(roomId.toString())
     })
-
+    console.log(`chat: ${invitee} has entered to ${roomId}`)
     // room의 모두에게 NOTICE 전송
     this.emitNotice(invitee, roomId, 'join')
   }

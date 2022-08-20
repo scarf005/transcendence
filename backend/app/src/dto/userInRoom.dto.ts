@@ -7,6 +7,6 @@ export class UserInRoomDto {
   roomId: number
 
   @ApiProperty()
-  @IsString()
+  @IsNumber()
   uid: number
 }

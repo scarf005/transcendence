@@ -14,6 +14,7 @@ import { RoomType } from './roomtype.enum'
 import { User } from 'user/user.entity'
 import * as bcrypt from 'bcryptjs'
 import { Status } from 'user/status.enum'
+import { Server } from 'socket.io'
 
 @Injectable()
 export class ChatService {
@@ -233,8 +234,7 @@ export class ChatService {
       relations: ['chatUser', 'chatUser.user'],
     })
     if (!room) throw new NotFoundException('Room not found or User not in room')
-    if (room.bannedIds.find((id) => id === uid))
-      throw new BadRequestException('Already banned')
+    if (room.bannedIds.find((id) => id === uid)) return
     room.bannedIds.push(uid)
     return this.chatRoomRepository.save(room)
   }
@@ -246,8 +246,7 @@ export class ChatService {
       relations: ['chatUser', 'chatUser.user'],
     })
     if (!room) throw new NotFoundException('Room not found or User not in room')
-    if (!room.bannedIds.find((id) => id === uid))
-      throw new BadRequestException('User not banned')
+    if (!room.bannedIds.find((id) => id === uid)) return
     room.bannedIds = room.bannedIds.filter((id) => id !== uid)
     return this.chatRoomRepository.save(room)
   }
@@ -319,5 +318,12 @@ export class ChatService {
 
   async changeStatus(uid: number, status: Status) {
     return await this.userService.changeStatus(uid, status)
+  }
+
+  async getSocketByUid(server: Server, uid: number) {
+    const clients = await server.fetchSockets()
+    return clients.filter(
+      (soc) => soc.data && soc.data.uid && soc.data.uid === uid,
+    )
   }
 }

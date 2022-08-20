@@ -10,4 +10,6 @@ export const chatEvent = {
   REMOVE_ADMIN: 'REMOVE_ADMIN',
   INVITE: 'INVITE',
   PASSWORD: 'PASSWORD',
+  BAN: 'BAN',
+  UNBAN: 'UNBAN',
 } as const
