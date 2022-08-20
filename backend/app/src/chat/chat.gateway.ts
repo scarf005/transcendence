@@ -393,14 +393,14 @@ export class ChatGateway {
     if (client.rooms.has(roomId.toString()) === false) return { status: 400 }
     // invitee의 소켓id 찾아서 room에 추가
     const sockets = await this.chatService.getSocketByUid(this.server, invitee)
-    sockets.forEach(async (el) => {
+    for (const soc of sockets) {
       try {
         await this.chatService.addUserToRoom(invitee, roomId, null, isInvite)
       } catch (error) {
         return error
       }
-      el.join(roomId.toString())
-    })
+      soc.join(roomId.toString())
+    }
     console.log(`chat: ${invitee} has entered to ${roomId}`)
     // room의 모두에게 NOTICE 전송
     this.emitNotice(invitee, roomId, 'join')
