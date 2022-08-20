@@ -12,12 +12,15 @@ import { ApiProperty } from '@nestjs/swagger'
 
 export class FindUserDto {
   @IsNumber()
+  @ApiProperty({ description: 'user id' })
   uid: number
 
   @IsString()
+  @ApiProperty({ description: 'nickname' })
   nickname: string
 
   @IsUrl()
+  @ApiProperty({ description: 'avatar path' })
   avatar: string
 
   @IsEnum(Status)
@@ -33,5 +36,6 @@ export class FindUserDto {
   blocks: number[]
 
   @IsObject()
+  @ApiProperty({ description: '유저의 stat' })
   stat: StatDto
 }

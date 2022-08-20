@@ -26,5 +26,6 @@ export class ChatMessageDto {
   @Type(() => Date)
   @IsDate()
   @IsOptional()
+  @ApiProperty({ description: '생성일' })
   createdAt?: Date
 }

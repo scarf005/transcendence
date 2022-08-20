@@ -11,5 +11,6 @@ export class StatDto {
   lose: number
 
   @IsNumber()
+  @ApiProperty({ description: '유저의 rating 점수' })
   rating: number
 }
