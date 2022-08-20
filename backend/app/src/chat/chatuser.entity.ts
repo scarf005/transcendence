@@ -6,6 +6,7 @@ import {
   JoinColumn,
 } from 'typeorm'
 import { User } from 'user/user.entity'
+import { ApiProperty } from '@nestjs/swagger'
 
 @Entity()
 export class ChatUser {
@@ -23,5 +24,6 @@ export class ChatUser {
 
   @ManyToOne(() => User)
   @JoinColumn()
+  @ApiProperty({ description: '사용자' })
   user: User
 }

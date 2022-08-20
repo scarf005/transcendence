@@ -1,7 +1,9 @@
+import { ApiProperty } from '@nestjs/swagger'
 import { IsNotEmpty, IsNumberString } from 'class-validator'
 
 export class UidDto {
   @IsNumberString()
   @IsNotEmpty()
-  uid: string
+  @ApiProperty({ description: '사용자 uid' })
+  uid: string // FIXME: 버그?
 }

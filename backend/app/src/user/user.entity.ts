@@ -7,6 +7,7 @@ import {
 } from 'typeorm'
 import { Stat } from './stat.entity'
 import { Status } from './status.enum'
+import { ApiProperty } from '@nestjs/swagger'
 
 @Entity()
 export class User {
@@ -26,9 +27,11 @@ export class User {
   avatar: string
 
   @Column('int', { array: true, default: [] })
+  @ApiProperty({ description: '친구 uid 목록' })
   friends: number[]
 
   @Column('int', { array: true, default: [] })
+  @ApiProperty({ description: '차단 uid 목록' })
   blocks: number[]
 
   @OneToOne(() => Stat, { cascade: true })
@@ -36,5 +39,6 @@ export class User {
   stat: Stat
 
   @Column({ default: true })
+  @ApiProperty({ description: '온라인 여부' })
   isActive: boolean
 }
