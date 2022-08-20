@@ -1,10 +1,7 @@
 import { useRef, useEffect, useState } from 'react'
 import Avatar from '@mui/material/Avatar'
-import { Stack, Typography, Box, Modal, Button, setRef } from '@mui/material'
+import { Stack, Typography, Box, Modal, Button } from '@mui/material'
 import styled from 'styled-components'
-import { useApiQuery } from 'hook'
-import { useAvatar } from 'hook/useAvatar'
-import { User } from 'data'
 import { useUserQuery } from 'hook/useUserQuery'
 
 export type Rect = {
@@ -150,48 +147,66 @@ export const PongResult = ({
   )
 }
 
+let lastTs = 0
+
 const Pong = (props: PongProps) => {
   const pongCanvas = useRef<HTMLCanvasElement>(null)
+  const [pongBaseCanvas, _] = useState<HTMLCanvasElement>(
+    document.createElement('canvas'),
+  )
+  const [fps, setFps] = useState(0)
 
   useEffect(() => {
-    const req = requestAnimationFrame(() => {
+    pongBaseCanvas.width = 800
+    pongBaseCanvas.height = 450
+
+    const ctx = pongBaseCanvas.getContext('2d') as CanvasRenderingContext2D
+    ctx.fillStyle = 'black'
+    ctx.fillRect(
+      0,
+      0,
+      props.window.height * props.window.ratio,
+      props.window.height,
+    )
+    ctx.fillStyle = 'white'
+    const fontSize = props.window.height * 0.1
+    ctx.font = `${fontSize}px monospace`
+    ctx.textBaseline = 'top'
+    ctx.textAlign = 'center'
+    ctx.fillText(
+      props.leftScore.toLocaleString(undefined, { minimumIntegerDigits: 2 }),
+      (props.window.height * props.window.ratio) / 2 - fontSize,
+      0,
+    )
+    ctx.fillText(
+      props.rightScore.toLocaleString(undefined, { minimumIntegerDigits: 2 }),
+      (props.window.height * props.window.ratio) / 2 + fontSize,
+      0,
+    )
+    const rectWidth = props.window.height * 0.025
+    for (let i = 0; i < 20; i++) {
+      ctx.fillRect(
+        (props.window.height * props.window.ratio) / 2 - rectWidth / 2,
+        (props.window.height / 20) * i + rectWidth * 0.5,
+        rectWidth,
+        rectWidth,
+      )
+    }
+    lastTs = Date.now()
+  }, [props.window, props.leftScore, props.rightScore])
+
+  useEffect(() => {
+    const req = requestAnimationFrame((ts) => {
+      setFps((v) => Math.round(1000 / (ts - lastTs)))
+      lastTs = ts
       const ctx = (pongCanvas.current as HTMLCanvasElement).getContext(
         '2d',
       ) as CanvasRenderingContext2D
-      ctx.fillStyle = 'black'
-      ctx.fillRect(
-        0,
-        0,
-        props.window.height * props.window.ratio,
-        props.window.height,
-      )
+      ctx.drawImage(pongBaseCanvas, 0, 0)
       ctx.fillStyle = 'white'
       drawRect(ctx, props.window, props.leftPaddle)
       drawRect(ctx, props.window, props.rightPaddle)
       drawRect(ctx, props.window, props.ball)
-      const fontSize = props.window.height * 0.1
-      ctx.font = `${fontSize}px monospace`
-      ctx.textBaseline = 'top'
-      ctx.textAlign = 'center'
-      ctx.fillText(
-        props.leftScore.toLocaleString(undefined, { minimumIntegerDigits: 2 }),
-        (props.window.height * props.window.ratio) / 2 - fontSize,
-        0,
-      )
-      ctx.fillText(
-        props.rightScore.toLocaleString(undefined, { minimumIntegerDigits: 2 }),
-        (props.window.height * props.window.ratio) / 2 + fontSize,
-        0,
-      )
-      const rectWidth = props.window.height * 0.025
-      for (let i = 0; i < 20; i++) {
-        ctx.fillRect(
-          (props.window.height * props.window.ratio) / 2 - rectWidth / 2,
-          (props.window.height / 20) * i + rectWidth * 0.5,
-          rectWidth,
-          rectWidth,
-        )
-      }
     })
     return () => cancelAnimationFrame(req)
   }, [props])
