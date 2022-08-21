@@ -14,7 +14,7 @@ type Messages = {
   [roomId: number]: Message[]
 }
 
-export const ChatView = ({ socket }: { socket: ChatSocket }) => {
+export const ChatView = ({ socket }: { socket?: ChatSocket }) => {
   const [modal, setModal] = useState(false)
   const [messages, setMessages] = useState<Messages>({})
   const [showChat, setShowChat] = useState({
@@ -22,14 +22,9 @@ export const ChatView = ({ socket }: { socket: ChatSocket }) => {
     roomId: 0,
     roomType: 'PUBLIC',
   })
-  const { data: me } = useApiQuery<User>(['user', 'me'])
+  const { data: me, isSuccess } = useApiQuery<User>(['user', 'me'])
   const { data: chatRoomList } = useApiQuery<Room[]>(['chat', 'joinlist'])
   const { data: joinedRoomList } = useApiQuery<JoinedRoom[]>(['chat', 'me'])
-
-  if (!me) {
-    return null
-  }
-  const { uid: myUid } = me
 
   const updateRoom = () => {
     queryClient.invalidateQueries(['chat', 'joinlist'])
@@ -37,17 +32,26 @@ export const ChatView = ({ socket }: { socket: ChatSocket }) => {
       return { ...showChat, bool: false }
     })
   }
+
   useEffect(() => {
+    if (!isSuccess || socket === undefined) {
+      return
+    }
+    const { uid } = me
     socket.on('NOTICE', (res: Message) => {
-      if (res.senderUid === myUid) {
+      if (res.senderUid === uid) {
         queryClient.invalidateQueries(['chat', 'me'])
       }
     })
     return () => {
       socket.removeAllListeners('NOTICE')
     }
-  }, [myUid])
+  }, [me, socket])
+
   useEffect(() => {
+    if (socket === undefined) {
+      return
+    }
     socket.on('RECEIVE', (res: Message) => {
       const id = res.roomId
       const msg = {
@@ -66,9 +70,12 @@ export const ChatView = ({ socket }: { socket: ChatSocket }) => {
     return () => {
       socket.removeAllListeners('RECEIVE')
     }
-  }, [])
+  }, [socket])
 
   useEffect(() => {
+    if (socket === undefined) {
+      return
+    }
     socket.on('DESTROYED', () => {
       queryClient.invalidateQueries(['chat', 'me'])
       queryClient.invalidateQueries(['chat', 'joinlist'])
@@ -79,10 +86,10 @@ export const ChatView = ({ socket }: { socket: ChatSocket }) => {
     return () => {
       socket.removeAllListeners('DESTROYED')
     }
-  }, [])
+  }, [socket])
 
   const leaveRoom = (roomId: number) => {
-    socket.emit('LEAVE', { roomId }, () => {
+    socket?.emit('LEAVE', { roomId }, () => {
       queryClient.invalidateQueries(['chat', 'me'])
       setShowChat((showChat) => {
         return { ...showChat, bool: false }
@@ -90,6 +97,10 @@ export const ChatView = ({ socket }: { socket: ChatSocket }) => {
     })
     // const newJoinedRoom = joinedRoomList.filter((el) => el.id !== roomId)
     // setJoinedRoomList(newJoinedRoom)
+  }
+
+  if (!isSuccess || socket === undefined) {
+    return null
   }
 
   return (

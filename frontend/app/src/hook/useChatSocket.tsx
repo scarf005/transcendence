@@ -19,7 +19,7 @@ export const useChatSocket = () => {
     // return () => {
     //   socket.disconnect()
     // }
-  }, [])
+  }, [socket])
 
   return { socket }
 }

@@ -27,7 +27,7 @@ export const MainRouter = () => {
             <Route path="/friend" element={<FriendView />} />
             <Route
               path="/chat"
-              element={<ChatView socket={chatSocket.socket as Socket} />}
+              element={<ChatView socket={chatSocket.socket} />}
             />
           </Routes>
         </ChatSocketContext.Provider>
