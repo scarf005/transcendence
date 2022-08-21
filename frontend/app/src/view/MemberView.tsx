@@ -16,8 +16,8 @@ export const MemberView = ({ roomId }: Props) => {
   ])
 
   if (meOk && usersOk) {
-    const users = chatusers.map(({ user }) => user)
-    return <MemberList users={users} refUser={me} />
+    // const users = chatusers.map(({ user }) => user)
+    return <MemberList chatusers={chatusers} refUser={me} />
   }
 
   return <div>Loading...</div>

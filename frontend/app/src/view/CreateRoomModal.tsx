@@ -83,8 +83,8 @@ export const BasicModal = (prop: {
 
   const createRoom = () => {
     const roomName = input.current?.value
-    if (roomName && roomName.length >= 30) {
-      setErrMsg('방 제목은 1자 이상 30자 미만입니다')
+    if (roomName && roomName.search(/^\w{2,30}$/) === -1) {
+      setErrMsg('방 제목은 2~30자 영문으로 만들어주세요')
       return
     }
     if (password)

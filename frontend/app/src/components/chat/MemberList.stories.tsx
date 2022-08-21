@@ -11,5 +11,5 @@ const Template: ComponentStory<typeof MemberList> = (args) => (
   <MemberList {...args} />
 )
 
-export const Default = Template.bind({})
-Default.args = { users: mockUsers, refUser: mockUsers[0] }
+// export const Default = Template.bind({})
+// Default.args = { users: mockUsers, refUser: mockUsers[0] }

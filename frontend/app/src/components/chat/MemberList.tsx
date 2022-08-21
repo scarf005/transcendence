@@ -1,5 +1,5 @@
-import { Card, List, Modal, Container, Box } from '@mui/material'
-import { OtherUser, User } from 'data'
+import { Card, List, Modal, Container, Box, Button } from '@mui/material'
+import { OtherUser, User, ChatUser } from 'data'
 import { useToggles } from 'hook'
 import { partition } from 'utility'
 import { ProfileDisplay } from 'components'
@@ -7,6 +7,7 @@ import { useState } from 'react'
 import { ListSubheader } from '@mui/material'
 import { ProfileListItem } from 'components'
 import { MyProfile, OtherProfile } from 'components'
+import { MemberListOption } from '../../view/MemberListOption'
 
 interface SectionProps {
   title: string
@@ -38,17 +39,17 @@ const style = {
 interface Props {
   // TODO: ChatUser 배열을 받아 추가 정보 표시?
   /** 모든 사용자 */
-  users: OtherUser[]
+  chatusers: ChatUser[]
   /** 로그인한 사용자 */
   refUser: User
 }
-export const MemberList = ({ users, refUser }: Props) => {
+export const MemberList = ({ chatusers, refUser }: Props) => {
   const [id, setId] = useState(refUser.uid)
   const [open, { on, off }] = useToggles(false)
-
-  const otherUser = users.find((user) => user.uid === id)
+  const users = chatusers.map(({ user }) => user)
+  const otherUser = chatusers.find((user) => user.user.uid === id)
   const isMe = id === refUser.uid
-
+  const meForOption = chatusers.find((user) => user.user.uid === refUser.uid)
   const openModal = (uid: number) => {
     on()
     setId(uid)
@@ -64,9 +65,14 @@ export const MemberList = ({ users, refUser }: Props) => {
         <Box sx={style}>
           <Card sx={{ padding: '2vw' }}>
             {isMe ? (
-              <MyProfile user={refUser} />
+              <>
+                <MyProfile user={refUser} />
+              </>
             ) : otherUser ? (
-              <OtherProfile user={otherUser} refUser={refUser} />
+              <>
+                <OtherProfile user={otherUser.user} refUser={refUser} />
+                <MemberListOption user={otherUser} refUser={meForOption} />
+              </>
             ) : null}
           </Card>
         </Box>
