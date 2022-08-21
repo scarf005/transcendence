@@ -233,14 +233,23 @@ export class ChatService {
 
   async addBannedUser(uid: number, roomId: number) {
     const room = await this.chatRoomRepository.findOne({
-      select: ['id', 'bannedIds', 'chatUser'],
-      where: { id: roomId, chatUser: { user: { uid } } },
+      where: { id: roomId },
       relations: ['chatUser', 'chatUser.user'],
     })
-    if (!room) throw new NotFoundException('Room not found or User not in room')
+    if (!room) throw new NotFoundException('Room not found')
+    let chatuser: ChatUser
+    if (
+      !room.chatUser.find((chatUser) => {
+        if (chatUser.user.uid === uid) {
+          chatuser = chatUser
+          return true
+        }
+      })
+    )
+      throw new NotFoundException('User not in room')
     room.bannedIds.push(uid)
     await this.chatRoomRepository.save(room)
-    return await this.chatUserRepository.delete(room.chatUser[0].id)
+    return await this.chatUserRepository.delete(chatuser.id)
   }
 
   async deleteBannedUser(uid: number, roomId: number) {
