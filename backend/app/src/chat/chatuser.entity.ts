@@ -7,6 +7,7 @@ import {
 } from 'typeorm'
 import { User } from 'user/user.entity'
 import { ApiProperty } from '@nestjs/swagger'
+import { ChatRoom } from './chatroom.entity'
 
 @Entity()
 export class ChatUser {
@@ -21,6 +22,12 @@ export class ChatUser {
 
   @Column({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
   endOfMute: Date
+
+  @ManyToOne(() => ChatRoom, (chatRoom) => chatRoom.chatUser, {
+    onDelete: 'CASCADE',
+  })
+  @ApiProperty({ description: 'room' })
+  room: ChatRoom
 
   @ManyToOne(() => User)
   @JoinColumn()

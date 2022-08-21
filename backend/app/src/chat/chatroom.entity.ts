@@ -2,7 +2,7 @@ import {
   Column,
   Entity,
   JoinTable,
-  ManyToMany,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm'
 import { ChatUser } from './chatuser.entity'
@@ -25,7 +25,7 @@ export class ChatRoom {
   @Column('int', { array: true, default: [] })
   bannedIds: number[]
 
-  @ManyToMany(() => ChatUser, { cascade: true })
+  @OneToMany(() => ChatUser, (chatUser) => chatUser.room, { cascade: true })
   @JoinTable()
   chatUser: ChatUser[]
 }
