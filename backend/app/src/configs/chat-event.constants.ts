@@ -9,6 +9,7 @@ export const chatEvent = {
   ADD_ADMIN: 'ADD_ADMIN',
   REMOVE_ADMIN: 'REMOVE_ADMIN',
   INVITE: 'INVITE',
+  INVITE_DM: 'INVITE_DM',
   PASSWORD: 'PASSWORD',
   BAN: 'BAN',
   UNBAN: 'UNBAN',

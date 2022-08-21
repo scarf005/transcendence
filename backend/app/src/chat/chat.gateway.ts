@@ -23,6 +23,8 @@ import { Status } from 'user/status.enum'
 import { ChatInviteDto } from 'dto/chatInvite.dto'
 import { ChatPasswordDto } from 'dto/chatRoomPassword.dto'
 import { RoomPasswordCommand } from './roomPasswordCommand.enum'
+import { ChatInviteDMDto } from 'dto/chatInviteDM.dto'
+import { RoomType } from './roomtype.enum'
 
 @AsyncApiService()
 @UsePipes(new WSValidationPipe())
@@ -405,6 +407,50 @@ export class ChatGateway {
     console.log(`chat: ${invitee} has entered to ${roomId}`)
     // room의 모두에게 NOTICE 전송
     this.emitNotice(invitee, roomId, 'join')
+  }
+
+  @AsyncApiPub({
+    channel: chatEvent.INVITE_DM,
+    summary: 'invitee와의 DM방 생성',
+    description:
+      'dm방을 새로 만들고 sender와 invitee를 집어넣음. sender와 invitee에게 "join"을 NOTICE',
+    message: { name: 'ChatInviteDMDto', payload: { type: ChatInviteDMDto } },
+  })
+  @SubscribeMessage(chatEvent.INVITE_DM)
+  async onInviteDM(
+    @ConnectedSocket() client,
+    @MessageBody() data: ChatInviteDMDto,
+  ) {
+    const inviter = client.data.uid
+    const { title, invitee } = data
+    // TODO: inviter, invitee 둘이 속한 DM방이 있는지 확인
+    // TODO: title 서버에서 생성
+    // TODO: inviter가 나가도 채팅방 폭파시키지 않기
+
+    // create new DM room
+    let newRoom: ChatRoom
+    try {
+      newRoom = await this.chatService.createChatroom(
+        inviter,
+        title,
+        RoomType.DM,
+      )
+    } catch (error) {
+      return error
+    }
+    client.join(newRoom.id.toString())
+    console.log(`chat: ${inviter} has entered to ${newRoom.id}`)
+
+    this.chatService.addUserToRoom(invitee, newRoom.id)
+    const sockets = await this.chatService.getSocketByUid(this.server, invitee)
+    sockets.forEach(async (el) => {
+      el.join(newRoom.id.toString())
+    })
+    console.log(`chat: ${invitee} has entered to ${newRoom.id}`)
+
+    this.emitNotice(inviter, newRoom.id, 'join')
+    this.emitNotice(invitee, newRoom.id, 'join')
+    return { status: 200 }
   }
 
   @AsyncApiPub({
