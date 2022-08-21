@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/naming-convention */
+import { CssBaselineProps } from '@mui/material'
 import { Socket } from 'socket.io-client'
 
 /** {@link backend/src/data/Chat.dto} */
@@ -42,19 +44,21 @@ export interface PasswordSetting {
   password?: string
 }
 
+type Response = { status: number; [key: string]: any }
+type cb = (res: Response) => void
 export type Chat = Omit<Message, 'roomId'>
-export type MessageHandler = (message: Message) => void
-export type UserHandler = (user: UserInRoom) => void
+export type MessageHandler = (message: Message, fn?: cb) => void
+export type UserHandler = (user: UserInRoom, fn?: cb) => void
 // TODO: response dto 작성
 interface ClientToServerEvents {
   SEND: MessageHandler
-  JOIN: (room: ChatJoinRoom, fn?: (res: any) => void) => void
-  LEAVE: (room: LeaveChatRoom, fn?: (res: any) => void) => void
-  CREATE: (room: ChatCreateRoom) => void
+  JOIN: (room: ChatJoinRoom, fn?: cb) => void
+  LEAVE: (room: LeaveChatRoom, fn?: cb) => void
+  CREATE: (room: ChatCreateRoom, fn?: cb) => void
   ADD_ADMIN: UserHandler
   REMOVE_ADMIN: UserHandler
-  INVITE: (data: InviteRoom, fn?: (res: any) => void) => void
-  PASSWORD: (data: PasswordSetting) => void
+  INVITE: (data: InviteRoom, fn?: cb) => void
+  PASSWORD: (data: PasswordSetting, fn?: cb) => void
 }
 
 interface ServerToClientEvents {

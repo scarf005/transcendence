@@ -1,8 +1,12 @@
 import React, { useState } from 'react'
 import { Grid, List, Divider, Input, Typography } from '@mui/material'
-import { ProfileListItem, VerticalDivider } from 'components'
+import {
+  MyProfile,
+  OtherProfile,
+  ProfileListItem,
+  VerticalDivider,
+} from 'components'
 import { User } from 'data'
-import { ProfileDisplay } from 'components'
 import { findUser } from 'utility'
 
 export interface Props {
@@ -18,6 +22,9 @@ export const UsersPanel = ({ users, friends, refUser }: Props) => {
   const [text, setText] = useState('')
   const seenUsers = text ? findUser(users, text) : friends
   const listname = text ? '검색 결과' : '친구 목록'
+
+  const isRefUser = id === refUser.uid
+  const currentUser = users.find((user) => user.uid === id) as User
 
   return (
     <Grid container justifyContent="space-between">
@@ -50,7 +57,11 @@ export const UsersPanel = ({ users, friends, refUser }: Props) => {
       </Grid>
       <VerticalDivider />
       <Grid item xs={8} padding="100px">
-        <ProfileDisplay users={users} refUser={refUser} uid={id} />
+        {isRefUser ? (
+          <MyProfile user={refUser} />
+        ) : (
+          <OtherProfile user={currentUser} refUser={refUser} />
+        )}
       </Grid>
     </Grid>
   )

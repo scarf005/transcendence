@@ -9,10 +9,11 @@ interface Props {
 export const MemberView = ({ roomId }: Props) => {
   console.log(`roomId: ${roomId}`)
   const { data: me, isSuccess: meOk } = useApiQuery<User>(['user', 'me'])
-  const { data: chatusers, isSuccess: usersOk } = useApiQuery<ChatUser[]>(
-    ['chat', roomId, 'list'],
-    { enabled: meOk },
-  )
+  const { data: chatusers, isSuccess: usersOk } = useApiQuery<ChatUser[]>([
+    'chat',
+    roomId,
+    'list',
+  ])
 
   if (meOk && usersOk) {
     const users = chatusers.map(({ user }) => user)

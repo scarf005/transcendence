@@ -17,7 +17,7 @@ export interface User {
   blocks: userID[]
   stat: Stat
 }
-export type OtherUser = Omit<User, 'friends' | 'blocks' | 'stat'>
+export type OtherUser = Omit<User, 'friends' | 'blocks'>
 
 export interface ChatUser {
   id: number

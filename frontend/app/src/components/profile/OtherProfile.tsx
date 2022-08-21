@@ -1,6 +1,6 @@
 import React, { useContext } from 'react'
 import { ButtonGroup, Grid, Typography } from '@mui/material'
-import { User } from 'data'
+import { ChatSocket, OtherUser, User } from 'data'
 import { Profile } from './Profile'
 import {
   AddFriendButton,
@@ -11,21 +11,24 @@ import {
   JoinGameAsSpectatorButton,
 } from './userActions'
 
-import { PongSocketContext } from 'router/Main'
-import { useNavigate } from 'react-router-dom'
+import { ChatSocketContext, PongSocketContext } from 'router/Main'
+import { Navigate, useNavigate } from 'react-router-dom'
 import { getAuthHeader } from 'hook/getAuthHeader'
 import axios from 'axios'
 import { useMutation } from '@tanstack/react-query'
 import {
   addFriendMutation,
   blockMutation,
+  queryClient,
   refreshUsers,
   removeFriendMutation,
   unblockMutation,
+  useApiQuery,
 } from 'hook'
+import { strtrim } from 'utility'
 
 type userStatus = 'DEFAULT' | 'BLOCKED' | 'FRIEND'
-const getStatus = (user: User, refUser: User): userStatus => {
+const getStatus = (user: OtherUser, refUser: User): userStatus => {
   if (refUser.blocks.includes(user.uid)) {
     return 'BLOCKED'
   } else if (refUser.friends.includes(user.uid)) {
@@ -35,6 +38,13 @@ const getStatus = (user: User, refUser: User): userStatus => {
   }
 }
 
+const createDM = (socket: ChatSocket, title: string) => {
+  socket.emit('CREATE', { title, type: 'DM' }, (res) => {
+    if (res.status !== 200) {
+      alert('Error creating chat')
+    }
+  })
+}
 const Actions = ({
   status,
   selfUid,
@@ -45,8 +55,10 @@ const Actions = ({
   isInGame: boolean
 }) => {
   const pongSocket = useContext(PongSocketContext)
+  const chatSocket = useContext(ChatSocketContext)
+  const me = useApiQuery<User>(['user', 'me'])
+  const otherUser = useApiQuery<User>(['user', selfUid])
   const navigate = useNavigate()
-  const { headers } = getAuthHeader()
   const [block, unblock, addFriend, removeFriend] = [
     blockMutation(),
     unblockMutation(),
@@ -58,14 +70,23 @@ const Actions = ({
     return <UnblockButton onClick={() => unblock.mutate(selfUid)} />
   }
   return (
-    <ButtonGroup>
+    <>
       {status === 'FRIEND' ? (
         <RemoveFriendButton onClick={() => removeFriend.mutate(selfUid)} />
       ) : (
         <AddFriendButton onClick={() => addFriend.mutate(selfUid)} />
       )}
       <BlockButton onClick={() => block.mutate(selfUid)} />
-      <MessageButton onClick={() => alert('pressed direct message button')} />
+      {chatSocket && otherUser && me ? (
+        <MessageButton
+          onClick={() => {
+            const title = strtrim(`DM${me}${otherUser}`)
+            createDM(chatSocket, title)
+            queryClient.invalidateQueries(['chat', 'me'])
+            navigate('/chat')
+          }}
+        />
+      ) : null}
       {isInGame ? (
         <JoinGameAsSpectatorButton
           onClick={() => {
@@ -78,15 +99,16 @@ const Actions = ({
           }}
         />
       ) : null}
-    </ButtonGroup>
+    </>
   )
 }
 
 interface Props {
-  user: User
+  user: OtherUser
   refUser: User
+  buttons?: JSX.Element
 }
-export const OtherProfile = ({ user, refUser }: Props) => {
+export const OtherProfile = ({ user, refUser, buttons }: Props) => {
   const status = getStatus(user, refUser)
 
   return (
@@ -94,11 +116,14 @@ export const OtherProfile = ({ user, refUser }: Props) => {
       <Profile user={user} />
       <Typography align="center">{`status: ${status}`}</Typography>
       <Grid container justifyContent="right">
-        <Actions
-          status={status}
-          isInGame={user.status === 'GAME'}
-          selfUid={user.uid}
-        />
+        <ButtonGroup>
+          {buttons}
+          <Actions
+            status={status}
+            isInGame={user.status === 'GAME'}
+            selfUid={user.uid}
+          />
+        </ButtonGroup>
       </Grid>
     </>
   )

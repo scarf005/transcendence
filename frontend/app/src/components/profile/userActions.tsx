@@ -50,6 +50,7 @@ export const MessageButton = ({ onClick }: OnClickProps) => {
   )
 }
 
+/** @deprecated 그냥 풀어서 쓰기 */
 export const ChangeNickNameButton = ({ onClick }: OnClickProps) => {
   return (
     <IconButtonWrap

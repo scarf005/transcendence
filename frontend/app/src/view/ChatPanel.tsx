@@ -1,4 +1,4 @@
-import { Grid, Button, Tooltip, Typography } from '@mui/material'
+import { Grid, Button, Tooltip, Typography, Paper, Box } from '@mui/material'
 import { Message, ChatSocket, User, ChatUser } from 'data'
 import { ChatInput, ChatList, MemberList } from 'components'
 import { useApiQuery } from 'hook'
@@ -70,7 +70,9 @@ export const ChatPanel = ({
   return (
     <Grid container justifyContent="space-between">
       <Grid item xs={8}>
-        <ChatList chats={chats} />
+        <Box style={{ height: '60vh', overflow: 'auto' }}>
+          <ChatList chats={chats} />
+        </Box>
       </Grid>
       <Grid item xs={4}>
         <ExtraOptionPerRoom socket={socket} roomInfo={roomInfo} />
