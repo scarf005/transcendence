@@ -13,4 +13,6 @@ export const chatEvent = {
   PASSWORD: 'PASSWORD',
   BAN: 'BAN',
   UNBAN: 'UNBAN',
+  MUTE: 'MUTE',
+  UNMUTE: 'UNMUTE',
 } as const

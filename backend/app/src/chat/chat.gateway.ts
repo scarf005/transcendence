@@ -25,6 +25,7 @@ import { ChatPasswordDto } from 'dto/chatRoomPassword.dto'
 import { RoomPasswordCommand } from './roomPasswordCommand.enum'
 import { ChatInviteDMDto } from 'dto/chatInviteDM.dto'
 import { RoomType } from './roomtype.enum'
+import { ChatMuteUserDto } from 'dto/chatMuteUser.dto'
 
 @AsyncApiService()
 @UsePipes(new WSValidationPipe())
@@ -369,6 +370,58 @@ export class ChatGateway {
       return error
     }
     console.log(`chat: ${uid} is unbanned from ${roomId}`)
+    return { status: 200 }
+  }
+
+  @AsyncApiPub({
+    channel: chatEvent.MUTE,
+    summary: 'uid를 muteSec초동안 mute시킴',
+    description:
+      'admin이 아닐 땐 403 리턴, uid가 보낸 메시지는 roomId내에서 muteSec초동안 아무에게도 전달되지 않음',
+    message: { name: 'ChatMuteUserDto', payload: { type: ChatMuteUserDto } },
+  })
+  @SubscribeMessage(chatEvent.MUTE)
+  async onMuteUser(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() data: ChatMuteUserDto,
+  ) {
+    const { roomId, muteSec } = data
+    const target = data.uid
+    // check if client is admin
+    if ((await this.chatService.isAdmin(client.data.uid, roomId)) === false)
+      return new ForbiddenException('You are not admin')
+    try {
+      await this.chatService.addMuteUser(target, roomId, muteSec)
+    } catch (error) {
+      return error
+    }
+    console.log(`${target} in is muted for ${muteSec} seconds in ${roomId}`)
+    return { status: 200 }
+  }
+
+  @AsyncApiPub({
+    channel: chatEvent.UNMUTE,
+    summary: 'uid의 mute 상태를 해제',
+    description:
+      'admin이 아닐 땐 403 리턴, uid가 보낸 메시지를 roomId의 모든 참여자가 수신할 수 있음',
+    message: { name: 'ChatMuteUserDto', payload: { type: ChatMuteUserDto } },
+  })
+  @SubscribeMessage(chatEvent.UNMUTE)
+  async onUnmuteUser(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() data: ChatMuteUserDto,
+  ) {
+    const roomId = data.roomId
+    const target = data.uid
+    // check if client is admin
+    if ((await this.chatService.isAdmin(client.data.uid, roomId)) === false)
+      return new ForbiddenException('You are not admin')
+    try {
+      await this.chatService.addMuteUser(target, roomId, 0)
+    } catch (error) {
+      return error
+    }
+    console.log(`${target} in is unmuted in ${roomId}`)
     return { status: 200 }
   }
 
