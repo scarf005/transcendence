@@ -191,6 +191,7 @@ export class ChatService {
         'chatRoom.id',
         'chatUser.isAdmin',
         'chatUser.isOwner',
+        'chatUser.endOfMute',
         'user.uid',
         'user.nickname',
         'user.avatar',
