@@ -317,7 +317,7 @@ export class ChatGateway {
     if ((await this.chatService.isAdmin(client.data.uid, roomId)) === false)
       return new ForbiddenException('You are not admin')
     // check if target is owner
-    if ((await this.chatService.isOwner(uid, roomId)) === false)
+    if ((await this.chatService.isOwner(uid, roomId)) === true)
       return new ForbiddenException('Owner cannot be banned')
     // add user to banned list
     try {
@@ -336,10 +336,11 @@ export class ChatGateway {
     // let user out from room
     const sockets = await this.chatService.getSocketByUid(this.server, uid)
     sockets.forEach(async (el) => {
-      console.log(`${el.data.uid} will be banned`)
+      console.log(`${el.data.uid} will be banned from ${roomId}`)
       // el.emit(chatEvent.NOTICE, msg)
       el.leave(roomId.toString())
     })
+    // await this.chatService.removeUserFromRoom(uid, roomId)
     return { status: 200 }
   }
 
