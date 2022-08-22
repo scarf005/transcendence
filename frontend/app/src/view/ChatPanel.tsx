@@ -1,7 +1,7 @@
 import { Grid, Button, Tooltip, Typography, Paper, Box } from '@mui/material'
 import { Message, ChatSocket, User, ChatUser } from 'data'
 import { ChatInput, ChatList, MemberList } from 'components'
-import { useApiQuery } from 'hook'
+import { useApiQuery, useChatUsersQuery, useUserQuery } from 'hook'
 import { Logout } from '@mui/icons-material'
 import { InviteUser } from './InviteUser'
 import { MemberView } from './MemberView'
@@ -26,8 +26,8 @@ interface ExtraOptionProps {
 
 const ExtraOptionPerRoom = ({ socket, roomInfo }: ExtraOptionProps) => {
   const [isOwner, setIsOwner] = useState(false)
-  const { data: me, isSuccess: meOk } = useApiQuery<User>(['user', 'me'])
-  const { data: users, isSuccess: usersOk } = useApiQuery<ChatUser[]>(
+  const { data: me, isSuccess: meOk } = useUserQuery(['user', 'me'])
+  const { data: users, isSuccess: usersOk } = useChatUsersQuery(
     ['chat', roomInfo.roomId, 'list'],
     { enabled: meOk },
   )
@@ -67,7 +67,7 @@ export const ChatPanel = ({
     console.log(`sent msg: ${msg}`)
   }
 
-  const { data: me, isSuccess: meOk } = useApiQuery<User>(['user', 'me'])
+  const { data: me, isSuccess: meOk } = useUserQuery(['user', 'me'])
   const { data: chatusers, isSuccess: usersOk } = useApiQuery<ChatUser[]>([
     'chat',
     roomInfo.roomId,

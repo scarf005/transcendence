@@ -1,9 +1,9 @@
 import { Profile } from 'components/profile/Profile'
 import { User } from 'data'
-import { useApiQuery } from 'hook'
+import { useUserQuery } from 'hook'
 
 export const ProfileView = () => {
-  const { data, isSuccess } = useApiQuery<User>(['user', 'me'])
+  const { data, isSuccess } = useUserQuery(['user', 'me'])
 
   if (isSuccess) {
     return <Profile user={data} />

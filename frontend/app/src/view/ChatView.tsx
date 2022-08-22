@@ -7,7 +7,7 @@ import { BasicModal } from './CreateRoomModal'
 import { JoinedRoom, Room, Message, ChatSocket, User } from 'data'
 import { ChatPanel } from './ChatPanel'
 import { getAuthHeader } from 'hook/getAuthHeader'
-import { queryClient, useApiQuery } from 'hook'
+import { queryClient, useApiQuery, useUserQuery } from 'hook'
 import { useMutation } from '@tanstack/react-query'
 
 type Messages = {
@@ -22,7 +22,7 @@ export const ChatView = ({ socket }: { socket?: ChatSocket }) => {
     roomId: 0,
     roomType: 'PUBLIC',
   })
-  const { data: me, isSuccess } = useApiQuery<User>(['user', 'me'])
+  const { data: me, isSuccess } = useUserQuery(['user', 'me'])
   const { data: chatRoomList } = useApiQuery<Room[]>(['chat', 'joinlist'])
   const { data: joinedRoomList } = useApiQuery<JoinedRoom[]>(['chat', 'me'])
 

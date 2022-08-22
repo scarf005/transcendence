@@ -2,7 +2,7 @@ import { List } from '@mui/material'
 import { Message, User } from 'data'
 import { ChatListItem } from './ChatListItem'
 import { groupBySerial } from 'utility'
-import { useApiQuery } from 'hook'
+import { useApiQuery, useUserQuery } from 'hook'
 
 interface ListProps {
   group: Message[]
@@ -10,7 +10,7 @@ interface ListProps {
 export const WrappedChatListItem = ({ group }: ListProps) => {
   const first = group[0]
   const { senderUid: uid } = first
-  const { data: user } = useApiQuery<User>(['user', uid])
+  const { data: user } = useUserQuery(['user', uid])
   return (
     <ChatListItem user={user} messages={group.map((msg) => msg.msgContent)} />
   )

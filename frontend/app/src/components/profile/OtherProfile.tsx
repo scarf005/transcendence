@@ -21,6 +21,7 @@ import {
   blockMutation,
   queryClient,
   refreshUsers,
+  useUserQuery,
   removeFriendMutation,
   unblockMutation,
   useApiQuery,
@@ -56,8 +57,8 @@ const Actions = ({
 }) => {
   const pongSocket = useContext(PongSocketContext)
   const chatSocket = useContext(ChatSocketContext)
-  const me = useApiQuery<User>(['user', 'me'])
-  const otherUser = useApiQuery<User>(['user', selfUid])
+  const me = useUserQuery(['user', 'me'])
+  const otherUser = useUserQuery(['user', selfUid])
   const navigate = useNavigate()
   const [block, unblock, addFriend, removeFriend] = [
     blockMutation(),

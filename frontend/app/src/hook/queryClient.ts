@@ -8,6 +8,7 @@ export const queryClient = new QueryClient({
         const { data } = await axios.get(`/api/${url}`)
         return data
       },
+      staleTime: Infinity,
     },
   },
 })

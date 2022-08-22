@@ -41,7 +41,7 @@ const drawRect = (
 }
 
 const PongUser = ({ uid }: { uid: number }) => {
-  const { data: profile, isSuccess } = useUserQuery(uid)
+  const { data: profile, isSuccess } = useUserQuery(['user', uid])
 
   if (!isSuccess) {
     return null
