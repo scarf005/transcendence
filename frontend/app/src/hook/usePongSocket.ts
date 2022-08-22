@@ -16,22 +16,32 @@ export const usePongSocket = () => {
       return
     }
 
-    socket.on('gameInfo', (message) => {
+    const handleGameInfo = (message: any) => {
       setGameMode(message.mode)
       setPlayer({ leftUser: message.leftUser, rightUser: message.rightUser })
       setGameInfo(message)
       setGameState('gameInfo')
-    })
+    }
 
-    socket.on('render', (message) => {
+    const handleRender = (message: any) => {
       setGameInfo(message)
       setGameState('play')
-    })
+    }
 
-    socket.on('gameEnd', (message) => {
+    const handleGameEnd = (message: any) => {
       setWinner(message)
       setGameState('gameEnd')
-    })
+    }
+
+    socket.on('gameInfo', handleGameInfo)
+    socket.on('render', handleRender)
+    socket.on('gameEnd', handleGameEnd)
+
+    return () => {
+      socket.off('gameInfo', handleGameInfo)
+      socket.off('render', handleRender)
+      socket.off('gameEnd', handleGameEnd)
+    }
   })
 
   return {

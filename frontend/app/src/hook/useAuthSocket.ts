@@ -6,7 +6,7 @@ export const useAuthSocket = <T extends Socket>(url: string): T | undefined => {
   const [socket, setSocket] = useState<Socket>()
 
   useEffect(() => {
-    setSocket(io(url, { auth: { token } }))
+    setSocket(io(url, { auth: { token }, transports: ['websocket'] }))
   }, [])
 
   return socket as T
