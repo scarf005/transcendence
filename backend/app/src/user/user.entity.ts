@@ -4,14 +4,13 @@ import {
   JoinColumn,
   OneToOne,
   PrimaryGeneratedColumn,
-  BaseEntity,
 } from 'typeorm'
 import { Stat } from './stat.entity'
 import { Status } from './status.enum'
 import { ApiProperty } from '@nestjs/swagger'
 
 @Entity()
-export class User extends BaseEntity {
+export class User {
   @PrimaryGeneratedColumn()
   uid: number
 

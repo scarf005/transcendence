@@ -4,13 +4,12 @@ import {
   JoinTable,
   OneToMany,
   PrimaryGeneratedColumn,
-  BaseEntity,
 } from 'typeorm'
 import { ChatUser } from './chatuser.entity'
 import { RoomType } from './roomtype.enum'
 
 @Entity()
-export class ChatRoom extends BaseEntity {
+export class ChatRoom {
   @PrimaryGeneratedColumn()
   id: number
 

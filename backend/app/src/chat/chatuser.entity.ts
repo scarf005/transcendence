@@ -4,14 +4,13 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
   JoinColumn,
-  BaseEntity,
 } from 'typeorm'
 import { User } from 'user/user.entity'
 import { ApiProperty } from '@nestjs/swagger'
 import { ChatRoom } from './chatroom.entity'
 
 @Entity()
-export class ChatUser extends BaseEntity {
+export class ChatUser {
   @PrimaryGeneratedColumn()
   id: number
 

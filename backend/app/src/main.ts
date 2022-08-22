@@ -3,7 +3,6 @@ import { AppModule } from './app.module'
 import { setupAsyncApi } from './utils/setupAsyncApi'
 import { setupSwagger } from './utils/setupSwagger'
 import { ValidationPipe } from '@nestjs/common'
-import { setupAdmin } from 'configs/setup.admin'
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule)
@@ -18,7 +17,6 @@ async function bootstrap() {
   )
   await setupAsyncApi(app)
   setupSwagger(app)
-  await setupAdmin(app)
   await app.listen(3000)
 }
 bootstrap()
