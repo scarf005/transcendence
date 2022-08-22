@@ -1,63 +1,41 @@
-import { useState } from 'react'
 import styled from 'styled-components'
 import { PongMatchForm } from './GameOption'
-import Button from '@mui/material/Button'
-import GameList from './GameList'
+import { MatchHistory } from './MatchHistory'
+import { useApiQuery } from 'hook'
+import { Stack } from '@mui/material'
 
-const Grid = styled.div`
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  grid-template-rows: 1fr 1fr 1fr 1fr;
-  width: 100%;
-  height: 600px;
-  text-align: center;
-  grid-gap: 1px;
-`
-const Game = styled.div`
-  padding: 80px 0;
-  grid-column: 1/2;
-  grid-row: 1/3;
-  border-style: solid;
-`
-const Watch = styled.div`
-  padding: 120px 0;
-  grid-column: 1/2;
-  grid-row: 3/5;
-  border-style: solid;
-`
-const List = styled.div`
-  grid-column: 2/4;
-  grid-row: 1/5;
-  border-style: solid;
+const WithBorder = styled.div`
+  border: 1px solid black;
+  margin: 4px;
 `
 
 const GameGrid = (props: { requestMatch: (matchData: any) => void }) => {
-  const [games, _setGames] = useState({})
-  const refreshGameList = () => {
-    // axios.get('/game').then((res) => setGames(res))
+  const { data, isSuccess } = useApiQuery<any>(['match'])
+
+  if (!isSuccess) {
+    return null
   }
-  //   useEffect(() => {
-  //     axios.get('/game').then((res) => setGames(res))
-  //   }, [])
+
+  const matches = data.map((match: any) => {
+    return {
+      loser: match.loser.nickname,
+      winner: match.winner.nickname,
+      timestamp: match.endOfGame,
+    }
+  })
+
   return (
-    <Grid>
-      <Game>
+    <Stack direction="row">
+      <WithBorder>
         <PongMatchForm requestMatch={props.requestMatch} />
-      </Game>
-      <Watch>
-        <Button
-          onClick={() => refreshGameList()}
-          variant="outlined"
-          style={{ margin: '0.5rem', width: '243px' }}
-        >
-          관전
-        </Button>
-      </Watch>
-      <List>
-        <div style={{ margin: '0.5rem' }}>진행중인 게임</div>
-        <GameList games={games} />
-      </List>
-    </Grid>
+      </WithBorder>
+      <WithBorder>
+        <Stack width="50vw">
+          <div style={{ margin: '0.5rem' }}>매치 기록</div>
+          <MatchHistory matches={matches} />
+        </Stack>
+      </WithBorder>
+    </Stack>
   )
 }
 export default GameGrid
