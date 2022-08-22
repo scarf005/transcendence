@@ -1,8 +1,14 @@
-import { Entity, JoinColumn, OneToOne, PrimaryColumn } from 'typeorm'
+import {
+  Entity,
+  JoinColumn,
+  OneToOne,
+  PrimaryColumn,
+  BaseEntity,
+} from 'typeorm'
 import { User } from 'user/user.entity'
 
 @Entity()
-export class TwoFactor {
+export class TwoFactor extends BaseEntity {
   @PrimaryColumn()
   secret: string
 

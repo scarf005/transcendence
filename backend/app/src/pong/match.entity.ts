@@ -4,12 +4,13 @@ import {
   ManyToOne,
   JoinColumn,
   Column,
+  BaseEntity,
 } from 'typeorm'
 import { User } from 'user/user.entity'
 import { ApiProperty } from '@nestjs/swagger'
 
 @Entity()
-export class Match {
+export class Match extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number
 
