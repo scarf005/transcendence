@@ -32,6 +32,7 @@ import { RoomType } from './roomtype.enum'
 import { ChatMuteUserDto } from 'dto/chatMuteUser.dto'
 import { ChatUserEvent } from './chatuserEvent.enum'
 import { ChatUserStatusChangedDto } from 'dto/chatuserStatusChanged.dto'
+import { ChatBanUserDto } from 'dto/chatBanUser.dto'
 
 /* FIXME: websocket 테스트 클라이언트에서는 cors: true 키만 있어야 동작함
 추후 제출 시에는 다음과 같이 변경:
@@ -320,14 +321,14 @@ export class ChatGateway {
     summary: 'uid를 roomId의 banned 리스트에 추가',
     description:
       'admin이 아니거나 owner를 밴할 땐 403 리턴, uid나 roomId가 유효하지 않으면 400리턴',
-    message: { name: 'UserInRoomDto', payload: { type: UserInRoomDto } },
+    message: { name: 'ChatBanUserDto', payload: { type: ChatBanUserDto } },
   })
   @SubscribeMessage(chatEvent.BAN)
   async onBanUser(
     @ConnectedSocket() client: Socket,
-    @MessageBody() data: UserInRoomDto,
+    @MessageBody() data: ChatBanUserDto,
   ) {
-    const { uid, roomId } = data
+    const { uid, roomId, banSec } = data
     // check if client is admin
     if ((await this.chatService.isAdmin(client.data.uid, roomId)) === false)
       return new ForbiddenException('You are not admin')
@@ -336,7 +337,7 @@ export class ChatGateway {
       return new ForbiddenException('Owner cannot be banned')
     // add user to banned list
     try {
-      await this.chatService.addBannedUser(uid, roomId)
+      await this.chatService.addBannedUser(uid, roomId, banSec)
     } catch (error) {
       return error
     }
@@ -355,7 +356,6 @@ export class ChatGateway {
       // el.emit(chatEvent.NOTICE, msg)
       el.leave(roomId.toString())
     })
-    // await this.chatService.removeUserFromRoom(uid, roomId)
     return { status: 200 }
   }
 
@@ -364,7 +364,7 @@ export class ChatGateway {
     summary: 'uid를 roomId의 banned 리스트에서 삭제',
     description:
       'admin이 아닐 땐 403 리턴, uid나 roomId가 유효하지 않으면 400리턴',
-    message: { name: 'UserInRoomDto', payload: { type: UserInRoomDto } },
+    message: { name: 'ChatBanUserDto', payload: { type: ChatBanUserDto } },
   })
   @SubscribeMessage(chatEvent.UNBAN)
   async onUnbanUser(
@@ -377,7 +377,7 @@ export class ChatGateway {
       return new ForbiddenException('You are not admin')
     // delete user from banned list
     try {
-      await this.chatService.deleteBannedUser(uid, roomId)
+      await this.chatService.addBannedUser(uid, roomId, 0)
     } catch (error) {
       return error
     }
