@@ -53,10 +53,15 @@ export class ChatGateway {
       const uid = Number(client.handshake.query.uid)
       if (uid !== undefined) {
         client.data.uid = Number(client.handshake.query.uid)
-      } else return client.disconnect()
+      } else {
+        return client.disconnect()
+      }
     } else {
       try {
-        const decoded = jwt.verify(token, jwtConstants.secret) as jwt.JwtPayload
+        const decoded = jwt.verify(
+          token.trim(),
+          jwtConstants.secret,
+        ) as jwt.JwtPayload
         if (decoded.uidType !== 'user' || decoded.twoFactorPassed !== true) {
           return client.disconnect()
         }

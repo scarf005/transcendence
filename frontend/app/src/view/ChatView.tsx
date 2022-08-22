@@ -39,9 +39,12 @@ export const ChatView = ({ socket }: { socket?: ChatSocket }) => {
     }
     const { uid } = me
     socket.on('NOTICE', (res: Message) => {
+      console.log(res)
       if (res.senderUid === uid) {
         queryClient.invalidateQueries(['chat', 'me'])
       }
+      if (showChat.roomId >= 1)
+        queryClient.invalidateQueries(['chat', showChat.roomId, 'list'])
     })
     return () => {
       socket.removeAllListeners('NOTICE')

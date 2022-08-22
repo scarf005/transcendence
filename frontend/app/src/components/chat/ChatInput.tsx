@@ -15,23 +15,10 @@ export const ChatInput = ({ sendMsg, me }: Props) => {
     setText('')
   }
   let isMuted = false
-  if (me) isMuted = me.endOfMute > new Date()
+  if (me) isMuted = new Date(me.endOfMute) > new Date()
 
   if (isMuted)
-    return (
-      <TextField
-        label="Send Text"
-        placeholder="관리자에 의하여 MUTE 중입니다"
-        value={text}
-        InputProps={{
-          endAdornment: (
-            <Button>
-              <Send />
-            </Button>
-          ),
-        }}
-      />
-    )
+    return <TextField label="관리자에 의하여 MUTE 중입니다" value={text} />
   else {
     return (
       <TextField

@@ -44,7 +44,7 @@ export const PwdModal = (prop: {
       },
       (res: any) => {
         if (res.status === 400) {
-          setErrMsg('비밀번호가 다릅니다')
+          setErrMsg('방에 입장할 수 없습니다')
           return
         } else if (res.status === 200) {
           setErrMsg('OK')

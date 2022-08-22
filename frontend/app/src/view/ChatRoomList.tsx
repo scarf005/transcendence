@@ -28,8 +28,11 @@ export const ChatRoomList = (prop: {
 }) => {
   const [modal, setModal] = useState(false)
   const joinRoom = (room: number, type: string) => {
-    prop.socket.emit('JOIN', { roomId: room })
-    prop.setShowChat({ bool: true, roomId: room, roomType: type })
+    prop.socket.emit('JOIN', { roomId: room }, (res: any) => {
+      if (res.status === 200)
+        prop.setShowChat({ bool: true, roomId: room, roomType: type })
+      else if (res.status === 400) return
+    })
   }
 
   return (

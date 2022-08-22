@@ -59,11 +59,23 @@ export interface Unmutesetting {
   uid: number
 }
 
+export interface userStatus {
+  roomId: number
+  uid: number
+  type: string
+}
+export interface Bansetting {
+  roomId: number
+  uid: number
+  banSec: number
+}
+
 type Response = { status: number; [key: string]: any }
 type cb = (res: Response) => void
 export type Chat = Omit<Message, 'roomId'>
 export type MessageHandler = (message: Message, fn?: cb) => void
 export type UserHandler = (user: UserInRoom, fn?: cb) => void
+export type StatusHandler = (status: userStatus) => void
 // TODO: response dto 작성
 interface ClientToServerEvents {
   SEND: MessageHandler
@@ -76,12 +88,14 @@ interface ClientToServerEvents {
   REMOVE_ADMIN: (data: adminSetting) => void
   MUTE: (data: Mutesetting) => void
   UNMUTE: (data: Unmutesetting) => void
+  BAN: (data: Bansetting) => void
 }
 
 interface ServerToClientEvents {
   RECEIVE: MessageHandler
   NOTICE: MessageHandler
   DESTROYED: MessageHandler
+  CHATUSER_STATUS: StatusHandler
 }
 
 export type ChatSocket = Socket<ServerToClientEvents, ClientToServerEvents>
