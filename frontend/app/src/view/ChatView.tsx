@@ -42,9 +42,12 @@ export const ChatView = ({ socket }: { socket?: ChatSocket }) => {
       console.log(res)
       if (res.senderUid === uid) {
         queryClient.invalidateQueries(['chat', 'me'])
+        if (res.msgContent === 'banned')
+          setShowChat((showChat) => {
+            return { ...showChat, bool: false }
+          })
       }
-      if (showChat.roomId >= 1)
-        queryClient.invalidateQueries(['chat', showChat.roomId, 'list'])
+      queryClient.invalidateQueries(['chat'])
     })
     return () => {
       socket.removeAllListeners('NOTICE')

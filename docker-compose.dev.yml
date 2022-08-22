@@ -13,20 +13,6 @@ services:
     networks:
       - internal
 
-  storybook:
-    build:
-      context: frontend
-      dockerfile: Dockerfile.dev.storybook
-    restart: always
-    volumes:
-      - "./frontend/app:/app"
-    expose:
-      - 6006
-    networks:
-      - internal
-    logging:
-      driver: none
-
   reverse_proxy:
     build: reverse_proxy
     restart: always

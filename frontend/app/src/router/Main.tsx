@@ -7,6 +7,7 @@ import { io, Socket } from 'socket.io-client'
 import { usePongSocket, useChatSocket } from 'hook'
 
 import { ChatSocket } from 'data'
+import axios from 'axios'
 
 export const PongSocketContext = createContext<Socket | undefined>(undefined)
 export const ChatSocketContext = createContext<ChatSocket | undefined>(

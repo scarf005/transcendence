@@ -76,6 +76,7 @@ export const MemberList = ({ chatusers, refUser, roomInfo }: Props) => {
                   user={otherUser}
                   refUser={meForOption}
                   roomInfo={roomInfo}
+                  off={off}
                 />
               </>
             ) : null}
