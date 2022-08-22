@@ -523,7 +523,11 @@ export class ChatGateway {
     client.join(newRoom.id.toString())
     console.log(`chat: ${inviter} has entered to ${newRoom.id}`)
 
-    this.chatService.addUserToRoom(invitee, newRoom.id)
+    try {
+      await this.chatService.addUserToRoom(invitee, newRoom.id)
+    } catch (error) {
+      return error
+    }
     const sockets = await this.chatService.getSocketByUid(this.server, invitee)
     sockets.forEach(async (el) => {
       el.join(newRoom.id.toString())

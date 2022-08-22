@@ -7,7 +7,7 @@ import {
 
 export async function setupAsyncApi(app: INestApplication): Promise<void> {
   const server: AsyncServerObject = {
-    url: 'http://localhost:3000/api/chat?query={uid}',
+    url: 'http://localhost:3000/api/chat?uid={uid}',
     protocol: 'socket.io',
     protocolVersion: '4',
     description:
