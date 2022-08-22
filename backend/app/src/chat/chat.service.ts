@@ -339,4 +339,16 @@ export class ChatService {
       (soc) => soc.data && soc.data.uid && soc.data.uid === uid,
     )
   }
+
+  async getRoomDmByUid(uid1: number, uid2: number) {
+    const room = await this.chatRoomRepository
+      .createQueryBuilder('chatRoom')
+      .where('chatRoom.roomtype = :roomtype', { roomtype: RoomType.DM })
+      .andWhere('user.uid = :uid', { uid: uid1 })
+      .andWhere('user.uid = :uid', { uid: uid2 })
+      .leftJoin('chatRoom.chatUser', 'chatUser')
+      .leftJoin('chatUser.user', 'user')
+      .getOne()
+    return room
+  }
 }
