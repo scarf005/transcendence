@@ -123,6 +123,25 @@ export class ChatService {
     })
   }
 
+  async createDM(creatorId: number, roomTitle: string): Promise<ChatRoom> {
+    if (roomTitle.search(/^\w{2,30}$/) === -1)
+      throw new BadRequestException('RoomTitle is invalid')
+    const room = new ChatRoom()
+    let chatuser = new ChatUser()
+    const user = await this.userService.findSimpleOneByUid(creatorId)
+    chatuser.user = user
+    chatuser = await this.chatUserRepository.save(chatuser).catch(() => {
+      throw new InternalServerErrorException('ChatUser not created')
+    })
+    room.name = roomTitle
+    room.chatUser = []
+    room.roomtype = RoomType.DM
+    room.chatUser.push(chatuser)
+    return await this.chatRoomRepository.save(room).catch(() => {
+      throw new InternalServerErrorException('Room not created')
+    })
+  }
+
   async removeUserFromRoom(uid: number, roomId: number) {
     const room = await this.chatRoomRepository.findOne({
       select: ['chatUser'],
