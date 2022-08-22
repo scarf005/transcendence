@@ -10,18 +10,12 @@ import { ApiProperty } from '@nestjs/swagger'
 import { ChatRoom } from './chatroom.entity'
 
 @Entity()
-export class ChatUser {
+export class BanUser {
   @PrimaryGeneratedColumn()
   id: number
 
-  @Column({ default: false })
-  isAdmin: boolean
-
-  @Column({ default: false })
-  isOwner: boolean
-
   @Column({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
-  endOfMute: Date
+  endOfBan: Date
 
   @ManyToOne(() => ChatRoom, (chatRoom) => chatRoom.chatUser, {
     onDelete: 'CASCADE',

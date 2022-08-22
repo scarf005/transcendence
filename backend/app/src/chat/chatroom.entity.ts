@@ -7,6 +7,7 @@ import {
 } from 'typeorm'
 import { ChatUser } from './chatuser.entity'
 import { RoomType } from './roomtype.enum'
+import { BanUser } from './banuser.entity'
 
 @Entity()
 export class ChatRoom {
@@ -22,10 +23,11 @@ export class ChatRoom {
   @Column({ nullable: true })
   password: string
 
-  @Column('int', { array: true, default: [] })
-  bannedIds: number[]
-
   @OneToMany(() => ChatUser, (chatUser) => chatUser.room, { cascade: true })
   @JoinTable()
   chatUser: ChatUser[]
+
+  @OneToMany(() => BanUser, (banUser) => banUser.room, { cascade: true })
+  @JoinTable()
+  banUser: BanUser[]
 }

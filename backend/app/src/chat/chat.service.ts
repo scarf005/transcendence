@@ -15,6 +15,7 @@ import { User } from 'user/user.entity'
 import * as bcrypt from 'bcryptjs'
 import { Status } from 'user/status.enum'
 import { Server } from 'socket.io'
+import { BanUser } from './banuser.entity'
 
 @Injectable()
 export class ChatService {
@@ -23,6 +24,8 @@ export class ChatService {
     private chatRoomRepository: Repository<ChatRoom>,
     @InjectRepository(ChatUser)
     private chatUserRepository: Repository<ChatUser>,
+    @InjectRepository(BanUser)
+    private banUserRepository: Repository<BanUser>,
     private readonly userService: UserService,
   ) {}
 
@@ -76,6 +79,7 @@ export class ChatService {
     if (password) room.password = await bcrypt.hash(password, 10)
     room.name = roomTitle
     room.chatUser = []
+    room.banUser = []
     room.roomtype = roomType
     room.chatUser.push(chatuser)
     return await this.chatRoomRepository.save(room).catch(() => {
@@ -96,9 +100,14 @@ export class ChatService {
   ): Promise<ChatRoom> {
     const room = await this.chatRoomRepository.findOne({
       where: { id: roomId },
-      relations: ['chatUser', 'chatUser.user'],
+      relations: ['chatUser', 'chatUser.user', 'banUser', 'banUser.user'],
     })
     if (!room) throw new NotFoundException('Room not found')
+    room.banUser.map((banUser) => {
+      if (banUser.user.uid === uid) {
+        throw new BadRequestException('User is banned from this room')
+      }
+    })
     if (password && !isInvite) {
       if (!(await bcrypt.compare(password, room.password)))
         throw new BadRequestException('Password is wrong')
@@ -237,36 +246,50 @@ export class ChatService {
     return rooms
   }
 
-  async addMuteUser(uid: number, roomId: number, muteTime: number) {
+  async addMuteUser(uid: number, roomId: number, muteTimeSec: number) {
     const room = await this.chatRoomRepository.findOne({
       select: ['chatUser'],
       where: { id: roomId, chatUser: { user: { uid } } },
       relations: ['chatUser', 'chatUser.user'],
     })
     if (!room) throw new NotFoundException('Room not found or User not in room')
-    room.chatUser[0].endOfMute = new Date(Date.now() + muteTime * 1000)
+    room.chatUser[0].endOfMute = new Date(Date.now() + muteTimeSec * 1000)
     return this.chatUserRepository.save(room.chatUser[0])
   }
 
-  async addBannedUser(uid: number, roomId: number, banTime: number) {
+  async addBannedUser(uid: number, roomId: number, banTimeSec: number) {
     const room = await this.chatRoomRepository.findOne({
-      select: ['chatUser'],
-      where: { id: roomId, chatUser: { user: { uid } } },
-      relations: ['chatUser', 'chatUser.user'],
+      where: { id: roomId },
+      relations: ['banUser', 'banUser.user', 'chatUser', 'chatUser.user'],
     })
-    if (!room) throw new NotFoundException('Room not found or User not in room')
-    room.chatUser[0].endOfBan = new Date(Date.now() + banTime * 1000)
-    return this.chatUserRepository.save(room.chatUser[0])
+    if (!room) throw new NotFoundException('Room not found')
+    let chatuser: ChatUser
+    if (
+      !room.chatUser.find((chatUser) => {
+        if (chatUser.user.uid === uid) {
+          chatuser = chatUser
+          return true
+        }
+      })
+    )
+      throw new NotFoundException('User not in room')
+    let banuser = new BanUser()
+    banuser.user = chatuser.user
+    banuser.endOfBan = new Date(Date.now() + banTimeSec * 1000)
+    banuser = await this.banUserRepository.save(banuser)
+    room.banUser.push(banuser)
+    await this.chatRoomRepository.save(room)
+    return await this.chatUserRepository.delete(chatuser.id)
   }
 
   async isBanned(uid: number, roomId: number) {
     const room = await this.chatRoomRepository.findOne({
-      select: ['chatUser'],
-      where: { id: roomId, chatUser: { user: { uid } } },
-      relations: ['chatUser', 'chatUser.user'],
+      select: ['banUser'],
+      where: { id: roomId, banUser: { user: { uid } } },
+      relations: ['banUser', 'banUser.user'],
     })
     if (!room) false
-    if (room.chatUser[0].endOfBan > new Date()) return true
+    if (room.banUser[0].endOfBan > new Date()) return true
     return false
   }
 
