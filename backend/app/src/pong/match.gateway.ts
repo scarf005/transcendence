@@ -24,7 +24,11 @@ type PongKeyEvent = {
   key: 'up' | 'down' | 'stop'
 }
 
+/* websocket 테스트 클라이언트에서는 cors: true 키만 있어야 동작함
+추후 제출 시에는 다음과 같이 바꿔야 함:
 @WebSocketGateway({ namespace: 'api/pong', transports: ['websocket'] })
+*/
+@WebSocketGateway({ namespace: 'api/pong', cors: true })
 export class MatchGateWay implements OnGatewayDisconnect, OnGatewayConnection {
   constructor(
     private matchService: MatchService,

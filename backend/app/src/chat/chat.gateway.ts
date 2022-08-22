@@ -33,9 +33,13 @@ import { ChatMuteUserDto } from 'dto/chatMuteUser.dto'
 import { ChatUserEvent } from './chatuserEvent.enum'
 import { ChatUserStatusChangedDto } from 'dto/chatuserStatusChanged.dto'
 
+/* FIXME: websocket 테스트 클라이언트에서는 cors: true 키만 있어야 동작함
+추후 제출 시에는 다음과 같이 변경:
+@WebSocketGateway({ namespace: 'api/chat', transports: ['websocket'] })
+*/
 @AsyncApiService()
 @UsePipes(new WSValidationPipe())
-@WebSocketGateway({ namespace: 'api/chat', transports: ['websocket'] })
+@WebSocketGateway({ namespace: 'api/chat', cors: true })
 export class ChatGateway {
   constructor(private readonly chatService: ChatService) {}
   @WebSocketServer()
