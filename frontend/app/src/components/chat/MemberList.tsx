@@ -42,8 +42,9 @@ interface Props {
   chatusers: ChatUser[]
   /** 로그인한 사용자 */
   refUser: User
+  roomId: number
 }
-export const MemberList = ({ chatusers, refUser }: Props) => {
+export const MemberList = ({ chatusers, refUser, roomId }: Props) => {
   const [id, setId] = useState(refUser.uid)
   const [open, { on, off }] = useToggles(false)
   const users = chatusers.map(({ user }) => user)
@@ -71,7 +72,11 @@ export const MemberList = ({ chatusers, refUser }: Props) => {
             ) : otherUser ? (
               <>
                 <OtherProfile user={otherUser.user} refUser={refUser} />
-                <MemberListOption user={otherUser} refUser={meForOption} />
+                <MemberListOption
+                  user={otherUser}
+                  refUser={meForOption}
+                  roomId={roomId}
+                />
               </>
             ) : null}
           </Card>

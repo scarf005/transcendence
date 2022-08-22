@@ -44,6 +44,21 @@ export interface PasswordSetting {
   password?: string
 }
 
+export interface adminSetting {
+  roomId: number
+  uid: number
+}
+
+export interface Mutesetting {
+  roomId: number
+  uid: number
+  muteSec: number
+}
+export interface Unmutesetting {
+  roomId: number
+  uid: number
+}
+
 type Response = { status: number; [key: string]: any }
 type cb = (res: Response) => void
 export type Chat = Omit<Message, 'roomId'>
@@ -55,10 +70,12 @@ interface ClientToServerEvents {
   JOIN: (room: ChatJoinRoom, fn?: cb) => void
   LEAVE: (room: LeaveChatRoom, fn?: cb) => void
   CREATE: (room: ChatCreateRoom, fn?: cb) => void
-  ADD_ADMIN: UserHandler
-  REMOVE_ADMIN: UserHandler
   INVITE: (data: InviteRoom, fn?: cb) => void
   PASSWORD: (data: PasswordSetting, fn?: cb) => void
+  ADD_ADMIN: (data: adminSetting) => void
+  REMOVE_ADMIN: (data: adminSetting) => void
+  MUTE: (data: Mutesetting) => void
+  UNMUTE: (data: Unmutesetting) => void
 }
 
 interface ServerToClientEvents {

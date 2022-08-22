@@ -1,33 +1,72 @@
-import { Box, Button } from '@mui/material'
+import { Box, Button, Input } from '@mui/material'
 import { OtherUser, User, ChatUser } from 'data'
-import { useEffect, useState } from 'react'
+import { useContext, useEffect, useState, useRef } from 'react'
+import { ChatSocketContext } from '../router/Main'
 interface Props {
   // TODO: ChatUser 배열을 받아 추가 정보 표시?
   /** 모든 사용자 */
   user: ChatUser
   /** 로그인한 사용자 */
   refUser: ChatUser | undefined
+  roomId: number
 }
 
-export const MemberListOption = ({ user, refUser }: Props) => {
-  const [me, setMe] = useState('Nothing')
-  const [other, setOther] = useState('Nothing')
-  if (refUser === undefined) return <></>
+type UserType = 'Nothing' | 'Admin' | 'Owner'
+
+export const MemberListOption = ({ user, refUser, roomId }: Props) => {
+  const [me, setMe] = useState<UserType>('Nothing')
+  const [other, setOther] = useState<UserType>('Nothing')
+  const [adminMsg, setAdminMsg] = useState('관리자 지정')
+  const socket = useContext(ChatSocketContext)
+  const input = useRef<HTMLInputElement>()
+  const isMuted: boolean = user.endOfMute > new Date()
+  let muteText = 'MUTE'
+  if (isMuted) muteText = 'UNMUTE'
+  if (refUser === undefined || socket === undefined) return <></>
   useEffect(() => {
     if (refUser.isOwner) setMe('Owner')
     else if (refUser.isAdmin) setMe('Admin')
     else setMe('Nothing')
     if (user.isOwner) setOther('Owner')
-    else if (user.isAdmin) setOther('Admin')
-    else setOther('Nothing')
+    else if (user.isAdmin) {
+      setAdminMsg('관리자 지정 해제')
+      setOther('Admin')
+    } else {
+      setAdminMsg('관리자 지정')
+      setOther('Nothing')
+    }
   })
-
+  console.log(user)
+  const handleAdmin = () => {
+    if (other === 'Admin')
+      socket.emit('REMOVE_ADMIN', { roomId: roomId, uid: user.id })
+    else if (other === 'Nothing')
+      socket.emit('ADD_ADMIN', { roomId: roomId, uid: user.id })
+  }
+  const handleMute = () => {
+    if (input.current?.value && isMuted === false)
+      socket.emit('MUTE', {
+        roomId: roomId,
+        uid: user.id,
+        muteSec: parseInt(input.current.value),
+      })
+    else if (isMuted === true)
+      socket.emit('UNMUTE', {
+        roomId: roomId,
+        uid: user.id,
+      })
+  }
   return (
     <Box sx={{ display: 'flex' }} justifyContent="center">
       {me !== 'Nothing' && other !== 'Owner' ? (
         <>
           <Button variant="outlined" size="small">
-            MUTE
+            {isMuted ? (
+              <></>
+            ) : (
+              <Input ref={input} placeholder="초" onClick={handleMute} />
+            )}
+            {muteText}
           </Button>
           <Button variant="outlined" size="small">
             BAN
@@ -37,8 +76,8 @@ export const MemberListOption = ({ user, refUser }: Props) => {
         <></>
       )}
       {me !== 'Nothing' && other === 'Nothing' ? (
-        <Button variant="outlined" size="small">
-          관리자지정
+        <Button variant="outlined" size="small" onClick={handleAdmin}>
+          {adminMsg}
         </Button>
       ) : (
         <></>

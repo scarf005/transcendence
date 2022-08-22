@@ -67,6 +67,14 @@ export const ChatPanel = ({
     console.log(`sent msg: ${msg}`)
   }
 
+  const { data: me, isSuccess: meOk } = useApiQuery<User>(['user', 'me'])
+  const { data: chatusers, isSuccess: usersOk } = useApiQuery<ChatUser[]>([
+    'chat',
+    roomInfo.roomId,
+    'list',
+  ])
+  const mydata = chatusers?.find((user) => user.user.uid === me?.uid)
+
   return (
     <Grid container justifyContent="space-between">
       <Grid item xs={8}>
@@ -78,7 +86,7 @@ export const ChatPanel = ({
         <ExtraOptionPerRoom socket={socket} roomInfo={roomInfo} />
         {<MemberView roomId={roomInfo.roomId} />}
       </Grid>
-      <ChatInput sendMsg={sendMsg} />
+      <ChatInput sendMsg={sendMsg} me={mydata} />
       <LeaveButton onClick={() => leaveRoom(roomInfo.roomId)} />
     </Grid>
   )
