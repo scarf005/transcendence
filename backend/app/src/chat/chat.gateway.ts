@@ -17,7 +17,11 @@ import { ChatService } from './chat.service'
 import * as jwt from 'jsonwebtoken'
 import { jwtConstants } from 'configs/jwt-token.config'
 import { ChatRoom } from './chatroom.entity'
-import { ForbiddenException, UsePipes } from '@nestjs/common'
+import {
+  BadRequestException,
+  ForbiddenException,
+  UsePipes,
+} from '@nestjs/common'
 import { WSValidationPipe } from 'utils/WSValidationPipe'
 import { Status } from 'user/status.enum'
 import { ChatInviteDto } from 'dto/chatInvite.dto'
@@ -26,6 +30,8 @@ import { RoomPasswordCommand } from './roomPasswordCommand.enum'
 import { ChatInviteDMDto } from 'dto/chatInviteDM.dto'
 import { RoomType } from './roomtype.enum'
 import { ChatMuteUserDto } from 'dto/chatMuteUser.dto'
+import { ChatUserEvent } from './chatuserEvent.enum'
+import { ChatUserStatusChangedDto } from 'dto/chatuserStatusChanged.dto'
 
 @AsyncApiService()
 @UsePipes(new WSValidationPipe())
@@ -262,6 +268,7 @@ export class ChatGateway {
   @AsyncApiPub({
     channel: chatEvent.ADD_ADMIN,
     summary: 'uid를 roomId의 admin에 추가',
+    description: '성공하면 모든 참여자에게 CHATUSER_STATUS 이벤트 전송',
     message: { name: 'data', payload: { type: UserInRoomDto } },
   })
   @SubscribeMessage(chatEvent.ADD_ADMIN)
@@ -269,21 +276,22 @@ export class ChatGateway {
     @ConnectedSocket() client: Socket,
     @MessageBody() data: UserInRoomDto,
   ) {
-    if (
-      (await this.chatService.isAdmin(client.data.uid, data.roomId)) === false
-    )
+    const { roomId, uid } = data
+    if ((await this.chatService.isAdmin(client.data.uid, roomId)) === false)
       return new ForbiddenException('You are not admin')
     try {
-      await this.chatService.addUserAsAdmin(data.uid, data.roomId)
+      await this.chatService.addUserAsAdmin(uid, roomId)
     } catch (error) {
       return error
     }
+    this.onUserUpdateded(roomId, uid, ChatUserEvent.ADMIN_ADDED)
     return { status: 200 }
   }
 
   @AsyncApiPub({
     channel: chatEvent.REMOVE_ADMIN,
     summary: 'uid를  roomId의 admin에서 삭제',
+    description: '성공하면 모든 참여자에게 CHATUSER_STATUS 이벤트 전송',
     message: { name: 'data', payload: { type: UserInRoomDto } },
   })
   @SubscribeMessage(chatEvent.REMOVE_ADMIN)
@@ -291,15 +299,15 @@ export class ChatGateway {
     @ConnectedSocket() client: Socket,
     @MessageBody() data: UserInRoomDto,
   ) {
-    if (
-      (await this.chatService.isAdmin(client.data.uid, data.roomId)) === false
-    )
+    const { roomId, uid } = data
+    if ((await this.chatService.isAdmin(client.data.uid, roomId)) === false)
       return new ForbiddenException('You are not admin')
     try {
-      await this.chatService.removeUserAsAdmin(data.uid, data.roomId)
+      await this.chatService.removeUserAsAdmin(uid, roomId)
     } catch (error) {
       return error
     }
+    this.onUserUpdateded(roomId, uid, ChatUserEvent.ADMIN_REMOVED)
     return { status: 200 }
   }
 
@@ -377,7 +385,7 @@ export class ChatGateway {
     channel: chatEvent.MUTE,
     summary: 'uid를 muteSec초동안 mute시킴',
     description:
-      'admin이 아닐 땐 403 리턴, uid가 보낸 메시지는 roomId내에서 muteSec초동안 아무에게도 전달되지 않음',
+      'admin이 아닐 땐 403 리턴, uid가 보낸 메시지는 roomId내에서 muteSec초동안 아무에게도 전달되지 않음\n\n모든 참여자에게 CHATUSER_STATUS 이벤트 전송',
     message: { name: 'ChatMuteUserDto', payload: { type: ChatMuteUserDto } },
   })
   @SubscribeMessage(chatEvent.MUTE)
@@ -390,12 +398,15 @@ export class ChatGateway {
     // check if client is admin
     if ((await this.chatService.isAdmin(client.data.uid, roomId)) === false)
       return new ForbiddenException('You are not admin')
+    if (data.muteSec === undefined || data.muteSec === null)
+      return new BadRequestException('muteSec is required')
     try {
       await this.chatService.addMuteUser(target, roomId, muteSec)
     } catch (error) {
       return error
     }
     console.log(`${target} in is muted for ${muteSec} seconds in ${roomId}`)
+    this.onUserUpdateded(roomId, target, ChatUserEvent.MUTED)
     return { status: 200 }
   }
 
@@ -403,7 +414,7 @@ export class ChatGateway {
     channel: chatEvent.UNMUTE,
     summary: 'uid의 mute 상태를 해제',
     description:
-      'admin이 아닐 땐 403 리턴, uid가 보낸 메시지를 roomId의 모든 참여자가 수신할 수 있음',
+      'admin이 아닐 땐 403 리턴, uid가 보낸 메시지를 roomId의 모든 참여자가 수신할 수 있음\n\n모든 참여자에게 CHATUSER_STATUS 이벤트 전송',
     message: { name: 'ChatMuteUserDto', payload: { type: ChatMuteUserDto } },
   })
   @SubscribeMessage(chatEvent.UNMUTE)
@@ -422,6 +433,7 @@ export class ChatGateway {
       return error
     }
     console.log(`${target} in is unmuted in ${roomId}`)
+    this.onUserUpdateded(roomId, target, ChatUserEvent.UNMUTED)
     return { status: 200 }
   }
 
@@ -531,5 +543,23 @@ export class ChatGateway {
       return error
     }
     return { status: 200 }
+  }
+
+  @AsyncApiSub({
+    channel: chatEvent.CHATUSER_STATUS,
+    summary: 'room 참여자의 일부 상태 변경',
+    description: 'mute, unmute, addAdmin, removeAdmin이 성공했을 때',
+    message: {
+      name: 'ChatUserStatusChanged',
+      payload: { type: ChatUserStatusChangedDto },
+    },
+  })
+  async onUserUpdateded(roomId: number, uid: number, eventType: ChatUserEvent) {
+    const data: ChatUserStatusChangedDto = {
+      roomId: roomId,
+      uid: uid,
+      type: eventType,
+    }
+    this.server.to(roomId.toString()).emit(chatEvent.CHATUSER_STATUS, data)
   }
 }

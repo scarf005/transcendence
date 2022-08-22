@@ -1,0 +1,6 @@
+export enum ChatUserEvent {
+  ADMIN_ADDED = 'ADMIN_ADDED',
+  ADMIN_REMOVED = 'ADMIN_REMOVED',
+  MUTED = 'MUTED',
+  UNMUTED = 'UNMUTED',
+}

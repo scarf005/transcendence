@@ -15,4 +15,5 @@ export const chatEvent = {
   UNBAN: 'UNBAN',
   MUTE: 'MUTE',
   UNMUTE: 'UNMUTE',
+  CHATUSER_STATUS: 'CHATUSER_STATUS',
 } as const
