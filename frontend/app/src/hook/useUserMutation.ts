@@ -5,6 +5,7 @@ import { queryClient } from './queryClient'
 
 export const refreshUsers = () => {
   queryClient.invalidateQueries(['user'])
+  queryClient.invalidateQueries(['chat'])
 }
 
 export const addFriendMutation = () => {
@@ -59,7 +60,9 @@ export const renameMutation = () => {
   return useMutation(
     (nickname: string) =>
       axios.post('/api/user/nickname', { nickname }, { headers }),
-    { onSuccess: () => queryClient.invalidateQueries(['user', 'me']) },
+    {
+      onSuccess: () => refreshUsers(),
+    },
   )
 }
 
@@ -73,6 +76,8 @@ export const avatarChangeMutation = () => {
 
       return axios.post('/api/avatar/change', formdata, { headers })
     },
-    { onSuccess: () => queryClient.invalidateQueries(['user', 'me']) },
+    {
+      onSuccess: () => refreshUsers(),
+    },
   )
 }
