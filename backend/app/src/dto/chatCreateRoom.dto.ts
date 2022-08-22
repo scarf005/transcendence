@@ -14,7 +14,8 @@ export class ChatCreateRoomDto {
   title: string
 
   @ApiProperty({
-    description: 'PROTECTED는 암호 필요, PRIVATE은 초대받은 사용자만 입장 가능',
+    description:
+      'PROTECTED는 암호 필요, PRIVATE은 초대받은 사용자만 입장 가능\n\nDM은 CREATE로 만들 수 없고, INVITE_DM을 써야 함',
     enum: RoomType,
   })
   @IsEnum(RoomType)

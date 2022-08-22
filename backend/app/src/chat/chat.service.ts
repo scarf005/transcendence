@@ -132,20 +132,28 @@ export class ChatService {
     })
   }
 
-  async createDM(creatorId: number, roomTitle: string): Promise<ChatRoom> {
+  async createDmRoom(
+    uid1: number,
+    uid2: number,
+    roomTitle: string,
+  ): Promise<ChatRoom> {
     if (roomTitle.search(/^\w{2,30}$/) === -1)
       throw new BadRequestException('RoomTitle is invalid')
     const room = new ChatRoom()
-    let chatuser = new ChatUser()
-    const user = await this.userService.findSimpleOneByUid(creatorId)
-    chatuser.user = user
-    chatuser = await this.chatUserRepository.save(chatuser).catch(() => {
+    const chatuser1 = new ChatUser()
+    chatuser1.user = await this.userService.findSimpleOneByUid(uid1)
+    await this.chatUserRepository.save(chatuser1).catch(() => {
+      throw new InternalServerErrorException('ChatUser not created')
+    })
+    const chatuser2 = new ChatUser()
+    chatuser2.user = await this.userService.findSimpleOneByUid(uid2)
+    await this.chatUserRepository.save(chatuser2).catch(() => {
       throw new InternalServerErrorException('ChatUser not created')
     })
     room.name = roomTitle
     room.chatUser = []
     room.roomtype = RoomType.DM
-    room.chatUser.push(chatuser)
+    room.chatUser.push(chatuser1, chatuser2)
     return await this.chatRoomRepository.save(room).catch(() => {
       throw new InternalServerErrorException('Room not created')
     })
