@@ -99,9 +99,6 @@ export class ChatService {
       relations: ['chatUser', 'chatUser.user'],
     })
     if (!room) throw new NotFoundException('Room not found')
-    if (room.bannedIds.includes(uid)) {
-      throw new BadRequestException('User is banned')
-    }
     if (password && !isInvite) {
       if (!(await bcrypt.compare(password, room.password)))
         throw new BadRequestException('Password is wrong')
@@ -232,36 +229,26 @@ export class ChatService {
     return this.chatUserRepository.save(room.chatUser[0])
   }
 
-  async addBannedUser(uid: number, roomId: number) {
+  async addBannedUser(uid: number, roomId: number, banTime: number) {
     const room = await this.chatRoomRepository.findOne({
-      where: { id: roomId },
+      select: ['chatUser'],
+      where: { id: roomId, chatUser: { user: { uid } } },
       relations: ['chatUser', 'chatUser.user'],
     })
-    if (!room) throw new NotFoundException('Room not found')
-    let chatuser: ChatUser
-    if (
-      !room.chatUser.find((chatUser) => {
-        if (chatUser.user.uid === uid) {
-          chatuser = chatUser
-          return true
-        }
-      })
-    )
-      throw new NotFoundException('User not in room')
-    room.bannedIds.push(uid)
-    await this.chatRoomRepository.save(room)
-    return await this.chatUserRepository.delete(chatuser.id)
+    if (!room) throw new NotFoundException('Room not found or User not in room')
+    room.chatUser[0].endOfBan = new Date(Date.now() + banTime * 1000)
+    return this.chatUserRepository.save(room.chatUser[0])
   }
 
-  async deleteBannedUser(uid: number, roomId: number) {
+  async isBanned(uid: number, roomId: number) {
     const room = await this.chatRoomRepository.findOne({
-      select: ['id', 'bannedIds'],
-      where: { id: roomId },
+      select: ['chatUser'],
+      where: { id: roomId, chatUser: { user: { uid } } },
+      relations: ['chatUser', 'chatUser.user'],
     })
-    if (!room) throw new NotFoundException('Room not found or User not in room')
-    if (!room.bannedIds.find((id) => id === uid)) return
-    room.bannedIds = room.bannedIds.filter((id) => id !== uid)
-    return this.chatRoomRepository.save(room)
+    if (!room) false
+    if (room.chatUser[0].endOfBan > new Date()) return true
+    return false
   }
 
   async isMuted(uid: number, roomId: number) {

@@ -24,6 +24,9 @@ export class ChatUser extends BaseEntity {
   @Column({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
   endOfMute: Date
 
+  @Column({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
+  endOfBan: Date
+
   @ManyToOne(() => ChatRoom, (chatRoom) => chatRoom.chatUser, {
     onDelete: 'CASCADE',
   })
