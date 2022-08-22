@@ -32,7 +32,6 @@
     "react-hook-form": "^7.34.2",
     "react-hook-form-mui": "^5.5.1",
     "react-router-dom": "^6.3.0",
-    "react-scripts": "5.0.1",
     "react-use": "^17.4.0",
     "socket.io-client": "^4.5.1",
     "styled-components": "^5.3.5",
@@ -94,7 +93,8 @@
     "babel-plugin-named-exports-order": "^0.0.2",
     "prop-types": "^15.8.1",
     "storybook": "^6.5.10",
-    "webpack": "^5.74.0"
+    "webpack": "^5.74.0",
+    "react-scripts": "5.0.1"
   },
   "prettier": "@scarf005/prettier-config-transcendence"
 }
