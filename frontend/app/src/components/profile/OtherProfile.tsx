@@ -78,16 +78,6 @@ const Actions = ({
         <AddFriendButton onClick={() => addFriend.mutate(selfUid)} />
       )}
       <BlockButton onClick={() => block.mutate(selfUid)} />
-      {chatSocket && otherUser && me ? (
-        <MessageButton
-          onClick={() => {
-            const title = strtrim(`DM${me}${otherUser}`)
-            createDM(chatSocket, title)
-            queryClient.invalidateQueries(['chat', 'me'])
-            navigate('/chat')
-          }}
-        />
-      ) : null}
       {isInGame ? (
         <JoinGameAsSpectatorButton
           onClick={() => {
