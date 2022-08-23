@@ -52,8 +52,8 @@ export class ChatService {
       .createQueryBuilder('chatRoom')
       .select(['chatRoom.id', 'chatRoom.name', 'chatRoom.roomtype'])
       .where('chatRoom.id != ALL(:roomIds)', { roomIds: roomIds })
-      .andWhere('chatRoom.roomtype != :roomtype', {
-        roomtype: RoomType.PRIVATE,
+      .andWhere('chatRoom.roomtype != ALL(:roomtype)', {
+        roomtype: [RoomType.DM, RoomType.PRIVATE],
       })
       .orderBy('chatRoom.id', 'ASC')
       .getMany()

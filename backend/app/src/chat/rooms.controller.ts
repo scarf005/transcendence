@@ -24,7 +24,7 @@ export class RoomsController {
   @Get('/joinlist')
   @UseGuards(JwtAfterTwoFactorUserGuard)
   @ApiOperation({
-    summary: '본인이 들어간 방과 privatef 를 제외한 모든 채팅방을 가져오는 API',
+    summary: '본인이 들어간 방과 private 를 제외한 모든 채팅방을 가져오는 API',
     description: 'auth token 에서 uid 추출',
   })
   @ApiOkResponse({ type: ChatRoomDto, isArray: true })
