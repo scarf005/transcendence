@@ -154,6 +154,7 @@ export class ChatService {
     room.chatUser = []
     room.roomtype = RoomType.DM
     room.chatUser.push(chatuser1, chatuser2)
+    room.dmParticipantsUid = [uid1, uid2]
     return await this.chatRoomRepository.save(room).catch(() => {
       throw new InternalServerErrorException('Room not created')
     })
@@ -421,11 +422,34 @@ export class ChatService {
     const room = await this.chatRoomRepository
       .createQueryBuilder('chatRoom')
       .where('chatRoom.roomtype = :roomtype', { roomtype: RoomType.DM })
-      .andWhere('user.uid = :uid', { uid: uid1 })
-      .andWhere('user.uid = :uid', { uid: uid2 })
-      .leftJoin('chatRoom.chatUser', 'chatUser')
-      .leftJoin('chatUser.user', 'user')
+      .andWhere('chatRoom.dmParticipantsUid <@ :uids', { uids: [uid1, uid2] })
       .getOne()
     return room
+  }
+
+  async getDmRoomByRoomId(roomId: number) {
+    const room = await this.chatRoomRepository.findOne({
+      select: ['id', 'roomtype', 'dmParticipantsUid'],
+      where: { id: roomId },
+    })
+    if (room.roomtype !== RoomType.DM) return
+    return room
+  }
+
+  async isDmRoom(roomId: number) {
+    const room = await this.chatRoomRepository.findOne({
+      select: ['id', 'roomtype'],
+      where: { id: roomId },
+    })
+    if (room.roomtype === RoomType.DM) return true
+    return false
+  }
+
+  async getDmRoomParticipants(roomId: number): Promise<number[]> {
+    const room = await this.chatRoomRepository.findOne({
+      select: ['id', 'dmParticipantsUid'],
+      where: { id: roomId },
+    })
+    return room.dmParticipantsUid
   }
 }

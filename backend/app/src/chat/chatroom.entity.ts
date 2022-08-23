@@ -30,4 +30,7 @@ export class ChatRoom {
   @OneToMany(() => BanUser, (banUser) => banUser.room, { cascade: true })
   @JoinTable()
   banUser: BanUser[]
+
+  @Column('int', { nullable: true, array: true })
+  dmParticipantsUid: number[]
 }

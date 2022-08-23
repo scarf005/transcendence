@@ -107,18 +107,33 @@ export class ChatGateway {
     @ConnectedSocket() client: Socket,
     @MessageBody() data: ChatMessageDto,
   ) {
+    const { roomId, msgContent } = data
+    const dmroom = await this.chatService.getDmRoomByRoomId(roomId)
+    if (dmroom) {
+      // roomId 의 roomtype이 DM이면 구성원 force join
+      for (const uid of dmroom.dmParticipantsUid) {
+        const sockets = await this.chatService.getSocketByUid(this.server, uid)
+        for (const soc of sockets) {
+          try {
+            await this.chatService.addUserToRoom(uid, roomId)
+          } catch (error) {}
+          soc.join(roomId.toString())
+        }
+        this.emitNotice(uid, roomId, 'join')
+      }
+    }
     let isMuted: boolean
     try {
-      isMuted = await this.chatService.isMuted(client.data.uid, data.roomId)
+      isMuted = await this.chatService.isMuted(client.data.uid, roomId)
     } catch (error) {
       return error
     }
     if (!isMuted) {
-      console.log(`chat: ${client.data.uid} sent ${data.msgContent}`)
+      console.log(`chat: ${client.data.uid} sent ${msgContent}`)
       this.broadcastMessage(client, data)
     } else {
       console.log(
-        `chat: ${client.data.uid} sent message but is muted in ${data.roomId}`,
+        `chat: ${client.data.uid} sent message but is muted in ${roomId}`,
       )
     }
     return { status: 200 }
@@ -166,7 +181,6 @@ export class ChatGateway {
       return error
     }
     client.join(room.roomId.toString())
-    console.log(`chat: ${client.data.uid} has entered to ${room.roomId}`)
     this.emitNotice(client.data.uid, room.roomId, 'join')
     return { status: 200 }
   }
@@ -242,6 +256,7 @@ export class ChatGateway {
       msgContent: msg,
       createdAt: new Date(),
     }
+    console.log(`chat: ${uid} has entered to ${roomId}`)
     this.server.to(roomId.toString()).emit(chatEvent.NOTICE, data)
   }
 
@@ -273,7 +288,6 @@ export class ChatGateway {
       return error
     }
     client.join(newRoom.id.toString())
-    console.log(`chat: ${client.data.uid} has entered to ${newRoom.id}`)
     this.emitNotice(client.data.uid, newRoom.id, 'join')
     return { status: 200 }
   }
@@ -481,7 +495,6 @@ export class ChatGateway {
       }
       soc.join(roomId.toString())
     }
-    console.log(`chat: ${invitee} has entered to ${roomId}`)
     // room의 모두에게 NOTICE 전송
     this.emitNotice(invitee, roomId, 'join')
   }
@@ -505,11 +518,12 @@ export class ChatGateway {
     // inviter, invitee 둘이 속한 DM방이 있는지 확인
     const room = await this.chatService.getRoomDmByUid(inviter, invitee)
     if (room) {
-      return new BadRequestException(
-        `DM for ${inviter} and ${invitee} already exists(roomId ${room.id})`,
-      )
+      return {
+        status: 400,
+        roomId: room.id,
+        message: `DM for ${inviter} and ${invitee} already exists(roomId ${room.id})`,
+      }
     }
-
     // create new DM room
     let newRoom: ChatRoom
     try {
@@ -518,13 +532,11 @@ export class ChatGateway {
       return error
     }
     client.join(newRoom.id.toString())
-    console.log(`chat: ${inviter} has entered to ${newRoom.id}`)
 
     const sockets = await this.chatService.getSocketByUid(this.server, invitee)
     sockets.forEach(async (el) => {
       el.join(newRoom.id.toString())
     })
-    console.log(`chat: ${invitee} has entered to ${newRoom.id}`)
 
     this.emitNotice(inviter, newRoom.id, 'join')
     this.emitNotice(invitee, newRoom.id, 'join')
