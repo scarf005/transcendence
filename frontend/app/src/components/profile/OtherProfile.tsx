@@ -78,6 +78,15 @@ const Actions = ({
         <AddFriendButton onClick={() => addFriend.mutate(selfUid)} />
       )}
       <BlockButton onClick={() => block.mutate(selfUid)} />
+      {chatSocket ? (
+        <MessageButton
+          onClick={() => {
+            chatSocket.emit('INVITE_DM', { invitee: selfUid }, () =>
+              navigate('/chat'),
+            )
+          }}
+        />
+      ) : null}
       {isInGame ? (
         <JoinGameAsSpectatorButton
           onClick={() => {

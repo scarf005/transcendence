@@ -69,7 +69,10 @@ export interface Bansetting {
   uid: number
   banSec: number
 }
-
+interface ChatInviteDm {
+  /** DM 받을 사람의 uid */
+  invitee: number
+}
 type Response = { status: number; [key: string]: any }
 type cb = (res: Response) => void
 export type Chat = Omit<Message, 'roomId'>
@@ -83,6 +86,7 @@ interface ClientToServerEvents {
   LEAVE: (room: LeaveChatRoom, fn?: cb) => void
   CREATE: (room: ChatCreateRoom, fn?: cb) => void
   INVITE: (data: InviteRoom, fn?: cb) => void
+  INVITE_DM: (data: ChatInviteDm, fn?: cb) => void
   PASSWORD: (data: PasswordSetting, fn?: cb) => void
   ADD_ADMIN: (data: adminSetting) => void
   REMOVE_ADMIN: (data: adminSetting) => void
