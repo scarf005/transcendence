@@ -1,3 +1,4 @@
 extends: "@scarf005/eslint-config-transcendence"
 rules:
   "@typescript-eslint/no-unused-vars": off
+  "@typescript-eslint/naming-convention": off

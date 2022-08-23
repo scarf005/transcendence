@@ -1,34 +1,71 @@
-import { Box, Paper, Stack } from '@mui/material'
-import { styled } from '@mui/material/styles'
-import { JoinedRoom } from 'data'
+import {
+  Avatar,
+  AvatarGroup,
+  Box,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
+  Stack,
+} from '@mui/material'
+import { ChatUser, JoinedRoom, User } from 'data'
+import { useApiQuery } from 'hook'
 
-const Item = styled(Paper)(({ theme }) => ({
-  backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
-  ...theme.typography.body2,
-  padding: theme.spacing(1),
-  textAlign: 'center',
-  color: theme.palette.text.secondary,
-}))
+export const ChatRoomAvatars = ({ id }: { id: number }) => {
+  const { data: chatUsers } = useApiQuery<ChatUser[]>(['chat', id, 'list'])
+  const { data: me } = useApiQuery<User>(['user', 'me'])
 
-export const JoinedRoomList = (prop: {
+  if (!chatUsers || !me) return <Avatar />
+
+  const users = chatUsers
+    .map((u) => u.user)
+    .filter((u) => u.uid !== me.uid)
+    .slice(0, 6)
+
+  return (
+    <AvatarGroup total={users.length}>
+      {users.map((user) => (
+        <Avatar key={user.uid} src={user.avatar} />
+      ))}
+    </AvatarGroup>
+  )
+}
+
+interface ItemProps {
+  chatRoom: JoinedRoom
+  changeView: (id: number, roomType: string) => void
+}
+export const JoinedRoomItem = ({ chatRoom, changeView }: ItemProps) => {
+  return (
+    <ListItem
+      key={chatRoom.id}
+      onClick={() => changeView(chatRoom.id, chatRoom.roomtype)}
+    >
+      <ListItemAvatar>
+        <ChatRoomAvatars id={chatRoom.id} />
+      </ListItemAvatar>
+      <ListItemText primary={chatRoom.name} secondary={`#${chatRoom.id}`} />
+    </ListItem>
+  )
+}
+
+interface Props {
   room: JoinedRoom[]
   setShowChat: any
-}) => {
+}
+export const JoinedRoomList = ({ room, setShowChat }: Props) => {
   const changeView = (id: number, roomType: string) => {
-    prop.setShowChat({ bool: true, roomId: id, roomType: roomType })
+    setShowChat({ bool: true, roomId: id, roomType: roomType })
   }
   return (
-    <Box sx={{ width: '100%' }}>
-      <Stack spacing={2}>
-        {prop.room.map((chatRoom: JoinedRoom) => (
-          <Item
-            key={chatRoom.id}
-            onClick={() => changeView(chatRoom.id, chatRoom.roomtype)}
-          >
-            {`${chatRoom.name}#${chatRoom.id}`}
-          </Item>
-        ))}
-      </Stack>
-    </Box>
+    <List>
+      {room.map((chatRoom) => (
+        <JoinedRoomItem
+          key={chatRoom.id}
+          chatRoom={chatRoom}
+          changeView={changeView}
+        />
+      ))}
+    </List>
   )
 }

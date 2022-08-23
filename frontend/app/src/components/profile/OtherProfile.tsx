@@ -81,9 +81,10 @@ const Actions = ({
       {chatSocket ? (
         <MessageButton
           onClick={() => {
-            chatSocket.emit('INVITE_DM', { invitee: selfUid }, () =>
-              navigate('/chat'),
-            )
+            chatSocket.emit('INVITE_DM', { invitee: selfUid }, () => {
+              queryClient.invalidateQueries(['chat'])
+              navigate('/chat')
+            })
           }}
         />
       ) : null}
