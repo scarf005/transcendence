@@ -1,7 +1,8 @@
 import { Box, Button, Input } from '@mui/material'
 import { OtherUser, User, ChatUser, BanUser } from 'data'
 import { useContext, useEffect, useState, useRef } from 'react'
-import { ChatSocketContext } from '../router/Main'
+import { useNavigate } from 'react-router-dom'
+import { ChatSocketContext, PongSocketContext } from '../router/Main'
 interface Props {
   // TODO: ChatUser 배열을 받아 추가 정보 표시?
   /** 모든 사용자 */
@@ -52,7 +53,7 @@ export const MemberListOption = ({ user, refUser, roomInfo, off }: Props) => {
   // const [banSec, setBanSec] = useState<string>('')
   let muteText = 'MUTE'
   if (isMuted) muteText = 'UNMUTE'
-  if (refUser === undefined || socket === undefined) return <></>
+  if (refUser === undefined || socket === undefined) return null
   useEffect(() => {
     if (refUser.isOwner) setMe('Owner')
     else if (refUser.isAdmin) setMe('Admin')
@@ -100,9 +101,11 @@ export const MemberListOption = ({ user, refUser, roomInfo, off }: Props) => {
   if (roomInfo.roomType === 'DM')
     return (
       <Box sx={{ display: 'flex' }} justifyContent="center">
-        <Button variant="outlined" size="small">
-          게임초대
-        </Button>
+        <InviteGameButton
+          user={user.user}
+          refUser={refUser.user}
+          roomId={roomInfo.roomId}
+        />
       </Box>
     )
   else {
@@ -112,7 +115,7 @@ export const MemberListOption = ({ user, refUser, roomInfo, off }: Props) => {
           <Box sx={{ display: 'flex' }} justifyContent="center">
             <Button variant="outlined" size="small" onClick={handleMute}>
               {/* {isMuted ? (
-                <></>
+                null
               ) : (
                 <Input
                   onChange={(e) => setMuteSec(e.target.value)}
@@ -125,22 +128,55 @@ export const MemberListOption = ({ user, refUser, roomInfo, off }: Props) => {
               BAN
             </Button>
           </Box>
-        ) : (
-          <></>
-        )}
+        ) : null}
         <Box sx={{ display: 'flex' }} justifyContent="center">
           {me !== 'Nothing' && other !== 'Owner' ? (
             <Button variant="outlined" size="small" onClick={handleAdmin}>
               {adminMsg}
             </Button>
-          ) : (
-            <></>
-          )}
-          <Button variant="outlined" size="small">
-            게임초대
-          </Button>
+          ) : null}
+          <InviteGameButton
+            user={user.user}
+            refUser={refUser.user}
+            roomId={roomInfo.roomId}
+          />
         </Box>
       </>
     )
   }
+}
+interface InviteButtonProps {
+  user: OtherUser
+  refUser: OtherUser
+  roomId: number
+}
+const InviteGameButton = ({ user, refUser, roomId }: InviteButtonProps) => {
+  const chatSocket = useContext(ChatSocketContext)
+  const pongSocket = useContext(PongSocketContext)
+  const navigate = useNavigate()
+
+  if (!chatSocket || !pongSocket) return null
+
+  return (
+    <Button
+      variant="outlined"
+      size="small"
+      onClick={() => {
+        pongSocket.emit('match', {
+          isPrivate: true,
+          mode: 'classic', // 선택기능 추가
+        })
+        chatSocket.emit('SEND', {
+          senderUid: user.uid,
+          msgContent: `${refUser.nickname}님이 게임에 초대하였습니다`,
+          roomId: roomId,
+          inviteUid: user.uid,
+          createdAt: new Date(),
+        })
+        navigate('/game') // TODO: 상대방 수락시 실행되어야함
+      }}
+    >
+      게임초대
+    </Button>
+  )
 }

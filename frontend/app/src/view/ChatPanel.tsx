@@ -96,7 +96,7 @@ export const ChatPanel = ({
       </Grid>
       <Grid item xs={4}>
         <ExtraOptionPerRoom socket={socket} roomInfo={roomInfo} />
-        {<MemberView roomInfo={roomInfo} />}
+        <MemberView roomInfo={roomInfo} />
       </Grid>
       <ChatInput sendMsg={sendMsg} me={mydata} />
       <LeaveButton onClick={() => leaveRoom(roomInfo.roomId)} />

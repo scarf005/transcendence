@@ -28,4 +28,13 @@ export class ChatMessageDto {
   @IsOptional()
   @ApiProperty({ description: '생성일' })
   createdAt?: Date
+
+  @ApiProperty({
+    description: '게임 초대시 상대방 id. 포함 시 게임 초대 메시지로 변함',
+    nullable: true,
+    required: false,
+  })
+  @IsNumber()
+  @IsOptional()
+  inviteUid?: number
 }

@@ -9,18 +9,14 @@ import {
   Stack,
 } from '@mui/material'
 import { ChatUser, JoinedRoom, User } from 'data'
-import { useApiQuery } from 'hook'
+import { useChatUsersQuery } from 'hook'
 
 export const ChatRoomAvatars = ({ id }: { id: number }) => {
-  const { data: chatUsers } = useApiQuery<ChatUser[]>(['chat', id, 'list'])
-  const { data: me } = useApiQuery<User>(['user', 'me'])
+  const { data: chatUsers } = useChatUsersQuery(['chat', id, 'list'])
 
-  if (!chatUsers || !me) return <Avatar />
+  if (!chatUsers) return <Avatar />
 
-  const users = chatUsers
-    .map((u) => u.user)
-    .filter((u) => u.uid !== me.uid)
-    .slice(0, 6)
+  const users = chatUsers.map((u) => u.user).slice(0, 6)
 
   return (
     <AvatarGroup total={users.length}>

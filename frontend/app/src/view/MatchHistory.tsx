@@ -49,7 +49,7 @@ export const MatchHistory = ({ matches }: MatchHistoryProps) => {
         </Paper>
       </Grid>
       {matches.map((match) => (
-        <Match {...match} />
+        <Match key={match.timestamp} {...match} />
       ))}
     </Grid>
   )

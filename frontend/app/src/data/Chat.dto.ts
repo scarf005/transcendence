@@ -4,10 +4,13 @@ import { Socket } from 'socket.io-client'
 
 /** {@link backend/src/data/Chat.dto} */
 export interface Message {
+  /** 보낸 사람 uid */
   senderUid: number
   msgContent: string
   roomId: number
   createdAt: Date
+  /** 초대할 사용자 uid */
+  inviteUid?: number
 }
 export interface ChatJoinRoom {
   roomId: number
