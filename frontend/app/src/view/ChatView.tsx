@@ -2,7 +2,7 @@ import axios from 'axios'
 import { useState, useEffect } from 'react'
 import { ChatRoomList } from './ChatRoomList'
 import { JoinedRoomList } from './JoinedRoomList'
-import { Grid, Divider, Typography, Button } from '@mui/material'
+import { Grid, Divider, Typography, Button, Chip } from '@mui/material'
 import { BasicModal } from './CreateRoomModal'
 import { JoinedRoom, Room, Message, ChatSocket, User } from 'data'
 import { ChatPanel } from './ChatPanel'
@@ -121,7 +121,7 @@ export const ChatView = ({ socket }: { socket?: ChatSocket }) => {
             참여 가능한 방
           </Button>
           <Divider />
-          <Typography variant="h6" padding="1rem" textAlign="center">
+          <Typography variant="subtitle1" padding="1rem" textAlign="center">
             참여 중인 채팅 리스트
           </Typography>
           {joinedRoomList ? (

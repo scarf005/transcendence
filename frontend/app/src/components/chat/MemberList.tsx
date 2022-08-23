@@ -1,5 +1,5 @@
 import { Card, List, Modal, Container, Box, Button } from '@mui/material'
-import { OtherUser, User, ChatUser } from 'data'
+import { OtherUser, User, ChatUser, BanUser } from 'data'
 import { useToggles } from 'hook'
 import { partition } from 'utility'
 import { ProfileDisplay } from 'components'
@@ -7,7 +7,7 @@ import { useState } from 'react'
 import { ListSubheader } from '@mui/material'
 import { ProfileListItem } from 'components'
 import { MyProfile, OtherProfile } from 'components'
-import { MemberListOption } from '../../view/MemberListOption'
+import { MemberListOption, OptionForBanned } from '../../view/MemberListOption'
 
 interface SectionProps {
   title: string
@@ -43,19 +43,28 @@ interface Props {
   /** 로그인한 사용자 */
   refUser: User
   roomInfo: { bool: boolean; roomId: number; roomType: string }
+  banusers: BanUser[]
 }
-export const MemberList = ({ chatusers, refUser, roomInfo }: Props) => {
+export const MemberList = ({
+  chatusers,
+  refUser,
+  roomInfo,
+  banusers,
+}: Props) => {
   const [id, setId] = useState(refUser.uid)
   const [open, { on, off }] = useToggles(false)
   const users = chatusers.map(({ user }) => user)
   const otherUser = chatusers.find((user) => user.user.uid === id)
   const isMe = id === refUser.uid
-  const meForOption = chatusers.find((user) => user.user.uid === refUser.uid)
+  const meForOption: ChatUser | undefined = chatusers.find(
+    (user) => user.user.uid === refUser.uid,
+  )
   const openModal = (uid: number) => {
     on()
     setId(uid)
   }
-
+  const bannedUsers = banusers.map(({ user }) => user)
+  const bannedUser = banusers.find((user) => user.user.uid === id)
   const [onlineUsers, offlineUsers] = partition(
     users,
     (user) => user.status !== 'OFFLINE',
@@ -79,6 +88,16 @@ export const MemberList = ({ chatusers, refUser, roomInfo }: Props) => {
                   off={off}
                 />
               </>
+            ) : bannedUser ? (
+              <>
+                <OtherProfile user={bannedUser.user} refUser={refUser} />
+                <OptionForBanned
+                  user={bannedUser}
+                  refUser={meForOption}
+                  roomInfo={roomInfo}
+                  off={off}
+                />
+              </>
             ) : null}
           </Card>
         </Box>
@@ -92,6 +111,11 @@ export const MemberList = ({ chatusers, refUser, roomInfo }: Props) => {
       <Section
         title={`오프라인 - ${offlineUsers.length}`}
         users={offlineUsers as User[]}
+        onClick={openModal}
+      />
+      <Section
+        title={`밴유저 - ${bannedUsers.length}`}
+        users={bannedUsers as User[]}
         onClick={openModal}
       />
     </List>

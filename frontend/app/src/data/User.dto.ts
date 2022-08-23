@@ -26,3 +26,8 @@ export interface ChatUser {
   endOfMute: Date
   user: OtherUser
 }
+
+export interface BanUser {
+  id: number
+  user: OtherUser
+}

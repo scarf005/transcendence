@@ -67,7 +67,6 @@ export interface userStatus {
 export interface Bansetting {
   roomId: number
   uid: number
-  banSec: number
 }
 interface ChatInviteDm {
   /** DM 받을 사람의 uid */
@@ -93,6 +92,7 @@ interface ClientToServerEvents {
   MUTE: (data: Mutesetting) => void
   UNMUTE: (data: Unmutesetting) => void
   BAN: (data: Bansetting) => void
+  UNBAN: (data: Bansetting) => void
 }
 
 interface ServerToClientEvents {

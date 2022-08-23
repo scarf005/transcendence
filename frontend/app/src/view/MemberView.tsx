@@ -1,4 +1,9 @@
-import { useApiQuery, useUserQuery, useChatUsersQuery } from 'hook'
+import {
+  useApiQuery,
+  useUserQuery,
+  useChatUsersQuery,
+  useBanUsersQuery,
+} from 'hook'
 
 import { MemberList } from 'components'
 import { ChatUser, User } from 'data'
@@ -14,10 +19,23 @@ export const MemberView = ({ roomInfo }: Props) => {
     roomInfo.roomId,
     'list',
   ])
+  const { data: banusers, isSuccess: banOK } = useBanUsersQuery([
+    'chat',
+    roomInfo.roomId,
+    'ban',
+    'list',
+  ])
 
-  if (meOk && usersOk) {
+  if (meOk && usersOk && banOK) {
     // const users = chatusers.map(({ user }) => user)
-    return <MemberList chatusers={chatusers} refUser={me} roomInfo={roomInfo} />
+    return (
+      <MemberList
+        chatusers={chatusers}
+        refUser={me}
+        roomInfo={roomInfo}
+        banusers={banusers}
+      />
+    )
   }
 
   return <div>Loading...</div>

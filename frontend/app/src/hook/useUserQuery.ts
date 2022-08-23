@@ -1,6 +1,6 @@
 import { getAuthHeader } from './getAuthHeader'
 import { useQuery } from '@tanstack/react-query'
-import { ChatUser, OtherUser, User } from 'data'
+import { ChatUser, OtherUser, User, BanUser } from 'data'
 import axios, { AxiosError } from 'axios'
 import { MINUTE } from 'utility/time'
 import { getDataFn, ApiOptions } from './useApiQuery'
@@ -14,6 +14,17 @@ const mapUserAvatar = async (user: User) => {
   })
 
   user.avatar = window.URL.createObjectURL(blob)
+  return user
+}
+
+const mapBanUserAvatar = async (user: BanUser) => {
+  const { headers } = getAuthHeader()
+  const { data: blob } = await axios.get<Blob>(user.user.avatar, {
+    headers,
+    responseType: 'blob',
+  })
+
+  user.user.avatar = window.URL.createObjectURL(blob)
   return user
 }
 
@@ -41,6 +52,11 @@ const getChatUsersFn = (key: ['chat', number, 'list']) => async () => {
   return Promise.all(chatUsers.map((chatUser) => mapChatUserAvatar(chatUser)))
 }
 
+const getBanUsersFn = (key: ['chat', number, 'ban', 'list']) => async () => {
+  const BanUsers = await getDataFn<BanUser[]>(key)()
+  return Promise.all(BanUsers.map((BanUser) => mapBanUserAvatar(BanUser)))
+}
+
 export const useUserQuery = (key: UserApiKey) =>
   useQuery<User, AxiosError>(key, getUserFn(key))
 
@@ -51,3 +67,8 @@ export const useChatUsersQuery = (
   key: ['chat', number, 'list'],
   options?: ApiOptions,
 ) => useQuery<ChatUser[], AxiosError>(key, getChatUsersFn(key), options)
+
+export const useBanUsersQuery = (
+  key: ['chat', number, 'ban', 'list'],
+  options?: ApiOptions,
+) => useQuery<BanUser[], AxiosError>(key, getBanUsersFn(key), options)

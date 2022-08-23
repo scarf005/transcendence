@@ -1,5 +1,5 @@
 import { Box, Button, Input } from '@mui/material'
-import { OtherUser, User, ChatUser } from 'data'
+import { OtherUser, User, ChatUser, BanUser } from 'data'
 import { useContext, useEffect, useState, useRef } from 'react'
 import { ChatSocketContext } from '../router/Main'
 interface Props {
@@ -12,7 +12,35 @@ interface Props {
   off: () => void
 }
 
+interface BanProps {
+  user: BanUser
+  /** 로그인한 사용자 */
+  refUser: ChatUser | undefined
+  roomInfo: { bool: boolean; roomId: number; roomType: string }
+  off: () => void
+}
 type UserType = 'Nothing' | 'Admin' | 'Owner'
+
+export const OptionForBanned = ({ user, refUser, roomInfo, off }: BanProps) => {
+  const socket = useContext(ChatSocketContext)
+  if (refUser === undefined || socket === undefined) return <></>
+  const handleBan = () => {
+    socket.emit('UNBAN', {
+      roomId: roomInfo.roomId,
+      uid: user.user.uid,
+    })
+    off()
+  }
+  return (
+    <>
+      <Box sx={{ display: 'flex' }} justifyContent="center">
+        <Button variant="outlined" size="small" onClick={handleBan}>
+          UNBAN
+        </Button>
+      </Box>
+    </>
+  )
+}
 
 export const MemberListOption = ({ user, refUser, roomInfo, off }: Props) => {
   const [me, setMe] = useState<UserType>('Nothing')
@@ -21,7 +49,7 @@ export const MemberListOption = ({ user, refUser, roomInfo, off }: Props) => {
   const socket = useContext(ChatSocketContext)
   const isMuted: boolean = new Date(user.endOfMute) > new Date()
   // const [muteSec, setMuteSec] = useState<string>('')
-  const [banSec, setBanSec] = useState<string>('')
+  // const [banSec, setBanSec] = useState<string>('')
   let muteText = 'MUTE'
   if (isMuted) muteText = 'UNMUTE'
   if (refUser === undefined || socket === undefined) return <></>
@@ -63,15 +91,11 @@ export const MemberListOption = ({ user, refUser, roomInfo, off }: Props) => {
       })
   }
   const handleBan = () => {
-    if (!banSec) return
-    else if (banSec) {
-      socket.emit('BAN', {
-        roomId: roomInfo.roomId,
-        uid: user.user.uid,
-        banSec: parseInt(banSec),
-      })
-      off()
-    }
+    socket.emit('BAN', {
+      roomId: roomInfo.roomId,
+      uid: user.user.uid,
+    })
+    off()
   }
   if (roomInfo.roomType === 'DM')
     return (
@@ -98,10 +122,6 @@ export const MemberListOption = ({ user, refUser, roomInfo, off }: Props) => {
               {muteText}
             </Button>
             <Button variant="outlined" size="small" onClick={handleBan}>
-              <Input
-                onChange={(e) => setBanSec(e.target.value)}
-                placeholder="초"
-              />
               BAN
             </Button>
           </Box>
