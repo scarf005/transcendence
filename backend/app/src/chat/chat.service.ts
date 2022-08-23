@@ -242,6 +242,29 @@ export class ChatService {
     return room.chatUser
   }
 
+  async findBanUserByRoomid(id: number): Promise<BanUser[]> {
+    const room = await this.chatRoomRepository
+      .createQueryBuilder('chatRoom')
+      .select([
+        'chatRoom.id',
+        'banUser',
+        'user.uid',
+        'user.nickname',
+        'user.avatar',
+        'user.status',
+        'stat.win',
+        'stat.lose',
+        'stat.rating',
+      ])
+      .leftJoin('chatRoom.banUser', 'banUser')
+      .leftJoin('banUser.user', 'user')
+      .leftJoin('user.stat', 'stat')
+      .where('chatRoom.id = :id', { id })
+      .getOne()
+    if (!room) throw new NotFoundException('Room not found')
+    return room.banUser
+  }
+
   async findRoomsByUserId(uid: number): Promise<ChatRoom[]> {
     const rooms = await this.chatRoomRepository
       .createQueryBuilder('chatRoom')
@@ -265,7 +288,7 @@ export class ChatService {
     return this.chatUserRepository.save(room.chatUser[0])
   }
 
-  async addBannedUser(uid: number, roomId: number, banTimeSec: number) {
+  async addBannedUser(uid: number, roomId: number) {
     const room = await this.chatRoomRepository.findOne({
       where: { id: roomId },
       relations: ['banUser', 'banUser.user', 'chatUser', 'chatUser.user'],
@@ -283,11 +306,29 @@ export class ChatService {
       throw new NotFoundException('User not in room')
     let banuser = new BanUser()
     banuser.user = chatuser.user
-    banuser.endOfBan = new Date(Date.now() + banTimeSec * 1000)
     banuser = await this.banUserRepository.save(banuser)
     room.banUser.push(banuser)
     await this.chatRoomRepository.save(room)
     return await this.chatUserRepository.delete(chatuser.id)
+  }
+
+  async deleteBannedUser(uid: number, roomId: number) {
+    const room = await this.chatRoomRepository.findOne({
+      where: { id: roomId },
+      relations: ['banUser', 'banUser.user'],
+    })
+    if (!room) throw new NotFoundException('Room not found')
+    let banuser: BanUser
+    if (
+      !room.banUser.map((banUser) => {
+        if (banUser.user.uid === uid) {
+          banuser = banUser
+          return true
+        }
+      })
+    )
+      throw new NotFoundException('User not banned')
+    return await this.banUserRepository.delete(banuser.id)
   }
 
   async isBanned(uid: number, roomId: number) {
@@ -297,8 +338,7 @@ export class ChatService {
       relations: ['banUser', 'banUser.user'],
     })
     if (!room) false
-    if (room.banUser[0].endOfBan > new Date()) return true
-    return false
+    return true
   }
 
   async isMuted(uid: number, roomId: number) {

@@ -4,6 +4,7 @@ import { ChatService } from './chat.service'
 import { ApiTags, ApiOkResponse, ApiOperation } from '@nestjs/swagger'
 import { JwtAfterTwoFactorUserGuard } from 'auth/jwt.strategy'
 import { ChatUser } from './chatuser.entity'
+import { BanUser } from './banuser.entity'
 
 @Controller('/api/chat')
 @ApiTags('채팅 API')
@@ -53,5 +54,16 @@ export class RoomsController {
   @ApiOkResponse({ type: ChatUser, isArray: true })
   getChatroomUserList(@Param('id') id: number) {
     return this.chatService.findRoomByRoomid(id)
+  }
+
+  @Get('/:id/ban/list')
+  @UseGuards(JwtAfterTwoFactorUserGuard)
+  @ApiOperation({
+    summary: '채팅방 id로 채탕방의 밴 목록을 가져오는 API',
+    description: 'param 에서 id 추출',
+  })
+  @ApiOkResponse({ type: BanUser, isArray: true })
+  getChatroomBanList(@Param('id') id: number) {
+    return this.chatService.findBanUserByRoomid(id)
   }
 }
