@@ -404,6 +404,19 @@ export class ChatGateway {
       return error
     }
     console.log(`chat: ${uid} is unbanned from ${roomId}`)
+    // 모든 참여자에게 uid가 unban 됐음을 notice
+    const msg: ChatMessageDto = {
+      roomId: roomId,
+      senderUid: uid,
+      msgContent: 'unbanned',
+      createdAt: new Date(),
+    }
+    this.server.to(roomId.toString()).emit(chatEvent.NOTICE, msg)
+    // unban될 사용자에게 unban됐음을 notice
+    const sockets = await this.chatService.getSocketByUid(this.server, uid)
+    sockets.forEach(async (el) => {
+      el.emit(chatEvent.NOTICE, msg)
+    })
     return { status: 200 }
   }
 
