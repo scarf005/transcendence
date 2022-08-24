@@ -4,9 +4,17 @@ RUN apk add nginx
 
 COPY nginx.conf /etc/nginx/http.d/app.conf
 
-COPY app /app
 WORKDIR /app
 
-RUN npm ci && npm run build
+COPY app/*.yml /app/
+COPY app/*.json /app/
+
+RUN npm ci
+
+COPY app/public /app/public/
+
+COPY app/src /app/src/
+
+RUN npm run build
 
 ENTRYPOINT [ "nginx",  "-g", "daemon off;" ]

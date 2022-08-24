@@ -4,10 +4,14 @@ RUN apk add chromium
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD true
 
 COPY avatar /srv/uploads/avatar
-COPY app /app
 
 WORKDIR /app
 
+COPY app/*.yml /app/
+COPY app/*.json /app/
+
 RUN  npm ci
+
+COPY app/src /app/src/
 
 ENTRYPOINT [ "npm", "run", "start:dev" ]
