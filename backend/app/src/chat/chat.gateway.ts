@@ -516,7 +516,7 @@ export class ChatGateway {
     channel: chatEvent.INVITE_DM,
     summary: 'invitee와의 DM방 생성',
     description:
-      'dm방을 새로 만들고 sender와 invitee를 집어넣음. sender와 invitee에게 "join"을 NOTICE',
+      'dm방을 새로 만들고 sender와 invitee를 집어넣음. sender와 invitee에게 "join"을 NOTICE\n\nsender와 invitee를 위한 DM방이 이미 존재하고, sender가 그 방에 들어있으면 400과 roomId를 리턴',
     message: { name: 'ChatInviteDMDto', payload: { type: ChatInviteDMDto } },
   })
   @SubscribeMessage(chatEvent.INVITE_DM)
@@ -531,10 +531,23 @@ export class ChatGateway {
     // inviter, invitee 둘이 속한 DM방이 있는지 확인
     const room = await this.chatService.getRoomDmByUid(inviter, invitee)
     if (room) {
-      return {
-        status: 400,
-        roomId: room.id,
-        message: `DM for ${inviter} and ${invitee} already exists(roomId ${room.id})`,
+      if (await this.chatService.isUserInRoom(inviter, room.id)) {
+        return {
+          status: 400,
+          roomId: room.id,
+          message: `DM for ${inviter} and ${invitee} already exists(roomId ${room.id})`,
+        }
+      } else {
+        const sockets = await this.chatService.getSocketByUid(
+          this.server,
+          inviter,
+        )
+        sockets.forEach(async (el) => {
+          el.join(room.id.toString())
+          this.emitNotice(inviter, room.id, 'join')
+        })
+        this.chatService.addUserToRoom(inviter, room.id)
+        return { status: 200 }
       }
     }
     // create new DM room

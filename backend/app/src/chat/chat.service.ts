@@ -452,4 +452,17 @@ export class ChatService {
     })
     return room.dmParticipantsUid
   }
+
+  async isUserInRoom(uid: number, roomId: number) {
+    const room = await this.chatRoomRepository
+      .createQueryBuilder('chatRoom')
+      .select(['chatRoom.id', 'user.uid'])
+      .leftJoin('chatRoom.chatUser', 'chatUser')
+      .leftJoin('chatUser.user', 'user')
+      .where('chatRoom.id = :id', { id: roomId })
+      .andWhere('user.uid = (:uid)', { uid: uid })
+      .getOne()
+    if (room) return true
+    return false
+  }
 }
