@@ -8,6 +8,8 @@ import {
 } from 'components'
 import { User } from 'data'
 import { findUser } from 'utility'
+import { useApiQuery, useUsersQuery } from 'hook'
+import { useUserQuery } from 'hook'
 
 export interface Props {
   /** refUser를 제외한 모든 사용자 */
@@ -16,23 +18,28 @@ export interface Props {
   friends: User[]
   /** 로그인한 사용자 */
   refUser: User
+  setProfileId: (value: number) => void
 }
-export const UsersPanel = ({ users, friends, refUser }: Props) => {
-  const [id, setId] = useState(refUser.uid)
+export const UsersPanel = ({
+  users,
+  friends,
+  refUser,
+  setProfileId,
+}: Props) => {
   const [text, setText] = useState('')
   const seenUsers = text ? findUser(users, text) : friends
   const listname = text ? '검색 결과' : '친구 목록'
 
-  const isRefUser = id === refUser.uid
-  const currentUser = users.find((user) => user.uid === id) as User
-
   return (
     <Grid container justifyContent="space-between">
-      <Grid item xs={4} padding="1rem">
+      <Grid item xs={12} padding="1rem">
         <Typography variant="h5" padding="1rem">
           My Profile
         </Typography>
-        <ProfileListItem user={refUser} onClick={() => setId(refUser.uid)} />
+        <ProfileListItem
+          user={refUser}
+          onClick={() => setProfileId(refUser.uid)}
+        />
         <Divider />
         <Typography variant="h5" padding="1rem">
           {listname}
@@ -50,19 +57,33 @@ export const UsersPanel = ({ users, friends, refUser }: Props) => {
             <ProfileListItem
               key={u.uid}
               user={u}
-              onClick={() => setId(u.uid)}
+              onClick={() => setProfileId(u.uid)}
             />
           ))}
         </List>
       </Grid>
-      <VerticalDivider />
-      <Grid item xs={8} padding="100px">
-        {isRefUser ? (
-          <MyProfile user={refUser} />
-        ) : (
-          <OtherProfile user={currentUser} refUser={refUser} />
-        )}
-      </Grid>
+    </Grid>
+  )
+}
+
+export interface Prop {
+  id: number
+}
+
+export const MainProfileView = ({ id }: Prop) => {
+  const { data: refUser } = useUserQuery(['user', 'me'])
+  const { data: users } = useUsersQuery(['user'])
+  if (!refUser || !users || id === 0) return <div>Loading...</div>
+  const isRefUser = id === refUser.uid
+  const currentUser = users.find((user) => user.uid === id) as User
+
+  return (
+    <Grid item xs={12} padding="100px">
+      {isRefUser ? (
+        <MyProfile user={refUser} />
+      ) : (
+        <OtherProfile user={currentUser} refUser={refUser} />
+      )}
     </Grid>
   )
 }

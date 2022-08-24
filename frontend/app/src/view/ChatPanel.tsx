@@ -90,7 +90,7 @@ export const ChatPanel = ({
   return (
     <Grid container justifyContent="space-between">
       <Grid item xs={8}>
-        <Box style={{ height: '60vh', overflow: 'auto' }}>
+        <Box style={{ overflow: 'auto' }}>
           <ChatList chats={chats} />
         </Box>
       </Grid>

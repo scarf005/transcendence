@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import Checkbox from '@mui/material/Checkbox'
 import FormControlLabel from '@mui/material/FormControlLabel'
 import FormControl from '@mui/material/FormControl'
-import Button from '@mui/material/Button'
+import { Button, Grid, Box } from '@mui/material'
 import { ButtonGroup, Paper, Typography } from '@mui/material'
 type GameMode = 'classic' | 'sizedown' | 'speedup' | 'ranked'
 
@@ -59,48 +59,78 @@ export const PongMatchForm = (props: {
     })
   }
 
-  const changeIsPrivate = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setGameInfo({
-      mode: 'classic',
-      isPrivate: e.target.checked,
-    })
-  }
+  // const changeIsPrivate = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   setGameInfo({
+  //     mode: 'classic',
+  //     isPrivate: e.target.checked,
+  //   })
+  // }
 
-  return (
-    <FormControl>
-      <FormControlLabel
+  /* <FormControlLabel
         control={<Checkbox onChange={changeIsPrivate} />}
         label="친구와 함께하기"
-      />
-      <ButtonGroup>
-        <Button variant="contained" onClick={() => changeGameMode('classic')}>
-          Classic
-        </Button>
-        <Button variant="contained" onClick={() => changeGameMode('speedup')}>
-          Speed-Up
-        </Button>
-        <Button variant="contained" onClick={() => changeGameMode('sizedown')}>
-          Size-Down
-        </Button>
+      /> */
+
+  return (
+    <Grid container rowSpacing={6} marginBottom="1rem">
+      <Grid item xs={12} sm={6} marginTop="15%">
         <Button
           variant="contained"
+          fullWidth={true}
+          size="large"
+          onClick={() => changeGameMode('classic')}
+        >
+          Classic
+        </Button>
+      </Grid>
+      <Grid item xs={12} sm={6} marginTop="15%">
+        <Button
+          variant="contained"
+          fullWidth={true}
+          size="large"
+          onClick={() => changeGameMode('speedup')}
+        >
+          Speed-Up
+        </Button>
+      </Grid>
+      <Grid item xs={12} sm={6}>
+        <Button
+          variant="contained"
+          fullWidth={true}
+          size="large"
+          onClick={() => changeGameMode('sizedown')}
+        >
+          Size-Down
+        </Button>
+      </Grid>
+      <Grid item xs={12} sm={6}>
+        <Button
+          variant="contained"
+          fullWidth={true}
+          size="large"
           disabled={gameInfo.isPrivate}
           onClick={() => changeGameMode('ranked')}
         >
           Ranked
         </Button>
-      </ButtonGroup>
-      <Paper>
-        <ModeExplain mode={gameInfo.mode} />
-      </Paper>
-      <Button
-        variant="contained"
-        onClick={() => {
-          props.requestMatch(gameInfo)
-        }}
-      >
-        PLAY!
-      </Button>
-    </FormControl>
+      </Grid>
+
+      <Grid item xs={12}>
+        <Box>
+          <ModeExplain mode={gameInfo.mode} />
+        </Box>
+      </Grid>
+      <Grid item xs={12}>
+        <Button
+          fullWidth={true}
+          variant="contained"
+          onClick={() => {
+            props.requestMatch(gameInfo)
+          }}
+        >
+          PLAY!
+        </Button>
+      </Grid>
+    </Grid>
   )
 }

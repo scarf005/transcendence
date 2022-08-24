@@ -13,6 +13,12 @@ const Wrapper = styled.div`
   margin-bottom: 2px;
   background-color: black;
   position: relative;
+  align: center;
+`
+const DIV = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 `
 
 const PingPongComponent = `
@@ -100,20 +106,22 @@ export const MatchingView = (props: { handleCancel: () => void }) => {
 
   return (
     <div>
-      <Wrapper>
-        <ElapsedTime startedAt={Date.now()} />
-        <LeftPaddle />
-        <Ball />
-        <RightPaddle />
-      </Wrapper>
-      <MatchCancelButton
-        onClick={() => {
-          socket?.emit('cancelMatch')
-          props.handleCancel()
-        }}
-      >
-        매치 취소
-      </MatchCancelButton>
+      <DIV>
+        <Wrapper>
+          <ElapsedTime startedAt={Date.now()} />
+          <LeftPaddle />
+          <Ball />
+          <RightPaddle />
+        </Wrapper>
+        <MatchCancelButton
+          onClick={() => {
+            socket?.emit('cancelMatch')
+            props.handleCancel()
+          }}
+        >
+          매치 취소
+        </MatchCancelButton>
+      </DIV>
     </div>
   )
 }

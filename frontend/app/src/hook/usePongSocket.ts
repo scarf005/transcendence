@@ -1,7 +1,13 @@
 import { useState, useEffect } from 'react'
 import { useAuthSocket } from './useAuthSocket'
 
-type PongState = 'selectMode' | 'findMatch' | 'gameInfo' | 'play' | 'gameEnd'
+type PongState =
+  | 'selectMode'
+  | 'findMatch'
+  | 'gameInfo'
+  | 'play'
+  | 'gameEnd'
+  | 'history'
 
 export const usePongSocket = () => {
   const [gameState, setGameState] = useState<PongState>('selectMode')

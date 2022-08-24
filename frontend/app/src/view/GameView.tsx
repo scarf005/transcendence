@@ -1,9 +1,11 @@
 import { useState, useEffect, useContext } from 'react'
 import Pong, { PongResult } from './Pong'
 import { createTheme } from '@mui/material/styles'
+import { Typography } from '@mui/material'
 import GameGrid from './GameGrid'
 import { usePongSocket } from 'hook'
 import { MatchingView } from './MatchingView'
+import { MatchHistory } from './MatchHistory'
 
 const _theme = createTheme({
   palette: {
@@ -12,9 +14,21 @@ const _theme = createTheme({
     },
   },
 })
+type PongState =
+  | 'selectMode'
+  | 'findMatch'
+  | 'gameInfo'
+  | 'play'
+  | 'gameEnd'
+  | 'history'
 
-const GamePannel = (props: { requestMatch: (matchData: any) => void }) => {
-  return <GameGrid requestMatch={props.requestMatch} />
+export const GamePannel = (props: {
+  requestMatch: (matchData: any) => void
+  setState: React.Dispatch<React.SetStateAction<PongState>>
+}) => {
+  return (
+    <GameGrid requestMatch={props.requestMatch} setState={props.setState} />
+  )
 }
 
 export const GameView = ({
@@ -71,12 +85,13 @@ export const GameView = ({
   switch (gameState) {
     case 'selectMode':
       return (
-        <GamePannel
-          requestMatch={(matchData: any) => {
-            socket?.emit('match', matchData)
-            setGameState('findMatch')
-          }}
-        />
+        // <GamePannel
+        //   requestMatch={(matchData: any) => {
+        //     socket?.emit('match', matchData)
+        //     setGameState('findMatch')
+        //   }}
+        // />
+        <Typography marginTop="10%">게임 모드를 선택해주세요</Typography>
       )
 
     case 'findMatch':
@@ -87,6 +102,9 @@ export const GameView = ({
           }}
         />
       )
+
+    case 'history':
+      return <MatchHistory />
 
     case 'gameInfo':
     case 'play':

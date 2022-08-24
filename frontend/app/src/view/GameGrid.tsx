@@ -1,41 +1,33 @@
 import styled from 'styled-components'
 import { PongMatchForm } from './GameOption'
 import { MatchHistory } from './MatchHistory'
-import { useApiQuery } from 'hook'
-import { Stack } from '@mui/material'
+
+import { Stack, Button, Grid } from '@mui/material'
 
 const WithBorder = styled.div`
   border: 1px solid black;
   margin: 4px;
 `
+type PongState =
+  | 'selectMode'
+  | 'findMatch'
+  | 'gameInfo'
+  | 'play'
+  | 'gameEnd'
+  | 'history'
 
-const GameGrid = (props: { requestMatch: (matchData: any) => void }) => {
-  const { data, isSuccess } = useApiQuery<any>(['match'])
-
-  if (!isSuccess) {
-    return null
-  }
-
-  const matches = data.map((match: any) => {
-    return {
-      loser: match.loser.nickname,
-      winner: match.winner.nickname,
-      timestamp: match.endOfGame,
-    }
-  })
-
+const GameGrid = (props: {
+  requestMatch: (matchData: any) => void
+  setState: React.Dispatch<React.SetStateAction<PongState>>
+}) => {
   return (
-    <Stack direction="row">
-      <WithBorder>
-        <PongMatchForm requestMatch={props.requestMatch} />
-      </WithBorder>
-      <WithBorder>
-        <Stack width="50vw">
-          <div style={{ margin: '0.5rem' }}>매치 기록</div>
-          <MatchHistory matches={matches} />
-        </Stack>
-      </WithBorder>
-    </Stack>
+    <Grid direction="column" rowSpacing={3}>
+      <PongMatchForm requestMatch={props.requestMatch} />
+
+      <Button variant="contained" onClick={() => props.setState('history')}>
+        매치 기록
+      </Button>
+    </Grid>
   )
 }
 export default GameGrid

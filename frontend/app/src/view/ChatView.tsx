@@ -1,5 +1,11 @@
 import axios from 'axios'
-import { useState, useEffect } from 'react'
+import {
+  useState,
+  useEffect,
+  useContext,
+  Dispatch,
+  SetStateAction,
+} from 'react'
 import { ChatRoomList } from './ChatRoomList'
 import { JoinedRoomList } from './JoinedRoomList'
 import { Grid, Divider, Typography, Button, Chip } from '@mui/material'
@@ -9,26 +15,41 @@ import { ChatPanel } from './ChatPanel'
 import { getAuthHeader } from 'hook/getAuthHeader'
 import { queryClient, useApiQuery, useUserQuery } from 'hook'
 import { useMutation } from '@tanstack/react-query'
+import { ChatSocketContext } from '../router/Main'
 
 type Messages = {
   [roomId: number]: Message[]
 }
 
-export const ChatView = ({ socket }: { socket?: ChatSocket }) => {
+type ChatViewOption = {
+  bool: boolean
+  roomId: number
+  roomType: string
+}
+export interface Props {
+  messages: Messages
+  setMessages: (value: any) => void
+  showChat: ChatViewOption
+  setShowChat: Dispatch<
+    SetStateAction<{ bool: boolean; roomId: number; roomType: string }>
+  >
+}
+export const ChatView = ({
+  messages,
+  setMessages,
+  showChat,
+  setShowChat,
+}: Props) => {
+  const socket = useContext(ChatSocketContext)
   const [modal, setModal] = useState(false)
-  const [messages, setMessages] = useState<Messages>({})
-  const [showChat, setShowChat] = useState({
-    bool: false,
-    roomId: 0,
-    roomType: 'PUBLIC',
-  })
+
   const { data: me, isSuccess } = useUserQuery(['user', 'me'])
   const { data: chatRoomList } = useApiQuery<Room[]>(['chat', 'joinlist'])
   const { data: joinedRoomList } = useApiQuery<JoinedRoom[]>(['chat', 'me'])
 
   const updateRoom = () => {
     queryClient.invalidateQueries(['chat', 'joinlist'])
-    setShowChat((showChat) => {
+    setShowChat((showChat: ChatViewOption) => {
       return { ...showChat, bool: false }
     })
   }
@@ -43,7 +64,7 @@ export const ChatView = ({ socket }: { socket?: ChatSocket }) => {
       if (res.senderUid === uid) {
         queryClient.invalidateQueries(['chat', 'me'])
         if (res.msgContent === 'banned')
-          setShowChat((showChat) => {
+          setShowChat((showChat: ChatViewOption) => {
             return { ...showChat, bool: false }
           })
       }
@@ -66,7 +87,7 @@ export const ChatView = ({ socket }: { socket?: ChatSocket }) => {
       }
       console.log('incoming message')
       console.debug(msg)
-      setMessages((messages) => {
+      setMessages((messages: Messages) => {
         return {
           ...messages,
           [id]: messages[id] ? [...messages[id], msg] : [msg],
@@ -85,7 +106,7 @@ export const ChatView = ({ socket }: { socket?: ChatSocket }) => {
     socket.on('DESTROYED', () => {
       queryClient.invalidateQueries(['chat', 'me'])
       queryClient.invalidateQueries(['chat', 'joinlist'])
-      setShowChat((showChat) => {
+      setShowChat((showChat: ChatViewOption) => {
         return { ...showChat, bool: false }
       })
     })
@@ -94,17 +115,6 @@ export const ChatView = ({ socket }: { socket?: ChatSocket }) => {
     }
   }, [socket])
 
-  const leaveRoom = (roomId: number) => {
-    socket?.emit('LEAVE', { roomId }, () => {
-      queryClient.invalidateQueries(['chat', 'me'])
-      setShowChat((showChat) => {
-        return { ...showChat, bool: false }
-      })
-    })
-    // const newJoinedRoom = joinedRoomList.filter((el) => el.id !== roomId)
-    // setJoinedRoomList(newJoinedRoom)
-  }
-
   if (!isSuccess || socket === undefined) {
     return null
   }
@@ -112,7 +122,7 @@ export const ChatView = ({ socket }: { socket?: ChatSocket }) => {
   return (
     <>
       <Grid container justifyContent="space-between">
-        <Grid item xs={3} padding="1rem">
+        <Grid item xs={12} padding="1rem">
           <Button fullWidth={true} onClick={() => setModal(true)}>
             방만들기
           </Button>
@@ -130,37 +140,60 @@ export const ChatView = ({ socket }: { socket?: ChatSocket }) => {
             <Typography>Loading...</Typography>
           )}
         </Grid>
-        <Divider
-          orientation="vertical"
-          flexItem
-          style={{ marginRight: '-1px' }}
+      </Grid>
+    </>
+  )
+}
+
+export const MainChatView = ({
+  messages,
+  setMessages,
+  showChat,
+  setShowChat,
+}: Props) => {
+  const socket = useContext(ChatSocketContext)
+  const { data: chatRoomList } = useApiQuery<Room[]>(['chat', 'joinlist'])
+  if (socket === undefined) return null
+
+  const leaveRoom = (roomId: number) => {
+    socket?.emit('LEAVE', { roomId }, () => {
+      queryClient.invalidateQueries(['chat', 'me'])
+      setShowChat((showChat: ChatViewOption) => {
+        return { ...showChat, bool: false }
+      })
+    })
+    // const newJoinedRoom = joinedRoomList.filter((el) => el.id !== roomId)
+    // setJoinedRoomList(newJoinedRoom)
+  }
+  return (
+    <Grid item xs={12} padding="100px">
+      {showChat.bool ? (
+        <ChatPanel
+          chats={messages[showChat.roomId] ? messages[showChat.roomId] : []}
+          socket={socket}
+          roomInfo={showChat}
+          leaveRoom={leaveRoom}
         />
-        <Grid item xs={9} padding="100px">
-          {showChat.bool ? (
-            <ChatPanel
-              chats={messages[showChat.roomId] ? messages[showChat.roomId] : []}
-              socket={socket}
-              roomInfo={showChat}
-              leaveRoom={leaveRoom}
-            />
-          ) : (
-            <div>
+      ) : (
+        <>
+          {chatRoomList && chatRoomList.length ? (
+            <>
               <Typography variant="h6" padding="1rem" textAlign="center">
                 참여 가능한 채팅 리스트
               </Typography>
-              {chatRoomList ? (
-                <ChatRoomList
-                  list={chatRoomList}
-                  socket={socket}
-                  setShowChat={setShowChat}
-                />
-              ) : (
-                <Typography>Loading...</Typography>
-              )}
-            </div>
+              <ChatRoomList
+                list={chatRoomList}
+                socket={socket}
+                setShowChat={setShowChat}
+              />
+            </>
+          ) : chatRoomList ? (
+            <Typography>참여 가능한 채팅방이 없습니다</Typography>
+          ) : (
+            <Typography>Loading...</Typography>
           )}
-        </Grid>
-      </Grid>
-    </>
+        </>
+      )}
+    </Grid>
   )
 }

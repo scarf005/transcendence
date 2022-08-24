@@ -1,4 +1,5 @@
 import { Grid, Paper, Typography } from '@mui/material'
+import { useApiQuery } from 'hook'
 
 type Match = {
   winner: string
@@ -30,7 +31,19 @@ const Match = (props: Match) => {
   )
 }
 
-export const MatchHistory = ({ matches }: MatchHistoryProps) => {
+export const MatchHistory = () => {
+  const { data, isSuccess } = useApiQuery<any>(['match'])
+  if (!isSuccess) {
+    return null
+  }
+
+  const matches = data.map((match: any) => {
+    return {
+      loser: match.loser.nickname,
+      winner: match.winner.nickname,
+      timestamp: match.endOfGame,
+    }
+  })
   return (
     <Grid container columnSpacing={2} rowSpacing={2}>
       <Grid item xs={4}>
@@ -48,7 +61,7 @@ export const MatchHistory = ({ matches }: MatchHistoryProps) => {
           <Typography>패배</Typography>
         </Paper>
       </Grid>
-      {matches.map((match) => (
+      {matches.map((match: Match) => (
         <Match key={match.timestamp} {...match} />
       ))}
     </Grid>
