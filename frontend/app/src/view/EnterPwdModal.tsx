@@ -1,4 +1,10 @@
-import React, { useRef, useState } from 'react'
+import React, {
+  Dispatch,
+  SetStateAction,
+  useContext,
+  useRef,
+  useState,
+} from 'react'
 import {
   Box,
   Input,
@@ -8,9 +14,14 @@ import {
   Radio,
   Typography,
   Modal,
+  Skeleton,
 } from '@mui/material'
 import { Socket } from 'socket.io-client'
-import { Message } from 'data'
+import { ChatSocket, Message } from 'data'
+import { ChatViewOption } from './ChatView'
+import { useRecoilState } from 'recoil'
+import { selectedChatState } from 'hook'
+import { ChatSocketContext } from 'router'
 
 const style = {
   position: 'absolute',
@@ -24,22 +35,22 @@ const style = {
   p: 4,
 }
 
-export const PwdModal = (prop: {
-  modal: boolean
-  setModal: (value: boolean) => void
-  setShowChat: any
-  socket: any
+interface Prop {
+  open: boolean
+  off: () => void
   roomId: number
-}) => {
+}
+export const PwdModal = ({ open, off, roomId }: Prop) => {
+  const socket = useContext(ChatSocketContext)
+  const [_, setSelectedChat] = useRecoilState(selectedChatState)
   const input = useRef<HTMLInputElement>()
-  const handleClose = () => prop.setModal(false)
   const [errMsg, setErrMsg] = useState('')
 
-  const roomPwdCheck = () => {
-    prop.socket.emit(
+  const roomPwdCheck = (socket: ChatSocket) => {
+    socket.emit(
       'JOIN',
       {
-        roomId: prop.roomId,
+        roomId,
         password: input.current?.value,
       },
       (res: any) => {
@@ -48,8 +59,8 @@ export const PwdModal = (prop: {
           return
         } else if (res.status === 200) {
           setErrMsg('OK')
-          handleClose()
-          prop.setShowChat({ bool: true, roomId: prop.roomId })
+          off()
+          setSelectedChat((prev) => ({ ...prev, roomId, bool: true }))
         }
       },
     )
@@ -58,8 +69,8 @@ export const PwdModal = (prop: {
   return (
     <div>
       <Modal
-        open={prop.modal}
-        onClose={handleClose}
+        open={open}
+        onClose={off}
         aria-labelledby="modal-modal-title"
         aria-describedby="modal-modal-description"
       >
@@ -72,9 +83,13 @@ export const PwdModal = (prop: {
             {errMsg}
           </Typography>
 
-          <Button onClick={roomPwdCheck} fullWidth={true}>
-            비밀번호 입력
-          </Button>
+          {socket ? (
+            <Button onClick={() => roomPwdCheck(socket)} fullWidth={true}>
+              비밀번호 입력
+            </Button>
+          ) : (
+            <Skeleton variant="rounded" />
+          )}
         </Box>
       </Modal>
     </div>

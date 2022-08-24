@@ -3,6 +3,7 @@ import { MainRouter, LoginRouter } from 'router'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { queryClient } from 'hook'
+import { RecoilRoot } from 'recoil'
 
 export const Context = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
@@ -23,8 +24,10 @@ export const Context = () => {
 export const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
-      <Context />
-      <ReactQueryDevtools initialIsOpen={false} />
+      <RecoilRoot>
+        <Context />
+        <ReactQueryDevtools initialIsOpen={false} />
+      </RecoilRoot>
     </QueryClientProvider>
   )
 }

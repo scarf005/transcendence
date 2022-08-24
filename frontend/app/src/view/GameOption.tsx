@@ -4,7 +4,8 @@ import FormControlLabel from '@mui/material/FormControlLabel'
 import FormControl from '@mui/material/FormControl'
 import { Button, Grid, Box } from '@mui/material'
 import { ButtonGroup, Paper, Typography } from '@mui/material'
-type GameMode = 'classic' | 'sizedown' | 'speedup' | 'ranked'
+type GameMode = 'classic' | 'speedup' | 'sizedown' | 'ranked'
+const gameModeList: GameMode[] = ['classic', 'speedup', 'sizedown', 'ranked']
 
 type GameInfo = {
   mode: GameMode
@@ -53,67 +54,25 @@ export const PongMatchForm = (props: {
   const changeGameMode = (mode: GameMode) => {
     setGameInfo((value: GameInfo) => {
       return {
-        mode: mode ? mode : value.mode,
+        mode: mode ?? value.mode,
         isPrivate: value.isPrivate,
       }
     })
   }
-
-  // const changeIsPrivate = (e: React.ChangeEvent<HTMLInputElement>) => {
-  //   setGameInfo({
-  //     mode: 'classic',
-  //     isPrivate: e.target.checked,
-  //   })
-  // }
-
-  /* <FormControlLabel
-        control={<Checkbox onChange={changeIsPrivate} />}
-        label="친구와 함께하기"
-      /> */
-
   return (
     <Grid container rowSpacing={6} marginBottom="1rem">
-      <Grid item xs={12} sm={6} marginTop="15%">
-        <Button
-          variant="contained"
-          fullWidth={true}
-          size="large"
-          onClick={() => changeGameMode('classic')}
-        >
-          Classic
-        </Button>
-      </Grid>
-      <Grid item xs={12} sm={6} marginTop="15%">
-        <Button
-          variant="contained"
-          fullWidth={true}
-          size="large"
-          onClick={() => changeGameMode('speedup')}
-        >
-          Speed-Up
-        </Button>
-      </Grid>
-      <Grid item xs={12} sm={6}>
-        <Button
-          variant="contained"
-          fullWidth={true}
-          size="large"
-          onClick={() => changeGameMode('sizedown')}
-        >
-          Size-Down
-        </Button>
-      </Grid>
-      <Grid item xs={12} sm={6}>
-        <Button
-          variant="contained"
-          fullWidth={true}
-          size="large"
-          disabled={gameInfo.isPrivate}
-          onClick={() => changeGameMode('ranked')}
-        >
-          Ranked
-        </Button>
-      </Grid>
+      {gameModeList.map((mode) => (
+        <Grid item key={mode} xs={12} sm={6} marginTop="15%">
+          <Button
+            variant="contained"
+            fullWidth={true}
+            size="large"
+            onClick={() => changeGameMode(mode)}
+          >
+            {mode}
+          </Button>
+        </Grid>
+      ))}
 
       <Grid item xs={12}>
         <Box>

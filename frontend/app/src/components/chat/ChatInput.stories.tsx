@@ -9,7 +9,7 @@ export default {
 const Template: ComponentStory<typeof ChatInput> = (args) => (
   <ChatInput {...args} />
 )
-export const Default = Template.bind({})
-Default.args = {
-  sendMsg: () => alert('send'),
-}
+// export const Default = Template.bind({})
+// Default.args = {
+//   sendMsg: () => alert('send'),
+// }

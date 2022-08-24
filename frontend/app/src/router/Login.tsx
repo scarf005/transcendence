@@ -1,4 +1,10 @@
-import { Route, Routes, useNavigate, useSearchParams } from 'react-router-dom'
+import {
+  Navigate,
+  Route,
+  Routes,
+  useNavigate,
+  useSearchParams,
+} from 'react-router-dom'
 import { useEffect } from 'react'
 import { RegisterUser } from 'view/RegisterUser'
 import styled from 'styled-components'
@@ -70,6 +76,7 @@ export function LoginRouter(props: {
         path="/two-factor"
         element={<QrPage setIsLoggedIn={props.setIsLoggedIn} />}
       />
+      <Route path="*" element={<Navigate to="/" />} />
     </Routes>
   )
 }

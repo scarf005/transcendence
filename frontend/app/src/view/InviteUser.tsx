@@ -1,18 +1,21 @@
-import { useState, useRef } from 'react'
-import { Button, Box, Typography, Input } from '@mui/material'
+import { useState, useRef, useContext } from 'react'
+import { Button, Box, Typography, Input, Skeleton } from '@mui/material'
 import { ChatSocket } from 'data'
 import { InputRounded } from '@mui/icons-material'
+import { ChatSocketContext } from 'router'
 
-export const InviteUser = (prop: { socket: ChatSocket; roomId: number }) => {
+export const InviteUser = (prop: { roomId: number }) => {
   const input = useRef<HTMLInputElement>()
   const [err, setErr] = useState('')
-  const handleInvite = () => {
+  const socket = useContext(ChatSocketContext)
+
+  const handleInvite = (socket: ChatSocket) => {
     if (!input.current || !input.current.value) {
       setErr('닉네임을 입력하세요')
       return
     }
     const nickName = input.current.value
-    prop.socket.emit(
+    socket.emit(
       'INVITE',
       { inviteeNickname: nickName, roomId: prop.roomId },
       (res: any) => {
@@ -30,9 +33,17 @@ export const InviteUser = (prop: { socket: ChatSocket; roomId: number }) => {
       >
         <Input placeholder="유저 닉네임 입력" inputRef={input}></Input>
 
-        <Button variant="outlined" onClick={handleInvite} size="small">
-          초대
-        </Button>
+        {socket ? (
+          <Button
+            variant="outlined"
+            onClick={() => handleInvite(socket)}
+            size="small"
+          >
+            초대
+          </Button>
+        ) : (
+          <Skeleton variant="rounded" />
+        )}
       </Box>
       <Typography
         id="modal-modal-title"

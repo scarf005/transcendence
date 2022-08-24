@@ -16,9 +16,10 @@ export interface ChatJoinRoom {
   roomId: number
   password?: string
 }
+export type RoomType = 'PUBLIC' | 'PRIVATE' | 'PROTECTED' | 'DM'
 export interface ChatCreateRoom {
   title: string
-  type: 'PUBLIC' | 'PRIVATE' | 'PROTECTED' | 'DM'
+  type: RoomType
   password?: string
 }
 export interface UserInRoom {
@@ -80,7 +81,7 @@ type cb = (res: Response) => void
 export type Chat = Omit<Message, 'roomId'>
 export type MessageHandler = (message: Message, fn?: cb) => void
 export type UserHandler = (user: UserInRoom, fn?: cb) => void
-export type StatusHandler = (status: userStatus) => void
+export type StatusHandler = (status: userStatus, fn?: cb) => void
 // TODO: response dto 작성
 interface ClientToServerEvents {
   SEND: MessageHandler
@@ -110,13 +111,13 @@ export type ChatSocket = Socket<ServerToClientEvents, ClientToServerEvents>
 export interface JoinedRoom {
   id: number
   name: string
-  roomtype: string
+  roomtype: RoomType
 }
 
 export interface Room {
   id: number
   name: string
-  roomtype: string
+  roomtype: RoomType
   password: string
   bannedIds: number[]
   mutedIds: number[]

@@ -8,8 +8,11 @@ import {
   ListItemText,
   Stack,
 } from '@mui/material'
-import { ChatUser, JoinedRoom, User } from 'data'
-import { useChatUsersQuery } from 'hook'
+import { ChatUser, JoinedRoom, RoomType, User } from 'data'
+import { useChatUsersQuery, selectedChatState } from 'hook'
+import { Dispatch, SetStateAction } from 'react'
+import { useRecoilState } from 'recoil'
+import { ChatViewOption } from './ChatView'
 
 export const ChatRoomAvatars = ({ id }: { id: number }) => {
   const { data: chatUsers } = useChatUsersQuery(['chat', id, 'list'])
@@ -29,14 +32,11 @@ export const ChatRoomAvatars = ({ id }: { id: number }) => {
 
 interface ItemProps {
   chatRoom: JoinedRoom
-  changeView: (id: number, roomType: string) => void
+  changeView: (id: number, roomType: RoomType) => void
 }
 export const JoinedRoomItem = ({ chatRoom, changeView }: ItemProps) => {
   return (
-    <ListItem
-      key={chatRoom.id}
-      onClick={() => changeView(chatRoom.id, chatRoom.roomtype)}
-    >
+    <ListItem onClick={() => changeView(chatRoom.id, chatRoom.roomtype)}>
       <ListItemAvatar>
         <ChatRoomAvatars id={chatRoom.id} />
       </ListItemAvatar>
@@ -47,11 +47,11 @@ export const JoinedRoomItem = ({ chatRoom, changeView }: ItemProps) => {
 
 interface Props {
   room: JoinedRoom[]
-  setShowChat: any
 }
-export const JoinedRoomList = ({ room, setShowChat }: Props) => {
-  const changeView = (id: number, roomType: string) => {
-    setShowChat({ bool: true, roomId: id, roomType: roomType })
+export const JoinedRoomList = ({ room }: Props) => {
+  const [_, setSelectedChat] = useRecoilState(selectedChatState)
+  const changeView = (roomId: number, roomType: RoomType) => {
+    setSelectedChat({ bool: true, roomId, roomType })
   }
   return (
     <List>

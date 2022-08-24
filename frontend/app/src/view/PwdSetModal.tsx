@@ -1,6 +1,10 @@
-import React, { useRef, useState } from 'react'
-import { Box, Input, Button, Typography, Modal } from '@mui/material'
-import { ChatSocket, User, ChatUser } from 'data'
+import React, { useContext, useRef, useState } from 'react'
+import { Box, Input, Button, Typography, Modal, Skeleton } from '@mui/material'
+import { ChatSocket, User, ChatUser, RoomType } from 'data'
+import { ChatViewOption } from './ChatView'
+import { selectedChatState, useToggles } from 'hook'
+import { useRecoilValue } from 'recoil'
+import { ChatSocketContext } from 'router'
 
 const style = {
   position: 'absolute',
@@ -14,62 +18,52 @@ const style = {
   p: 4,
 }
 
-interface ExtraOptionProps {
+interface Props {
+  off: () => void
+  open: boolean
   socket: ChatSocket
-  roomInfo: { bool: boolean; roomId: number; roomType: string }
 }
-interface PwdSetModalProps extends ExtraOptionProps {
-  setModal: (value: boolean) => void
-  modal: boolean
-}
-
-export const PwdSetModal = ({
-  socket,
-  roomInfo,
-  setModal,
-  modal,
-}: PwdSetModalProps) => {
+export const PwdSetModal = ({ open, off, socket }: Props) => {
+  const { roomId, roomType } = useRecoilValue(selectedChatState)
   const inputChange = useRef<HTMLInputElement>()
   const inputAdd = useRef<HTMLInputElement>()
-  const handleClose = () => setModal(false)
-  //   const [errMsg, setErrMsg] = useState('')
 
   const addPwd = () => {
     socket.emit('PASSWORD', {
-      roomId: roomInfo.roomId,
+      roomId,
       password: inputAdd.current?.value,
       command: 'ADD',
     })
-    handleClose()
+    off()
   }
   const removePwd = () => {
     socket.emit('PASSWORD', {
-      roomId: roomInfo.roomId,
+      roomId,
       command: 'DELETE',
     })
-    handleClose()
+    off()
   }
   const changePwd = () => {
     socket.emit('PASSWORD', {
-      roomId: roomInfo.roomId,
+      roomId,
       password: inputChange.current?.value,
       command: 'MODIFY',
     })
-    handleClose()
+    off()
   }
   return (
     <div>
       <Modal
-        open={modal}
-        onClose={handleClose}
-        aria-labelledby="modal-modal-title"
-        aria-describedby="modal-modal-description"
+        open={open}
+        onClose={off}
+        aria-labelledby="open-open-title"
+        aria-describedby="open-open-description"
       >
         <Box sx={style}>
-          <Typography id="modal-modal-title" variant="h6" component="h2">
+          <Typography id="open-open-title" variant="h6" component="h2">
             비밀번호 설정 변경
           </Typography>
-          {roomInfo.roomType === 'PROTECTED' ? (
+          {roomType === 'PROTECTED' ? (
             <>
               <Button onClick={removePwd} fullWidth={true}>
                 비밀번호 삭제
@@ -99,19 +93,20 @@ export const PwdSetModal = ({
   )
 }
 
-export const PwdSetOption = ({ socket, roomInfo }: ExtraOptionProps) => {
-  const [modal, setModal] = useState(false)
-  return (
-    <>
-      <PwdSetModal
-        setModal={setModal}
-        modal={modal}
-        socket={socket}
-        roomInfo={roomInfo}
-      />
-      <Button variant="outlined" onClick={() => setModal(true)} size="small">
-        비밀번호 설정
-      </Button>
-    </>
-  )
+export const PwdSetOption = () => {
+  const [open, { on, off }] = useToggles(false)
+  const socket = useContext(ChatSocketContext)
+
+  if (socket) {
+    return (
+      <>
+        <PwdSetModal open={open} off={off} socket={socket} />
+        <Button variant="outlined" onClick={on} size="small">
+          비밀번호 설정
+        </Button>
+      </>
+    )
+  } else {
+    return <Skeleton variant="rectangular" />
+  }
 }

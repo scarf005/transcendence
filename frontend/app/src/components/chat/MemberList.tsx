@@ -1,5 +1,5 @@
 import { Card, List, Modal, Container, Box, Button } from '@mui/material'
-import { OtherUser, User, ChatUser, BanUser } from 'data'
+import { OtherUser, User, ChatUser, BanUser, RoomType } from 'data'
 import { useToggles } from 'hook'
 import { partition } from 'utility'
 import { ProfileDisplay } from 'components'
@@ -42,15 +42,9 @@ interface Props {
   chatusers: ChatUser[]
   /** 로그인한 사용자 */
   refUser: User
-  roomInfo: { bool: boolean; roomId: number; roomType: string }
   banusers: BanUser[]
 }
-export const MemberList = ({
-  chatusers,
-  refUser,
-  roomInfo,
-  banusers,
-}: Props) => {
+export const MemberList = ({ chatusers, refUser, banusers }: Props) => {
   const [id, setId] = useState(refUser.uid)
   const [open, { on, off }] = useToggles(false)
   const users = chatusers.map(({ user }) => user)
@@ -75,16 +69,13 @@ export const MemberList = ({
         <Box sx={style}>
           <Card sx={{ padding: '2vw' }}>
             {isMe ? (
-              <>
-                <MyProfile user={refUser} />
-              </>
+              <MyProfile user={refUser} />
             ) : otherUser ? (
               <>
                 <OtherProfile user={otherUser.user} refUser={refUser} />
                 <MemberListOption
                   user={otherUser}
                   refUser={meForOption}
-                  roomInfo={roomInfo}
                   off={off}
                 />
               </>
@@ -94,7 +85,6 @@ export const MemberList = ({
                 <OptionForBanned
                   user={bannedUser}
                   refUser={meForOption}
-                  roomInfo={roomInfo}
                   off={off}
                 />
               </>

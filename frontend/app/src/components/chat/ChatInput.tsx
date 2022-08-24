@@ -1,25 +1,37 @@
 import { Send } from '@mui/icons-material'
-import { Button, TextField } from '@mui/material'
-import { useState } from 'react'
-import { ChatUser } from 'data'
+import { Button, Skeleton, TextField } from '@mui/material'
+import { useContext, useState } from 'react'
+import { ChatSocket, ChatUser, Message } from 'data'
+import { useRecoilValue } from 'recoil'
+import { selectedChatState } from 'hook'
+import { ChatSocketContext } from 'router'
 
 interface Props {
-  sendMsg: (msg: string) => void
   me: ChatUser | undefined
 }
-export const ChatInput = ({ sendMsg, me }: Props) => {
+export const ChatInput = ({ me }: Props) => {
   const [text, setText] = useState('')
-  const onSend = () => {
-    if (!text) return
-    sendMsg(text)
+  const socket = useContext(ChatSocketContext)
+  const { roomId } = useRecoilValue(selectedChatState)
+
+  const sendMsg = (socket: ChatSocket, msgContent: string) => {
+    if (!msgContent) return
+
+    socket.emit('SEND', {
+      roomId,
+      msgContent,
+      createdAt: new Date(),
+    } as Message)
+    console.log(`sent msg: ${msgContent}`)
     setText('')
   }
+
   let isMuted = false
   if (me) isMuted = new Date(me.endOfMute) > new Date()
 
-  if (isMuted)
+  if (isMuted) {
     return <TextField label="관리자에 의하여 MUTE 중입니다" value={text} />
-  else {
+  } else if (socket) {
     return (
       <TextField
         label="Send Text"
@@ -27,17 +39,19 @@ export const ChatInput = ({ sendMsg, me }: Props) => {
         onChange={(e) => setText(e.target.value)}
         onKeyDown={(e) => {
           if (e.key === 'Enter') {
-            onSend()
+            sendMsg(socket, text)
           }
         }}
         InputProps={{
           endAdornment: (
-            <Button onClick={onSend}>
+            <Button onClick={() => sendMsg(socket, text)}>
               <Send />
             </Button>
           ),
         }}
       />
     )
+  } else {
+    return <Skeleton variant="rectangular" width={300} height={50} />
   }
 }

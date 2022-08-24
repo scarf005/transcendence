@@ -1,12 +1,21 @@
 import { Grid, Button, Tooltip, Typography, Paper, Box } from '@mui/material'
-import { Message, ChatSocket, User, ChatUser } from 'data'
+import { Message, ChatSocket, User, ChatUser, RoomType } from 'data'
 import { ChatInput, ChatList, MemberList } from 'components'
-import { useApiQuery, useChatUsersQuery, useUserQuery, queryClient } from 'hook'
+import {
+  useApiQuery,
+  useChatUsersQuery,
+  useUserQuery,
+  queryClient,
+  selectedChatState,
+} from 'hook'
 import { Logout } from '@mui/icons-material'
 import { InviteUser } from './InviteUser'
 import { MemberView } from './MemberView'
 import { PwdSetOption } from './PwdSetModal'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useContext } from 'react'
+import { ChatViewOption } from './ChatView'
+import { useRecoilValue } from 'recoil'
+import { ChatSocketContext } from 'router'
 
 // TODO: 나가기 누를 때 한 번 더 확인하기
 const LeaveButton = ({ onClick }: { onClick: () => void }) => {
@@ -19,58 +28,38 @@ const LeaveButton = ({ onClick }: { onClick: () => void }) => {
   )
 }
 
-interface ExtraOptionProps {
-  socket: ChatSocket
-  roomInfo: { bool: boolean; roomId: number; roomType: string }
-}
-
-const ExtraOptionPerRoom = ({ socket, roomInfo }: ExtraOptionProps) => {
+const ExtraOptionPerRoom = () => {
+  const { roomId, roomType } = useRecoilValue(selectedChatState)
   const [isOwner, setIsOwner] = useState(false)
   const { data: me, isSuccess: meOk } = useUserQuery(['user', 'me'])
   const { data: users, isSuccess: usersOk } = useChatUsersQuery(
-    ['chat', roomInfo.roomId, 'list'],
+    ['chat', roomId, 'list'],
     { enabled: meOk },
   )
-  if (usersOk && meOk && isOwner === false) {
+  if (!isOwner && usersOk && meOk) {
     users.forEach((el) => {
       if (el.user.uid === me.uid && el.isOwner) setIsOwner(true)
     })
   }
-  if (
-    (roomInfo.roomType === 'PUBLIC' || roomInfo.roomType === 'PROTECTED') &&
-    isOwner
-  ) {
-    return <PwdSetOption socket={socket} roomInfo={roomInfo} />
-  } else if (roomInfo.roomType === 'PRIVATE') {
-    return <InviteUser socket={socket} roomId={roomInfo.roomId} />
+  if (isOwner && (roomType === 'PUBLIC' || roomType === 'PROTECTED')) {
+    return <PwdSetOption />
+  } else if (roomType === 'PRIVATE') {
+    return <InviteUser roomId={roomId} />
   } else return null
 }
 
 interface PanelProps {
   chats: Message[]
-  socket: ChatSocket
-  roomInfo: { bool: boolean; roomId: number; roomType: string }
   leaveRoom: (roomId: number) => void
 }
-export const ChatPanel = ({
-  chats,
-  socket,
-  roomInfo,
-  leaveRoom,
-}: PanelProps) => {
-  const sendMsg = (msg: string) => {
-    socket.emit('SEND', {
-      roomId: roomInfo.roomId,
-      msgContent: msg,
-      createdAt: new Date(),
-    } as Message)
-    console.log(`sent msg: ${msg}`)
-  }
+export const ChatPanel = ({ chats, leaveRoom }: PanelProps) => {
+  const socket = useContext(ChatSocketContext)
+  const { roomId } = useRecoilValue(selectedChatState)
 
   const { data: me, isSuccess: meOk } = useUserQuery(['user', 'me'])
   const { data: chatusers, isSuccess: usersOk } = useApiQuery<ChatUser[]>([
     'chat',
-    roomInfo.roomId,
+    roomId,
     'list',
   ])
   const mydata = chatusers?.find((user) => user.user.uid === me?.uid)
@@ -81,7 +70,7 @@ export const ChatPanel = ({
     socket.on('CHATUSER_STATUS', (res) => {
       console.log(res)
       queryClient.invalidateQueries(['user', 'me'])
-      queryClient.invalidateQueries(['chat', roomInfo.roomId, 'list'])
+      queryClient.invalidateQueries(['chat', roomId, 'list'])
     })
     return () => {
       socket.removeAllListeners('CHATUSER_STATUS')
@@ -95,11 +84,11 @@ export const ChatPanel = ({
         </Box>
       </Grid>
       <Grid item xs={4}>
-        <ExtraOptionPerRoom socket={socket} roomInfo={roomInfo} />
-        <MemberView roomInfo={roomInfo} />
+        <ExtraOptionPerRoom />
+        <MemberView />
       </Grid>
-      <ChatInput sendMsg={sendMsg} me={mydata} />
-      <LeaveButton onClick={() => leaveRoom(roomInfo.roomId)} />
+      <ChatInput me={mydata} />
+      <LeaveButton onClick={() => leaveRoom(roomId)} />
     </Grid>
   )
 }
