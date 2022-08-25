@@ -1,4 +1,5 @@
 export const chatEvent = {
+  STATUS: 'STATUS',
   JOIN: 'JOIN',
   LEAVE: 'LEAVE',
   CREATE: 'CREATE',
