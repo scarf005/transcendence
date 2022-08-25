@@ -180,8 +180,15 @@ export class ChatGateway {
     } catch (error) {
       return error
     }
-    client.join(room.roomId.toString())
-    this.emitNotice(client.data.uid, room.roomId, 'join')
+    //client.join(room.roomId.toString())
+    const sockets = await this.chatService.getSocketByUid(
+      this.server,
+      client.data.uid,
+    )
+    sockets.forEach(async (el) => {
+      el.join(room.roomId.toString())
+      this.emitNotice(client.data.uid, room.roomId, 'join')
+    })
     return { status: 200 }
   }
 
@@ -287,8 +294,15 @@ export class ChatGateway {
     } catch (error) {
       return error
     }
-    client.join(newRoom.id.toString())
-    this.emitNotice(client.data.uid, newRoom.id, 'join')
+    // client.join(newRoom.id.toString())
+    const sockets = await this.chatService.getSocketByUid(
+      this.server,
+      client.data.uid,
+    )
+    sockets.forEach(async (el) => {
+      el.join(newRoom.id.toString())
+      this.emitNotice(client.data.uid, newRoom.id, 'join')
+    })
     return { status: 200 }
   }
 
