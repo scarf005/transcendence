@@ -7,12 +7,14 @@ import {
 } from '@mui/material'
 import { User } from 'data'
 import { AcceptOrDeny, AvatarWithStatus } from 'components'
-import { useApiQuery, useToggles } from 'hook'
+import { currentMessagesState, useApiQuery, useToggles } from 'hook'
 import { useContext } from 'react'
 import { ChatSocketContext, PongSocketContext } from 'router'
 import { useNavigate } from 'react-router-dom'
+import { useRecoilValue } from 'recoil'
 
-interface TextProps extends Pick<Props, 'messages'> {
+interface TextProps {
+  messages: string[]
   primary?: string
 }
 const ChatText = ({ messages, primary }: TextProps) => {
@@ -24,17 +26,6 @@ const ChatText = ({ messages, primary }: TextProps) => {
     />
   )
 }
-export const ChatListItemEmpty = ({ messages }: TextProps) => {
-  return (
-    <ListItem alignItems="flex-start" button>
-      <ListItemAvatar>
-        <Avatar />
-      </ListItemAvatar>
-      <ChatText messages={messages} />
-    </ListItem>
-  )
-}
-
 interface Props {
   user?: User
   messages: string[]
@@ -42,7 +33,14 @@ interface Props {
 }
 export const ChatListItem = ({ user, messages, onClick }: Props) => {
   if (!user) {
-    return <ChatListItemEmpty messages={messages} />
+    return (
+      <ListItem alignItems="flex-start" button>
+        <ListItemAvatar>
+          <Avatar />
+        </ListItemAvatar>
+        <ChatText messages={messages} />
+      </ListItem>
+    )
   }
 
   const { avatar, uid, nickname, status } = user

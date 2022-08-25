@@ -25,12 +25,16 @@ const style = {
   p: 4,
 }
 
-export const RoomOptionSecond = (prop: {
+interface RoomOptionProps {
   setPassword: (value: string) => void
   roomType: RoomType
-}) => {
+}
+export const RoomOptionSecond = ({
+  roomType,
+  setPassword,
+}: RoomOptionProps) => {
   const [pwd, setPwd] = useState('false')
-  if (prop.roomType === 'PUBLIC') {
+  if (roomType === 'PUBLIC') {
     return (
       <RadioGroup
         row
@@ -47,7 +51,7 @@ export const RoomOptionSecond = (prop: {
         <FormControlLabel value="true" control={<Radio />} label="암호설정" />
         {pwd === 'true' ? (
           <Input
-            onChange={(e) => prop.setPassword(e.target.value)}
+            onChange={(e) => setPassword(e.target.value)}
             placeholder="암호를 입력해주세요"
           ></Input>
         ) : (
@@ -69,16 +73,16 @@ export const RoomOptionSecond = (prop: {
     )
   }
 }
-
-export const BasicModal = (prop: {
+interface Props {
   modal: boolean
   setModal: (value: boolean) => void
   socket: ChatSocket
-}) => {
+}
+export const CreateRoomModal = ({ modal, setModal, socket }: Props) => {
   const [roomType, setRoomType] = useState<RoomType>('PUBLIC')
   const [password, setPassword] = useState('')
   const input = useRef<HTMLInputElement>()
-  const handleClose = () => prop.setModal(false)
+  const handleClose = () => setModal(false)
   const [errMsg, setErrMsg] = useState('')
 
   const createRoom = () => {
@@ -91,18 +95,18 @@ export const BasicModal = (prop: {
       setErrMsg('방 제목은 2~30자 영문으로 만들어주세요')
       return
     } else if (password) {
-      prop.socket.emit('CREATE', {
+      socket.emit('CREATE', {
         title: roomName,
         type: 'PROTECTED',
         password: password,
       })
-    } else prop.socket.emit('CREATE', { title: roomName, type: roomType })
+    } else socket.emit('CREATE', { title: roomName, type: roomType })
     handleClose()
   }
   return (
     <div>
       <Modal
-        open={prop.modal}
+        open={modal}
         onClose={handleClose}
         aria-labelledby="modal-modal-title"
         aria-describedby="modal-modal-description"

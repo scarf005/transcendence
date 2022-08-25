@@ -16,6 +16,8 @@ const getData = (
         color: 'primary',
         badgeContent: <VideogameAssetIcon />,
       }
+    case 'UNKNOWN':
+      return { tooltip: 'Unknown', color: 'warning', badgeContent: '?' }
   }
 }
 interface UserStatusProps {

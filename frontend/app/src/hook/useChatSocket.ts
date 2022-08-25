@@ -3,24 +3,20 @@ import { ChatSocket } from 'data'
 import { useAuthSocket } from 'hook'
 import {
   queryClient,
-  selectedChatState as selectedChatState,
   useUserQuery,
+  onlineUsersState,
+  selectedChatState,
+  messageRecordState,
 } from 'hook'
 import { Message } from 'data'
 import { useRecoilState, useRecoilValue } from 'recoil'
 
-type Messages = {
-  [roomId: number]: Message[]
-}
-
-export interface Prop {
-  setMessages: React.Dispatch<React.SetStateAction<Messages>>
-}
-
-export const useChatSocket = ({ setMessages }: Prop) => {
+export const useChatSocket = () => {
   const socket = useAuthSocket<ChatSocket>('/api/chat')
-  const [_, setSelectedChat] = useRecoilState(selectedChatState)
-  const { roomId } = useRecoilValue(selectedChatState)
+  const [messages, setMessages] = useRecoilState(messageRecordState)
+  const [selectedChat, setSelectedChat] = useRecoilState(selectedChatState)
+  const [onlineUsers, setOnlineUsers] = useRecoilState(onlineUsersState)
+  const { roomId } = selectedChat
 
   const { data: me, isSuccess } = useUserQuery(['user', 'me'])
   useEffect(() => {
@@ -43,7 +39,21 @@ export const useChatSocket = ({ setMessages }: Prop) => {
     if (socket === undefined) {
       return
     }
+    socket.on('STATUS', ({ uid, status }) => {
+      setOnlineUsers((prev) => ({ ...prev, [uid]: status }))
+      queryClient.invalidateQueries(['user', 'me'])
+      queryClient.invalidateQueries(['chat'])
+    })
+    return () => {
+      socket.removeAllListeners('CHATUSER_STATUS')
+    }
+  }, [socket])
+  useEffect(() => {
+    if (socket === undefined) {
+      return
+    }
     socket.on('CHATUSER_STATUS', (res) => {
+      console.log('CHATUSER_STATUS: ', res)
       queryClient.invalidateQueries(['user', 'me'])
       queryClient.invalidateQueries(['chat'])
     })
@@ -81,14 +91,10 @@ export const useChatSocket = ({ setMessages }: Prop) => {
         ...res,
         createdAt: new Date(res.createdAt),
       }
-      console.log('incoming message')
-      console.debug(msg)
-      setMessages((messages: Messages) => {
-        return {
-          ...messages,
-          [id]: messages[id] ? [...messages[id], msg] : [msg],
-        }
-      })
+      setMessages((prev) => ({
+        ...prev,
+        [id]: prev[id] ? [...prev[id], msg] : [msg],
+      }))
     })
     return () => {
       socket.removeAllListeners('RECEIVE')

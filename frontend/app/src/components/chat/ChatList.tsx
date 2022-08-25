@@ -2,7 +2,8 @@ import { List } from '@mui/material'
 import { Message, User } from 'data'
 import { ChatListItem, AcceptGame } from './ChatListItem'
 import { groupBySerial } from 'utility'
-import { useApiQuery, useUserQuery } from 'hook'
+import { currentGroupedMessagesState, useApiQuery, useUserQuery } from 'hook'
+import { useRecoilValue } from 'recoil'
 
 interface ListProps {
   group: Message[]
@@ -28,19 +29,14 @@ export const WrappedChatListItem = ({ group }: ListProps) => {
     </>
   )
 }
-interface Props {
-  chats: Message[]
-}
-export const ChatList = ({ chats }: Props) => {
-  const groupedMessages = groupBySerial(chats, (chat) => chat.senderUid)
+
+export const ChatList = () => {
+  const groupedMessages = useRecoilValue(currentGroupedMessagesState)
 
   return (
     <List>
       {groupedMessages.map((group) => (
-        <WrappedChatListItem
-          key={group[0].createdAt.toISOString()}
-          group={group}
-        />
+        <WrappedChatListItem key={`${group[0].createdAt}`} group={group} />
       ))}
     </List>
   )

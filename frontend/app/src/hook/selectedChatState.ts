@@ -1,6 +1,10 @@
 import { atom } from 'recoil'
 import { ChatViewOption } from 'view'
+import { recoilPersist } from 'recoil-persist'
 
+const { persistAtom } = recoilPersist({
+  key: 'selectedChatState',
+})
 export const selectedChatState = atom<ChatViewOption>({
   key: 'selectedChatState',
   default: {
@@ -8,4 +12,5 @@ export const selectedChatState = atom<ChatViewOption>({
     roomId: 0,
     roomType: 'PUBLIC',
   },
+  effects_UNSTABLE: [persistAtom],
 })

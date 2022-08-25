@@ -15,11 +15,17 @@ import {
 import { ChangeAvatarButton } from './userActions'
 import { ReactNode } from 'react'
 import { AvatarWithStatus, IconButtonWrap } from 'components'
-import { avatarChangeMutation, renameMutation, useToggles } from 'hook'
+import {
+  avatarChangeMutation,
+  onlineUsersState,
+  renameMutation,
+  useToggles,
+} from 'hook'
 import { ButtonGroup, Container } from '@mui/material'
 import { FormContainer, TextFieldElement } from 'react-hook-form-mui'
 import { useForm } from 'react-hook-form'
 import { DriveFileRenameOutline, PhotoCamera } from '@mui/icons-material'
+import { useRecoilValue } from 'recoil'
 
 const StatDisplay = ({ stat }: { stat?: Stat }) => {
   if (!stat) {
@@ -43,7 +49,8 @@ interface Props {
   user: OtherUser
 }
 export const Profile = ({ user }: Props) => {
-  const { uid, stat, avatar, nickname, status } = user
+  const { uid, stat, avatar, nickname } = user
+  const status = useRecoilValue(onlineUsersState)[uid] ?? 'UNKNOWN'
 
   return (
     <>

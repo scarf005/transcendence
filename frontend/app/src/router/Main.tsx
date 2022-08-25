@@ -7,7 +7,7 @@ import { io, Socket } from 'socket.io-client'
 import { usePongSocket, useChatSocket } from 'hook'
 import { useUserQuery, useUsersQuery } from 'hook'
 
-import { ChatSocket } from 'data'
+import { ChatSocket, MessageRecord } from 'data'
 import { Grid, Paper, Chip } from '@mui/material'
 import { styled } from '@mui/material/styles'
 import axios from 'axios'
@@ -27,9 +27,6 @@ const Item = styled(Paper)(({ theme }) => ({
   color: theme.palette.text.secondary,
   minHeight: '570px',
 }))
-type Messages = {
-  [roomId: number]: Message[]
-}
 export const PongSocketContext = createContext<Socket | undefined>(undefined)
 export const ChatSocketContext = createContext<ChatSocket | undefined>(
   undefined,
@@ -37,8 +34,7 @@ export const ChatSocketContext = createContext<ChatSocket | undefined>(
 export const MainRouter = () => {
   const navigate = useNavigate()
   const pongData = usePongSocket()
-  const [messages, setMessages] = useState<Messages>({})
-  const chatSocket = useChatSocket({ setMessages })
+  const chatSocket = useChatSocket()
   const [chiptxt, setChiptxt] = useState('Game')
   const [profileId, setProfileId] = useState<number>(0)
   const changeMode = () => {
@@ -58,12 +54,7 @@ export const MainRouter = () => {
           left={
             <Item>
               <Routes>
-                <Route
-                  path="/chat"
-                  element={
-                    <ChatView messages={messages} setMessages={setMessages} />
-                  }
-                />
+                <Route path="/chat" element={<ChatView />} />
                 <Route
                   path="/game"
                   element={
@@ -88,15 +79,7 @@ export const MainRouter = () => {
                   path="/friend"
                   element={<MainProfileView id={profileId} />}
                 />
-                <Route
-                  path="/chat"
-                  element={
-                    <MainChatView
-                      messages={messages}
-                      setMessages={setMessages}
-                    />
-                  }
-                />
+                <Route path="/chat" element={<MainChatView />} />
                 <Route path="/game" element={<GameView {...pongData} />} />
               </Routes>
             </Item>

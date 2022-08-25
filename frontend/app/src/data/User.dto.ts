@@ -1,6 +1,6 @@
 type userID = number
 
-export type UserStatusType = 'ONLINE' | 'OFFLINE' | 'GAME'
+export type UserStatusType = 'ONLINE' | 'OFFLINE' | 'GAME' | 'UNKNOWN'
 
 export interface Stat {
   wins: number

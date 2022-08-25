@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import { CssBaselineProps } from '@mui/material'
 import { Socket } from 'socket.io-client'
+import { UserStatusType } from './User.dto'
 
 /** {@link backend/src/data/Chat.dto} */
 export interface Message {
@@ -12,6 +13,10 @@ export interface Message {
   /** 초대할 사용자 uid */
   inviteUid?: number
 }
+export type MessageRecord = {
+  [roomId: number]: Message[]
+}
+
 export interface ChatJoinRoom {
   roomId: number
   password?: string
@@ -62,11 +67,14 @@ export interface Unmutesetting {
   roomId: number
   uid: number
 }
-
-export interface userStatus {
+export interface userStatusEvent {
+  uid: number
+  status: UserStatusType
+}
+export interface userChatStatusEvent {
   roomId: number
   uid: number
-  type: string
+  type: 'ADMIN_ADDED' | 'ADMIN_REMOVED' | 'MUTED' | 'UNMUTED'
 }
 export interface Bansetting {
   roomId: number
@@ -81,8 +89,7 @@ type cb = (res: Response) => void
 export type Chat = Omit<Message, 'roomId'>
 export type MessageHandler = (message: Message, fn?: cb) => void
 export type UserHandler = (user: UserInRoom, fn?: cb) => void
-export type StatusHandler = (status: userStatus, fn?: cb) => void
-// TODO: response dto 작성
+
 interface ClientToServerEvents {
   SEND: MessageHandler
   JOIN: (room: ChatJoinRoom, fn?: cb) => void
@@ -103,7 +110,8 @@ interface ServerToClientEvents {
   RECEIVE: MessageHandler
   NOTICE: MessageHandler
   DESTROYED: MessageHandler
-  CHATUSER_STATUS: StatusHandler
+  CHATUSER_STATUS: (event: userChatStatusEvent, fn?: cb) => void
+  STATUS: (event: userStatusEvent, fn?: cb) => void
 }
 
 export type ChatSocket = Socket<ServerToClientEvents, ClientToServerEvents>
