@@ -50,27 +50,17 @@ export class ChatGateway {
 
   async handleConnection(client: Socket) {
     const { token } = client.handshake.auth
-    // FIXME: prod에선 쿼리로부터 uid를 확인할 필요 없음
-    if (token === undefined) {
-      const uid = Number(client.handshake.query.uid)
-      if (uid !== undefined) {
-        client.data.uid = Number(client.handshake.query.uid)
-      } else {
+    try {
+      const decoded = jwt.verify(
+        token.trim(),
+        jwtConstants.secret,
+      ) as jwt.JwtPayload
+      if (decoded.uidType !== 'user' || decoded.twoFactorPassed !== true) {
         return client.disconnect()
       }
-    } else {
-      try {
-        const decoded = jwt.verify(
-          token.trim(),
-          jwtConstants.secret,
-        ) as jwt.JwtPayload
-        if (decoded.uidType !== 'user' || decoded.twoFactorPassed !== true) {
-          return client.disconnect()
-        }
-        client.data.uid = decoded.uid
-      } catch {
-        return client.disconnect()
-      }
+      client.data.uid = decoded.uid
+    } catch {
+      return client.disconnect()
     }
 
     try {

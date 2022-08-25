@@ -5,5 +5,5 @@ export class UidDto {
   @IsNumberString()
   @IsNotEmpty()
   @ApiProperty({ description: '사용자 uid' })
-  uid: string // FIXME: 버그?
+  uid: string
 }
