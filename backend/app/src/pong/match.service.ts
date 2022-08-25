@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { Injectable, InternalServerErrorException } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 import { Socket } from 'socket.io'
@@ -127,6 +127,8 @@ export class MatchService {
     const newMatch = new Match()
     newMatch.winner = winner
     newMatch.loser = loser
-    return this.matchRepository.save(newMatch)
+    return this.matchRepository.save(newMatch).catch(() => {
+      throw new InternalServerErrorException('database error')
+    })
   }
 }

@@ -1,8 +1,15 @@
-import { Body, Get, Put, Redirect, Req } from '@nestjs/common'
-import { Controller } from '@nestjs/common'
+import {
+  Body,
+  Get,
+  Put,
+  Redirect,
+  Req,
+  Controller,
+  UseGuards,
+  NotFoundException,
+} from '@nestjs/common'
 import { UserService } from 'user/user.service'
 import { FtOauthService } from './ft-oauth.service'
-import { UseGuards } from '@nestjs/common'
 import { FtGuard } from './ft.strategy'
 import { JwtFtGuard } from './jwt-ft.strategy'
 import { RegisterUserDto } from 'dto/registerUser.dto'
@@ -85,8 +92,7 @@ export class FtController {
     const { uid } = req.user
     const user = await this.userService.create(body)
     const ftUser = await this.ftOauthService.findOne(uid)
-
-    ftUser.user = user
+    if (!ftUser) throw new NotFoundException('FtUser not found')
     await this.ftOauthService.save(ftUser)
 
     return { access_token: this.userService.issueToken(user, !user.twoFactor) }

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { Injectable, InternalServerErrorException } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 import { JwtService } from '@nestjs/jwt'
@@ -17,11 +17,15 @@ export class FtOauthService {
     const ftUser = new FtUser()
 
     ftUser.uid = intraUid
-    return await this.ftOauthRepository.save(ftUser)
+    return await this.ftOauthRepository.save(ftUser).catch(() => {
+      throw new InternalServerErrorException('Error while saving ft user')
+    })
   }
 
   async save(ftUser: FtUser) {
-    return await this.ftOauthRepository.save(ftUser)
+    return await this.ftOauthRepository.save(ftUser).catch(() => {
+      throw new InternalServerErrorException('Error while saving ft user')
+    })
   }
 
   async findOne(intraUid: number) {
@@ -32,7 +36,9 @@ export class FtOauthService {
   }
 
   async remove(intraUid: number) {
-    await this.ftOauthRepository.delete({ uid: intraUid })
+    await this.ftOauthRepository.delete({ uid: intraUid }).catch(() => {
+      throw new InternalServerErrorException('Error while deleting two factor')
+    })
   }
 
   issueToken(ftOauth: FtUser): string {

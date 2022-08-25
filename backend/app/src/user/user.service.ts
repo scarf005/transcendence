@@ -65,7 +65,7 @@ export class UserService {
     )
 
     return await this.userRepository.save(user).catch(() => {
-      throw new InternalServerErrorException('database error')
+      throw new InternalServerErrorException('User not created')
     })
   }
 
@@ -82,7 +82,7 @@ export class UserService {
 
   async update(user: User): Promise<User> {
     return await this.userRepository.save(user).catch(() => {
-      throw new InternalServerErrorException('database error')
+      throw new InternalServerErrorException('user not updated')
     })
   }
 
@@ -123,12 +123,6 @@ export class UserService {
     return user.uid
   }
 
-  async remove(uid: number): Promise<void> {
-    await this.userRepository.delete({ uid }).catch(() => {
-      throw new InternalServerErrorException('database error')
-    })
-  }
-
   issueToken(user: User, twoFactorPassed: boolean): string {
     const payload: UserPayload = {
       uidType: 'user',
@@ -148,7 +142,7 @@ export class UserService {
       throw new BadRequestException('Already friend')
     user.friends.push(targetUid)
     this.userRepository.save(user).catch(() => {
-      throw new InternalServerErrorException('database error')
+      throw new InternalServerErrorException('Friend not added')
     })
     return `${user.nickname} is now friend with ${friend.nickname}`
   }
@@ -163,7 +157,7 @@ export class UserService {
       throw new BadRequestException('Already blocked')
     user.blocks.push(targetUid)
     this.userRepository.save(user).catch(() => {
-      throw new InternalServerErrorException('database error')
+      throw new InternalServerErrorException('Block User not added')
     })
     return `${user.nickname} is now blocked with ${block.nickname}`
   }
@@ -178,7 +172,7 @@ export class UserService {
       throw new BadRequestException('Not friend')
     user.friends = user.friends.filter((id) => id !== targetUid)
     this.userRepository.save(user).catch(() => {
-      throw new InternalServerErrorException('database error')
+      throw new InternalServerErrorException('Friend not deleted')
     })
     return `${user.nickname} is no longer friend with ${friend.nickname}`
   }
@@ -193,7 +187,7 @@ export class UserService {
       throw new BadRequestException('Not Blocked')
     user.blocks = user.friends.filter((id) => id !== targetUid)
     this.userRepository.save(user).catch(() => {
-      throw new InternalServerErrorException('database error')
+      throw new InternalServerErrorException('Blocked user not deleted')
     })
     return `${user.nickname} is no longer blocked with ${block.nickname}`
   }
@@ -211,9 +205,12 @@ export class UserService {
   async changeAvatar(file: Express.Multer.File, uid: number) {
     const avatarPath = `${process.env.AVATAR_API}${file.filename}`
     let user = await this.userRepository.findOneBy({ uid })
+    if (!user) throw new NotFoundException('User not found')
     const currentPath = user.avatar.slice(user.avatar.lastIndexOf('/') + 1)
     user.avatar = avatarPath
-    user = await this.userRepository.save(user)
+    user = await this.userRepository.save(user).catch(() => {
+      throw new InternalServerErrorException('Avatar not changed')
+    })
     if (currentPath !== 'default.jpg') {
       fs.unlinkSync(`/srv/uploads/avatar/${currentPath}`)
     }
@@ -241,7 +238,9 @@ export class UserService {
       .getOne()
     if (!user) throw new NotFoundException('User not found')
     user.nickname = nickname
-    return this.userRepository.save(user)
+    return this.userRepository.save(user).catch(() => {
+      throw new InternalServerErrorException('Nickname not changed')
+    })
   }
 
   async findFriendsByUid(uid: number): Promise<User[]> {
@@ -266,19 +265,21 @@ export class UserService {
 
   async changeStatus(uid: number, status: Status) {
     const user = await this.findOneByUid(uid)
+    if (!user) throw new NotFoundException('User not found')
     user.status = status
     this.userRepository.save(user).catch(() => {
-      throw new InternalServerErrorException('database error')
+      throw new InternalServerErrorException('Status not changed')
     })
   }
 
   async restoreStatusAfterGameEnded(uid: number) {
     const user = await this.findOneByUid(uid)
+    if (!user) throw new NotFoundException('User not found')
     if (user.status === Status.GAME) {
       user.status = Status.ONLINE
     }
     this.userRepository.save(user).catch(() => {
-      throw new InternalServerErrorException('database error')
+      throw new InternalServerErrorException('Status not changed')
     })
   }
 }

@@ -89,7 +89,9 @@ export class ChatService {
 
   async deleteChatroom(ownerId: number, roomId: number) {
     if (!this.isOwner(ownerId, roomId)) return
-    return await this.chatRoomRepository.delete(roomId)
+    return await this.chatRoomRepository.delete(roomId).catch(() => {
+      throw new InternalServerErrorException('chatroom not deleted')
+    })
   }
 
   async addUserToRoom(
@@ -170,7 +172,7 @@ export class ChatService {
     return await this.chatUserRepository
       .delete({ id: room.chatUser[0].id })
       .catch(() => {
-        throw new InternalServerErrorException('user not removed')
+        throw new InternalServerErrorException('User not removed')
       })
   }
 
@@ -182,7 +184,9 @@ export class ChatService {
     })
     if (!room) throw new NotFoundException('Room not found or User not in room')
     room.chatUser[0].isAdmin = true
-    return this.chatUserRepository.save(room.chatUser[0])
+    return this.chatUserRepository.save(room.chatUser[0]).catch(() => {
+      throw new InternalServerErrorException('ChatUser not updated')
+    })
   }
 
   async removeUserAsAdmin(uid: number, roomId: number) {
@@ -193,7 +197,9 @@ export class ChatService {
     })
     if (!room) throw new NotFoundException('Room not found or User not in room')
     room.chatUser[0].isAdmin = false
-    return this.chatUserRepository.save(room.chatUser[0])
+    return this.chatUserRepository.save(room.chatUser[0]).catch(() => {
+      throw new InternalServerErrorException('ChatUser not updated')
+    })
   }
 
   async isOwner(uid: number, roomId: number) {
@@ -286,7 +292,9 @@ export class ChatService {
     })
     if (!room) throw new NotFoundException('Room not found or User not in room')
     room.chatUser[0].endOfMute = new Date(Date.now() + muteTimeSec * 1000)
-    return this.chatUserRepository.save(room.chatUser[0])
+    return this.chatUserRepository.save(room.chatUser[0]).catch(() => {
+      throw new InternalServerErrorException('mutetime not set')
+    })
   }
 
   async addBannedUser(uid: number, roomId: number) {
@@ -307,10 +315,16 @@ export class ChatService {
       throw new NotFoundException('User not in room')
     let banuser = new BanUser()
     banuser.user = chatuser.user
-    banuser = await this.banUserRepository.save(banuser)
+    banuser = await this.banUserRepository.save(banuser).catch(() => {
+      throw new InternalServerErrorException('banuser not created')
+    })
     room.banUser.push(banuser)
-    await this.chatRoomRepository.save(room)
-    return await this.chatUserRepository.delete(chatuser.id)
+    await this.chatRoomRepository.save(room).catch(() => {
+      throw new InternalServerErrorException('banuser not saved')
+    })
+    return await this.chatUserRepository.delete(chatuser.id).catch(() => {
+      throw new InternalServerErrorException('chatuser not deleted')
+    })
   }
 
   async deleteBannedUser(uid: number, roomId: number) {
@@ -329,9 +343,12 @@ export class ChatService {
       })
     )
       throw new NotFoundException('User not banned')
-    return await this.banUserRepository.delete(banuser.id)
+    return await this.banUserRepository.delete(banuser.id).catch(() => {
+      throw new InternalServerErrorException('banuser not deleted')
+    })
   }
 
+  // FIXEDME 이거 필요한가? 사용하는 곳이 없다.
   async isBanned(uid: number, roomId: number) {
     const room = await this.chatRoomRepository.findOne({
       select: ['banUser'],
@@ -373,10 +390,10 @@ export class ChatService {
       where: { id: roomId },
     })
     if (!room) throw new NotFoundException('Room not found')
-    // if (!(await bcrypt.compare(password, room.password)))
-    //   throw new BadRequestException('Password is wrong')
     room.password = await bcrypt.hash(password, 10)
-    return this.chatRoomRepository.save(room)
+    return this.chatRoomRepository.save(room).catch(() => {
+      throw new InternalServerErrorException('Password not changed')
+    })
   }
 
   async deleteRoomPassword(uid: number, roomId: number) {
@@ -387,11 +404,11 @@ export class ChatService {
       where: { id: roomId },
     })
     if (!room) throw new NotFoundException('Room not found')
-    // if (!(await bcrypt.compare(password, room.password)))
-    //   throw new BadRequestException('Password is wrong')
     room.password = null
     room.roomtype = RoomType.PUBLIC
-    return this.chatRoomRepository.save(room)
+    return this.chatRoomRepository.save(room).catch(() => {
+      throw new InternalServerErrorException('Password not deleted')
+    })
   }
 
   async createRoomPassword(uid: number, roomId: number, password: string) {
@@ -404,7 +421,9 @@ export class ChatService {
     if (!room) throw new NotFoundException('Room not found')
     room.password = await bcrypt.hash(password, 10)
     room.roomtype = RoomType.PROTECTED
-    return this.chatRoomRepository.save(room)
+    return this.chatRoomRepository.save(room).catch(() => {
+      throw new InternalServerErrorException('Password not created')
+    })
   }
 
   async changeStatus(uid: number, status: Status) {
@@ -424,32 +443,36 @@ export class ChatService {
       .where('chatRoom.roomtype = :roomtype', { roomtype: RoomType.DM })
       .andWhere('chatRoom.dmParticipantsUid <@ :uids', { uids: [uid1, uid2] })
       .getOne()
+    if (!room) return null
     return room
   }
 
   async getDmRoomByRoomId(roomId: number) {
     const room = await this.chatRoomRepository.findOne({
       select: ['id', 'roomtype', 'dmParticipantsUid'],
-      where: { id: roomId },
+      where: { id: roomId, roomtype: RoomType.DM },
     })
-    if (room.roomtype !== RoomType.DM) return
+    if (!room) return null
     return room
   }
 
+  // FIXEDME 이거 필요한가? 사용하는 곳이 없다.
   async isDmRoom(roomId: number) {
     const room = await this.chatRoomRepository.findOne({
       select: ['id', 'roomtype'],
-      where: { id: roomId },
+      where: { id: roomId, roomtype: RoomType.DM },
     })
-    if (room.roomtype === RoomType.DM) return true
-    return false
+    if (!room) return false
+    return true
   }
 
+  // FIXEDME 이거 필요한가? 사용하는 곳이 없다.
   async getDmRoomParticipants(roomId: number): Promise<number[]> {
     const room = await this.chatRoomRepository.findOne({
-      select: ['id', 'dmParticipantsUid'],
-      where: { id: roomId },
+      select: ['id', 'roomtype', 'dmParticipantsUid'],
+      where: { id: roomId, roomtype: RoomType.DM },
     })
+    if (!room) throw new NotFoundException('Dm not found')
     return room.dmParticipantsUid
   }
 
