@@ -36,8 +36,9 @@ export const OptionForBanned = ({ user, refUser, off }: BanProps) => {
       <>
         <Box sx={{ display: 'flex' }} justifyContent="center">
           <Button
+            sx={{ margin: '2px', width: '100px' }}
             variant="outlined"
-            size="small"
+            size="medium"
             onClick={() => handleBan(socket)}
           >
             UNBAN
@@ -124,7 +125,12 @@ export const MemberListOption = ({ user, refUser, off }: Props) => {
       <>
         {me !== 'Nothing' && other !== 'Owner' ? (
           <Box sx={{ display: 'flex' }} justifyContent="center">
-            <Button variant="outlined" size="small" onClick={handleMute}>
+            <Button
+              sx={{ margin: '2px', width: '100px' }}
+              variant="outlined"
+              size="medium"
+              onClick={handleMute}
+            >
               {/* {isMuted ? (
                 null
               ) : (
@@ -135,14 +141,24 @@ export const MemberListOption = ({ user, refUser, off }: Props) => {
               )} */}
               {muteText}
             </Button>
-            <Button variant="outlined" size="small" onClick={handleBan}>
+            <Button
+              sx={{ margin: '2px', width: '100px' }}
+              variant="outlined"
+              size="medium"
+              onClick={handleBan}
+            >
               BAN
             </Button>
           </Box>
         ) : null}
         <Box sx={{ display: 'flex' }} justifyContent="center">
           {me !== 'Nothing' && other !== 'Owner' ? (
-            <Button variant="outlined" size="small" onClick={handleAdmin}>
+            <Button
+              sx={{ margin: '2px', width: '100px' }}
+              variant="outlined"
+              size="medium"
+              onClick={handleAdmin}
+            >
               {adminMsg}
             </Button>
           ) : null}
@@ -171,7 +187,8 @@ const InviteGameButton = ({ user, refUser, roomId }: InviteButtonProps) => {
   return (
     <Button
       variant="outlined"
-      size="small"
+      size="medium"
+      sx={{ margin: '2px', width: '100px' }}
       onClick={() => {
         pongSocket.emit('match', {
           isPrivate: true,

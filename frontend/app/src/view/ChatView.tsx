@@ -95,7 +95,7 @@ export const MainChatView = ({ messages, setMessages }: Props) => {
     // setJoinedRoomList(newJoinedRoom)
   }
   return (
-    <Grid item xs={12} padding="100px">
+    <>
       {selectedChat.bool ? (
         <ChatPanel
           chats={
@@ -104,7 +104,7 @@ export const MainChatView = ({ messages, setMessages }: Props) => {
           leaveRoom={leaveRoom}
         />
       ) : (
-        <>
+        <Grid container padding="1rem">
           {chatRoomList && chatRoomList.length ? (
             <>
               <Typography variant="h6" padding="1rem" textAlign="center">
@@ -117,8 +117,8 @@ export const MainChatView = ({ messages, setMessages }: Props) => {
           ) : (
             <Typography>Loading...</Typography>
           )}
-        </>
+        </Grid>
       )}
-    </Grid>
+    </>
   )
 }

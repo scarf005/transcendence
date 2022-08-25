@@ -1,4 +1,12 @@
-import { Grid, Button, Tooltip, Typography, Paper, Box } from '@mui/material'
+import {
+  Grid,
+  Button,
+  Tooltip,
+  Typography,
+  Paper,
+  Box,
+  Divider,
+} from '@mui/material'
 import { Message, ChatSocket, User, ChatUser, RoomType } from 'data'
 import { ChatInput, ChatList, MemberList } from 'components'
 import {
@@ -65,18 +73,25 @@ export const ChatPanel = ({ chats, leaveRoom }: PanelProps) => {
   const mydata = chatusers?.find((user) => user.user.uid === me?.uid)
 
   return (
-    <Grid container justifyContent="space-between">
+    <Grid container padding="1rem" minHeight="570px">
       <Grid item xs={8}>
-        <Box style={{ overflow: 'auto' }}>
+        <Box style={{ overflow: 'auto' }} minHeight="80%">
           <ChatList chats={chats} />
         </Box>
+        <Grid container>
+          <Grid item xs={11}>
+            <ChatInput me={mydata} />
+          </Grid>
+          <Grid item xs={1}>
+            <LeaveButton onClick={() => leaveRoom(roomId)} />
+          </Grid>
+        </Grid>
       </Grid>
+
       <Grid item xs={4}>
         <ExtraOptionPerRoom />
         <MemberView />
       </Grid>
-      <ChatInput me={mydata} />
-      <LeaveButton onClick={() => leaveRoom(roomId)} />
     </Grid>
   )
 }

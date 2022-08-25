@@ -25,7 +25,7 @@ const Item = styled(Paper)(({ theme }) => ({
   padding: theme.spacing(1),
   textAlign: 'center',
   color: theme.palette.text.secondary,
-  minHeight: '500px',
+  minHeight: '570px',
 }))
 type Messages = {
   [roomId: number]: Message[]
@@ -41,7 +41,6 @@ export const MainRouter = () => {
   const chatSocket = useChatSocket({ setMessages })
   const [chiptxt, setChiptxt] = useState('Game')
   const [profileId, setProfileId] = useState<number>(0)
-
   const changeMode = () => {
     if (chiptxt === 'Game') {
       navigate('/game')

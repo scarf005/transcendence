@@ -60,10 +60,11 @@ export const PongMatchForm = (props: {
     })
   }
   return (
-    <Grid container rowSpacing={6} marginBottom="1rem">
+    <Grid container rowSpacing={4} marginBottom="15%" marginTop="20%">
       {gameModeList.map((mode) => (
-        <Grid item key={mode} xs={12} sm={6} marginTop="15%">
+        <Grid item key={mode} xs={12} sm={6}>
           <Button
+            sx={{ height: '50px' }}
             variant="contained"
             fullWidth={true}
             size="large"

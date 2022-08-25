@@ -34,6 +34,7 @@ export const ChatInput = ({ me }: Props) => {
   } else if (socket) {
     return (
       <TextField
+        fullWidth={true}
         label="Send Text"
         value={text}
         onChange={(e) => setText(e.target.value)}
