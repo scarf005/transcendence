@@ -30,6 +30,7 @@ type PongKeyEvent = {
 */
 @WebSocketGateway({ namespace: 'api/pong', cors: true })
 export class MatchGateWay implements OnGatewayDisconnect, OnGatewayConnection {
+  private readonly connectedUsers = new Set<number>()
   constructor(
     private matchService: MatchService,
     private pongService: PongService,
@@ -92,11 +93,14 @@ export class MatchGateWay implements OnGatewayDisconnect, OnGatewayConnection {
   }
 
   handleDisconnect(client: UserSocket) {
-    this.matchService.removeFromQueue(client)
-    const gameInfo = this.pongService.getGameByUser(client.uid)
-    if (gameInfo) {
-      const { manager, side } = gameInfo
-      manager.game.forceSetWinner(side === 'left' ? 'right' : 'left')
+    if (client.uid !== undefined) {
+      this.connectedUsers.delete(client.uid)
+      this.matchService.removeFromQueue(client)
+      const gameInfo = this.pongService.getGameByUser(client.uid)
+      if (gameInfo) {
+        const { manager, side } = gameInfo
+        manager.game.forceSetWinner(side === 'left' ? 'right' : 'left')
+      }
     }
   }
 
@@ -114,6 +118,13 @@ export class MatchGateWay implements OnGatewayDisconnect, OnGatewayConnection {
         client.disconnect()
         return
       }
+
+      if (this.connectedUsers.has(decoded.uid)) {
+        client.disconnect()
+        return
+      }
+
+      this.connectedUsers.add(decoded.uid)
       client.uid = decoded.uid
     } catch {
       client.disconnect()
