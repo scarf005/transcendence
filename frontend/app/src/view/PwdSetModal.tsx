@@ -3,8 +3,9 @@ import { Box, Input, Button, Typography, Modal, Skeleton } from '@mui/material'
 import { ChatSocket, User, ChatUser, RoomType } from 'data'
 import { ChatViewOption } from './ChatView'
 import { selectedChatState, useToggles } from 'hook'
-import { useRecoilValue } from 'recoil'
+import { useRecoilValue, useRecoilState } from 'recoil'
 import { ChatSocketContext } from 'router'
+import { queryClient } from 'hook'
 
 const style = {
   position: 'absolute',
@@ -25,6 +26,7 @@ interface Props {
 }
 export const PwdSetModal = ({ open, off, socket }: Props) => {
   const { roomId, roomType } = useRecoilValue(selectedChatState)
+  const [_, setSelectedChat] = useRecoilState(selectedChatState)
   const inputChange = useRef<HTMLInputElement>()
   const inputAdd = useRef<HTMLInputElement>()
 
@@ -34,6 +36,7 @@ export const PwdSetModal = ({ open, off, socket }: Props) => {
       password: inputAdd.current?.value,
       command: 'ADD',
     })
+    setSelectedChat({ bool: true, roomId, roomType: 'PROTECTED' })
     off()
   }
   const removePwd = () => {
@@ -41,6 +44,7 @@ export const PwdSetModal = ({ open, off, socket }: Props) => {
       roomId,
       command: 'DELETE',
     })
+    setSelectedChat({ bool: true, roomId, roomType: 'PUBLIC' })
     off()
   }
   const changePwd = () => {

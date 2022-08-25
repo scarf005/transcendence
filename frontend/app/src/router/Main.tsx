@@ -37,10 +37,11 @@ export const ChatSocketContext = createContext<ChatSocket | undefined>(
 export const MainRouter = () => {
   const navigate = useNavigate()
   const pongData = usePongSocket()
-  const chatSocket = useChatSocket()
+  const [messages, setMessages] = useState<Messages>({})
+  const chatSocket = useChatSocket({ setMessages })
   const [chiptxt, setChiptxt] = useState('Game')
   const [profileId, setProfileId] = useState<number>(0)
-  const [messages, setMessages] = useState<Messages>({})
+
   const changeMode = () => {
     if (chiptxt === 'Game') {
       navigate('/game')

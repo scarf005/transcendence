@@ -73,7 +73,8 @@ export interface Prop {
 export const MainProfileView = ({ id }: Prop) => {
   const { data: refUser } = useUserQuery(['user', 'me'])
   const { data: users } = useUsersQuery(['user'])
-  if (!refUser || !users || id === 0) return <div>Loading...</div>
+  if (id === 0) return <div>프로필을 보고 싶은 유저를 선택해주세요</div>
+  if (!refUser || !users) return <div>Loading...</div>
   const isRefUser = id === refUser.uid
   const currentUser = users.find((user) => user.uid === id) as User
 
