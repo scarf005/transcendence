@@ -20,6 +20,7 @@ import { ChatRoom } from './chatroom.entity'
 import {
   BadRequestException,
   ForbiddenException,
+  NotFoundException,
   UsePipes,
 } from '@nestjs/common'
 import { WSValidationPipe } from 'utils/WSValidationPipe'
@@ -494,7 +495,7 @@ export class ChatGateway {
     channel: chatEvent.INVITE,
     summary: 'nickname을 roomID에 초대',
     description:
-      'nickname이 존재하지 않으면 404 리턴, 기타 에러 400 리턴, 문제 없으면 200 리턴',
+      'nickname이 존재하지 않으면 404 리턴, 접속중이 아니거나 이미 방에 속해있으면 400 리턴, 문제 없으면 200 리턴',
     message: { name: 'ChatInviteDto', payload: { type: ChatInviteDto } },
   })
   @SubscribeMessage(chatEvent.INVITE)
@@ -509,17 +510,23 @@ export class ChatGateway {
     )
     const isInvite = true
     // inviteeNickname이 존재하는지
-    if (invitee === null) return { status: 404 }
+    if (invitee === null) return new NotFoundException()
     // inviter가 roomId에 속해있는지
-    if (client.rooms.has(roomId.toString()) === false) return { status: 400 }
+    if (client.rooms.has(roomId.toString()) === false)
+      return new BadRequestException()
+    // invitee가 roomId에 속해있는지
+    if (await this.chatService.isUserInRoom(invitee, roomId))
+      return new BadRequestException('user is already in room')
     // invitee의 소켓id 찾아서 room에 추가
     const sockets = await this.chatService.getSocketByUid(this.server, invitee)
+    if (sockets.length === 0) {
+      console.log(`${invitee} is not online`)
+      return new BadRequestException('user is not online')
+    }
     for (const soc of sockets) {
       try {
         await this.chatService.addUserToRoom(invitee, roomId, null, isInvite)
-      } catch (error) {
-        return error
-      }
+      } catch (error) {}
       soc.join(roomId.toString())
     }
     // room의 모두에게 NOTICE 전송
