@@ -9,6 +9,7 @@ import { useEffect } from 'react'
 import { RegisterUser } from 'view/RegisterUser'
 import styled from 'styled-components'
 import QrPage from 'view/twoFactor'
+import { Button } from '@mui/material'
 
 const CenterAlignedDiv = styled.div`
   display: flex;
@@ -20,16 +21,17 @@ const CenterAlignedDiv = styled.div`
 function LoginButton() {
   return (
     <CenterAlignedDiv>
-      <a
-        href="/api/auth/ft"
-        style={{ textDecoration: 'none', color: '#000000' }}
-      >
-        Login with 42Intra
-      </a>
+      <Button variant="outlined" color="error">
+        <a
+          href="/api/auth/ft"
+          style={{ textDecoration: 'none', color: '#fff' }}
+        >
+          Login with 42Intra
+        </a>
+      </Button>
     </CenterAlignedDiv>
   )
 }
-
 function ProcessLogin(props: { setIsLoggedIn: (value: boolean) => void }) {
   const [searchParams, _] = useSearchParams()
   const navigate = useNavigate()

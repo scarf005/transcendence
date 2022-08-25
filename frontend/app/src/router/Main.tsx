@@ -31,6 +31,17 @@ type Messages = {
   [roomId: number]: Message[]
 }
 
+const Item = styled(Paper)(({ theme }) => ({
+  backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
+  ...theme.typography.body2,
+  padding: theme.spacing(1),
+  textAlign: 'center',
+  color: theme.palette.text.secondary,
+  minHeight: '500px',
+}))
+type Messages = {
+  [roomId: number]: Message[]
+}
 export const PongSocketContext = createContext<Socket | undefined>(undefined)
 export const ChatSocketContext = createContext<ChatSocket | undefined>(
   undefined,
@@ -42,7 +53,6 @@ export const MainRouter = () => {
   const [chiptxt, setChiptxt] = useState('Game')
   const [profileId, setProfileId] = useState<number>(0)
   const [messages, setMessages] = useState<Messages>({})
-
   const changeMode = () => {
     if (chiptxt === 'Game') {
       navigate('/game')
