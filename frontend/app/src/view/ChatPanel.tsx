@@ -76,7 +76,7 @@ export const ChatPanel = () => {
   return (
     <Grid container padding="1rem" minHeight="570px">
       <Grid item xs={8}>
-        <Box style={{ overflow: 'auto' }}>
+        <Box style={{ overflow: 'auto' }} minHeight="80%">
           <ChatList />
         </Box>
         <Grid container>

@@ -31,7 +31,7 @@ export const OptionForBanned = ({ user, refUser, off }: BanProps) => {
     off()
   }
 
-  if (refUser && socket) {
+  if (refUser && socket && (refUser.isAdmin || refUser.isOwner)) {
     return (
       <>
         <Box sx={{ display: 'flex' }} justifyContent="center">
