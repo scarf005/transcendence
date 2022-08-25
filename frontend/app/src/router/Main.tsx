@@ -30,18 +30,6 @@ const Item = styled(Paper)(({ theme }) => ({
 type Messages = {
   [roomId: number]: Message[]
 }
-
-const Item = styled(Paper)(({ theme }) => ({
-  backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
-  ...theme.typography.body2,
-  padding: theme.spacing(1),
-  textAlign: 'center',
-  color: theme.palette.text.secondary,
-  minHeight: '500px',
-}))
-type Messages = {
-  [roomId: number]: Message[]
-}
 export const PongSocketContext = createContext<Socket | undefined>(undefined)
 export const ChatSocketContext = createContext<ChatSocket | undefined>(
   undefined,
