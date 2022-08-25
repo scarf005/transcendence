@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/naming-convention */
-import { CssBaselineProps } from '@mui/material'
 import { Socket } from 'socket.io-client'
 import { UserStatusType } from './User.dto'
 

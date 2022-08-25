@@ -3,7 +3,7 @@ import { MainRouter, LoginRouter } from 'router'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { queryClient } from 'hook'
-
+import { Background } from 'components'
 import { RecoilRoot } from 'recoil'
 
 export const Context = () => {
@@ -26,7 +26,9 @@ export const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <RecoilRoot>
-        <Context />
+        <Background>
+          <Context />
+        </Background>
         <ReactQueryDevtools initialIsOpen={false} />
       </RecoilRoot>
     </QueryClientProvider>

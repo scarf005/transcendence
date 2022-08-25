@@ -40,7 +40,7 @@ export const JoinedRoomItem = ({ chatRoom, changeView }: ItemProps) => {
       <ListItemAvatar>
         <ChatRoomAvatars id={chatRoom.id} />
       </ListItemAvatar>
-      <ListItemText primary={chatRoom.name} secondary={`#${chatRoom.id}`} />
+      <ListItemText primary={chatRoom.name} />
     </ListItem>
   )
 }
