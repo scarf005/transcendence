@@ -18,6 +18,7 @@ import { GamePannel } from 'view'
 import { useNavigate } from 'react-router-dom'
 import { MainGrid } from 'components'
 import { ChatViewOption } from 'view/ChatView'
+import { useToggle } from 'react-use'
 
 const Item = styled(Paper)(({ theme }) => ({
   backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
@@ -35,21 +36,20 @@ export const MainRouter = () => {
   const navigate = useNavigate()
   const pongData = usePongSocket()
   const chatSocket = useChatSocket()
-  const [chiptxt, setChiptxt] = useState('Game')
   const [profileId, setProfileId] = useState<number>(0)
-  const changeMode = () => {
-    if (chiptxt === 'Game') {
-      navigate('/game')
-      setChiptxt('Chat')
-    } else {
-      navigate('/chat')
-      setChiptxt('Game')
-    }
-  }
+  const [toGame, toggle] = useToggle(true)
+
   return (
     <PongSocketContext.Provider value={pongData.socket}>
       <ChatSocketContext.Provider value={chatSocket.socket}>
-        <Chip label={chiptxt} onClick={changeMode} />
+        <Chip
+          color={toGame ? 'secondary' : 'success'}
+          label={toGame ? 'Game' : 'Chat'}
+          onClick={() => {
+            navigate(toGame ? '/game' : '/chat')
+            toggle()
+          }}
+        />
         <MainGrid
           left={
             <Item>

@@ -8,11 +8,12 @@ import {
 import { useEffect } from 'react'
 import { RegisterUser } from 'view/RegisterUser'
 import QrPage from 'view/twoFactor'
-import { Button } from '@mui/material'
+import { Button, createTheme, CssBaseline, Link } from '@mui/material'
 import styled from 'styled-components'
 import { Typography } from '@mui/material'
 import { ThemeProvider } from '@mui/material'
 import './Login.css'
+import { mainTheme } from 'components'
 
 const CenterAlignedDiv = styled.div`
   display: flex;
@@ -24,17 +25,19 @@ const CenterAlignedDiv = styled.div`
 function LoginButton() {
   return (
     <>
-      <Typography variant="h2" align="center" paddingTop="100px">
-        Pong Game
+      <Typography
+        variant="h2"
+        align="center"
+        paddingTop="100px"
+        color="#ffffff"
+      >
+        Exciting Pong
       </Typography>
       <CenterAlignedDiv>
         <Button variant="outlined" color="error">
-          <a
-            href="/api/auth/ft"
-            style={{ textDecoration: 'none', color: '#fff' }}
-          >
+          <Link color="#ffffff" href="/api/auth/ft">
             Login with 42Intra
-          </a>
+          </Link>
         </Button>
       </CenterAlignedDiv>
     </>
