@@ -8,6 +8,7 @@ import {
   ListItemText,
   Stack,
 } from '@mui/material'
+import { ScrollableList } from 'components'
 import { ChatUser, JoinedRoom, RoomType, User } from 'data'
 import { useChatUsersQuery, selectedChatState } from 'hook'
 import { Dispatch, SetStateAction } from 'react'
@@ -54,7 +55,7 @@ export const JoinedRoomList = ({ room }: Props) => {
     setSelectedChat({ bool: true, roomId, roomType })
   }
   return (
-    <List style={{ maxHeight: '70vh', overflow: 'auto' }}>
+    <ScrollableList>
       {room.map((chatRoom) => (
         <JoinedRoomItem
           key={chatRoom.id}
@@ -62,6 +63,6 @@ export const JoinedRoomList = ({ room }: Props) => {
           changeView={changeView}
         />
       ))}
-    </List>
+    </ScrollableList>
   )
 }

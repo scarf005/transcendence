@@ -4,6 +4,7 @@ import {
   MyProfile,
   OtherProfile,
   ProfileListItem,
+  ScrollableList,
   VerticalDivider,
 } from 'components'
 import { User } from 'data'
@@ -52,7 +53,7 @@ export const UsersPanel = ({
           color="success"
           style={{ width: '50%' }}
         />
-        <List style={{ maxHeight: '70vh', overflow: 'auto' }}>
+        <ScrollableList>
           {seenUsers.map((u) => (
             <ProfileListItem
               key={u.uid}
@@ -60,7 +61,7 @@ export const UsersPanel = ({
               onClick={() => setProfileId(u.uid)}
             />
           ))}
-        </List>
+        </ScrollableList>
       </Grid>
     </Grid>
   )

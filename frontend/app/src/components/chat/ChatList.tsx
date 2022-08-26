@@ -4,6 +4,7 @@ import { ChatListItem, AcceptGame } from './ChatListItem'
 import { groupBySerial } from 'utility'
 import { currentGroupedMessagesState, useApiQuery, useUserQuery } from 'hook'
 import { useRecoilValue } from 'recoil'
+import { ScrollableList } from 'components/container'
 
 interface ListProps {
   group: Message[]
@@ -34,10 +35,10 @@ export const ChatList = () => {
   const groupedMessages = useRecoilValue(currentGroupedMessagesState)
 
   return (
-    <List style={{ maxHeight: '70vh', overflow: 'auto' }}>
+    <ScrollableList>
       {groupedMessages.map((group) => (
         <WrappedChatListItem key={`${group[0].createdAt}`} group={group} />
       ))}
-    </List>
+    </ScrollableList>
   )
 }
