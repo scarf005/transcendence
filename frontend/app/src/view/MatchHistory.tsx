@@ -1,69 +1,48 @@
-import { Grid, Paper, Typography } from '@mui/material'
+import {
+  Grid,
+  List,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Typography,
+} from '@mui/material'
+import { Match } from 'data'
 import { useApiQuery } from 'hook'
 
-type Match = {
-  winner: string
-  loser: string
-  timestamp: string
-}
-
-type MatchHistoryProps = {
-  matches: Match[]
-}
-
-const Match = (props: Match) => {
-  return (
-    <>
-      <Grid item xs={4}>
-        <Paper>
-          {`${new Date(props.timestamp).toLocaleDateString()} ${new Date(
-            props.timestamp,
-          ).toLocaleTimeString()}`}
-        </Paper>
-      </Grid>
-      <Grid item xs={4}>
-        <Paper>{props.winner}</Paper>
-      </Grid>
-      <Grid item xs={4}>
-        <Paper>{props.loser}</Paper>
-      </Grid>
-    </>
-  )
-}
+const MatchCell = ({ msg }: { msg: string }) => (
+  <TableCell align="center">{msg}</TableCell>
+)
 
 export const MatchHistory = () => {
-  const { data, isSuccess } = useApiQuery<any>(['match'])
+  const { data: matches, isSuccess } = useApiQuery<Match[]>(['match'])
   if (!isSuccess) {
     return null
   }
 
-  const matches = data.map((match: any) => {
-    return {
-      loser: match.loser.nickname,
-      winner: match.winner.nickname,
-      timestamp: match.endOfGame,
-    }
-  })
   return (
-    <Grid container columnSpacing={1} rowGap="0.5rem">
-      <Grid item xs={4}>
-        <Paper>
-          <Typography>시간</Typography>
-        </Paper>
-      </Grid>
-      <Grid item xs={4}>
-        <Paper>
-          <Typography>승리</Typography>
-        </Paper>
-      </Grid>
-      <Grid item xs={4}>
-        <Paper>
-          <Typography>패배</Typography>
-        </Paper>
-      </Grid>
-      {matches.map((match: Match) => (
-        <Match key={match.timestamp} {...match} />
-      ))}
-    </Grid>
+    <TableContainer component={List}>
+      <Table>
+        <TableHead>
+          <TableRow>
+            <MatchCell msg="시간" />
+            <MatchCell msg="승리" />
+            <MatchCell msg="패배" />
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {matches.map(({ winner, loser, endOfGame }) => (
+            <TableRow>
+              <MatchCell msg={endOfGame as unknown as string} />
+              <MatchCell msg={winner.nickname} />
+              <MatchCell msg={loser.nickname} />
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
   )
 }
