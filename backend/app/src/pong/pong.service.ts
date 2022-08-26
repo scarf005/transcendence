@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common'
 import { ChatGateway } from 'chat/chat.gateway'
 import { Socket } from 'socket.io'
+import { Status } from 'user/status.enum'
 import { User } from 'user/user.entity'
 import { UserService } from 'user/user.service'
 import * as CONSTANTS from '../configs/pong.config'
 import { MatchService } from './match.service'
-import { GameStatus } from 'user/gamestatus.enum'
 
 class Rect {
   x: number
@@ -472,8 +472,8 @@ export class PongService {
     this.gamesByUser.set(leftUser.uid, { manager: gameManager, side: 'left' })
     this.gamesByUser.set(rightUser.uid, { manager: gameManager, side: 'right' })
 
-    this.userService.changeGameStatus(leftUser.uid, GameStatus.ON)
-    this.userService.changeGameStatus(rightUser.uid, GameStatus.ON)
+    this.userService.changeStatus(leftUser.uid, Status.GAME)
+    this.userService.changeStatus(rightUser.uid, Status.GAME)
     this.chatGateway.onUserStatusChanged(leftUser.uid)
     this.chatGateway.onUserStatusChanged(rightUser.uid)
 
@@ -519,14 +519,8 @@ export class PongService {
       this.gamesByUser.delete(gameManager.leftUser.uid)
       this.gamesByUser.delete(gameManager.rightUser.uid)
 
-      this.userService.changeGameStatus(
-        gameManager.leftUser.uid,
-        GameStatus.OFF,
-      )
-      this.userService.changeGameStatus(
-        gameManager.rightUser.uid,
-        GameStatus.OFF,
-      )
+      this.userService.restoreStatusAfterGameEnded(gameManager.leftUser.uid)
+      this.userService.restoreStatusAfterGameEnded(gameManager.rightUser.uid)
       this.chatGateway.onUserStatusChanged(gameManager.leftUser.uid)
       this.chatGateway.onUserStatusChanged(gameManager.rightUser.uid)
     }

@@ -7,7 +7,6 @@ import {
 } from 'typeorm'
 import { Stat } from './stat.entity'
 import { Status } from './status.enum'
-import { GameStatus } from './gamestatus.enum'
 import { ApiProperty } from '@nestjs/swagger'
 
 @Entity()
@@ -23,9 +22,6 @@ export class User {
 
   @Column({ default: Status.OFFLINE })
   status: Status
-
-  @Column({ default: GameStatus.OFF })
-  gameStatus: GameStatus
 
   @Column()
   avatar: string
