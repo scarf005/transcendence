@@ -13,6 +13,7 @@ import { RegisterUserDto } from 'dto/registerUser.dto'
 import { Stat } from './stat.entity'
 import * as fs from 'fs'
 import { Status } from './status.enum'
+import { GameStatus } from './gamestatus.enum'
 
 @Injectable()
 export class UserService {
@@ -272,20 +273,21 @@ export class UserService {
     })
   }
 
-  async getUserStatus(uid: number): Promise<Status> {
+  async changeGameStatus(uid: number, gameStatus: GameStatus) {
     const user = await this.findOneByUid(uid)
     if (!user) throw new NotFoundException('User not found')
-    return user.status
-  }
-
-  async restoreStatusAfterGameEnded(uid: number) {
-    const user = await this.findOneByUid(uid)
-    if (!user) throw new NotFoundException('User not found')
-    if (user.status === Status.GAME) {
-      user.status = Status.ONLINE
-    }
+    user.gameStatus = gameStatus
     this.userRepository.save(user).catch(() => {
       throw new InternalServerErrorException('Status not changed')
     })
+  }
+
+  async getUserStatus(uid: number): Promise<Status> {
+    const user = await this.findOneByUid(uid)
+    if (!user) throw new NotFoundException('User not found')
+    if (user.gameStatus === GameStatus.ON) {
+      return Status.GAME
+    }
+    return user.status
   }
 }
