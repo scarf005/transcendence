@@ -74,11 +74,9 @@ export const ChatPanel = () => {
   const mydata = chatusers?.find((user) => user.user.uid === me?.uid)
 
   return (
-    <Grid container padding="1rem" minHeight="570px">
+    <Grid container padding="1rem">
       <Grid item xs={8}>
-        <Box style={{ overflow: 'auto' }} minHeight="80%">
-          <ChatList />
-        </Box>
+        <ChatList />
         <Grid container>
           <Grid item xs={11}>
             <ChatInput me={mydata} />

@@ -54,7 +54,7 @@ export const JoinedRoomList = ({ room }: Props) => {
     setSelectedChat({ bool: true, roomId, roomType })
   }
   return (
-    <List>
+    <List style={{ maxHeight: '70vh', overflow: 'auto' }}>
       {room.map((chatRoom) => (
         <JoinedRoomItem
           key={chatRoom.id}

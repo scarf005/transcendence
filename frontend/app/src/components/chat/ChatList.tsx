@@ -34,7 +34,7 @@ export const ChatList = () => {
   const groupedMessages = useRecoilValue(currentGroupedMessagesState)
 
   return (
-    <List>
+    <List style={{ maxHeight: '70vh', overflow: 'auto' }}>
       {groupedMessages.map((group) => (
         <WrappedChatListItem key={`${group[0].createdAt}`} group={group} />
       ))}

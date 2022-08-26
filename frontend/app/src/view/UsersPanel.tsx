@@ -52,7 +52,7 @@ export const UsersPanel = ({
           color="success"
           style={{ width: '50%' }}
         />
-        <List>
+        <List style={{ maxHeight: '70vh', overflow: 'auto' }}>
           {seenUsers.map((u) => (
             <ProfileListItem
               key={u.uid}
