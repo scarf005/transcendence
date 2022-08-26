@@ -35,16 +35,18 @@ export const PwdSetModal = ({ open, off, socket }: Props) => {
       roomId,
       password: inputAdd.current?.value,
       command: 'ADD',
-    })
+    }, ()=>queryClient.invalidateQueries(['chat', 'me']))
     setSelectedChat({ bool: true, roomId, roomType: 'PROTECTED' })
+    
     off()
   }
   const removePwd = () => {
     socket.emit('PASSWORD', {
       roomId,
       command: 'DELETE',
-    })
+    }, ()=>queryClient.invalidateQueries(['chat', 'me']))
     setSelectedChat({ bool: true, roomId, roomType: 'PUBLIC' })
+    
     off()
   }
   const changePwd = () => {
@@ -52,7 +54,8 @@ export const PwdSetModal = ({ open, off, socket }: Props) => {
       roomId,
       password: inputChange.current?.value,
       command: 'MODIFY',
-    })
+    }, ()=>queryClient.invalidateQueries(['chat', 'me']))
+   
     off()
   }
   return (
