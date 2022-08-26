@@ -45,7 +45,7 @@ export const MatchHistory = () => {
     }
   })
   return (
-    <Grid container columnSpacing={2} rowSpacing={2}>
+    <Grid container columnSpacing={1} rowGap="0.5rem">
       <Grid item xs={4}>
         <Paper>
           <Typography>시간</Typography>

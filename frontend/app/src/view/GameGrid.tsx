@@ -21,11 +21,10 @@ const GameGrid = (props: {
   setState: React.Dispatch<React.SetStateAction<PongState>>
 }) => {
   return (
-    <Grid direction="column" rowSpacing={3}>
+    <Grid container direction="column" padding="1.5rem" rowGap="1rem">
       <PongMatchForm requestMatch={props.requestMatch} />
-
       <Button variant="contained" onClick={() => props.setState('history')}>
-        매치 기록
+        매치기록
       </Button>
     </Grid>
   )

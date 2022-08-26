@@ -1,4 +1,4 @@
-import { Button, Stack, Typography } from '@mui/material'
+import { Button, Paper, Stack, Typography } from '@mui/material'
 import { PongSocketContext } from 'router'
 import { useState, useContext, useEffect } from 'react'
 import styled, { keyframes } from 'styled-components'
@@ -8,17 +8,19 @@ const PingPongAnimation = keyframes`
   to { left: 94%; }
 `
 const Wrapper = styled.div`
-  width: 600px;
-  height: 300px;
+  width: 100%;
+  height: 100%;
   margin-bottom: 2px;
-  background-color: black;
   position: relative;
   align: center;
 `
 const DIV = styled.div`
+  width: 100%;  
+  height: 100%;  
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
 `
 
 const PingPongComponent = `
@@ -48,7 +50,7 @@ const LeftPaddle = styled.div`
 const Ball = styled.div`
   ${PingPongComponent}
   width: 2%;
-  height: 4%;
+  height: 2%;
   animation-name: ${PingPongAnimation};
   animation-duration: 2s;
   animation-iteration-count: infinite;
@@ -65,7 +67,6 @@ const RightPaddle = styled.div`
 
 const MatchCancelButton = styled.button`
   width: 600px;
-  background-color: black;
   color: #cccccc;
 `
 
@@ -94,10 +95,12 @@ const ElapsedTime = (props: { startedAt: number }) => {
   const { seconds, minutes } = msToSecondsAndMinutes(elapsedTime)
 
   return (
-    <ElapsedTimeHolder>
-      적절한 상대를 찾는중 :{' '}
-      {`[${minutes}:${seconds.toString().padStart(2, '0')}]`}
-    </ElapsedTimeHolder>
+    <Paper>
+      <Typography variant="h4">
+        적절한 상대를 찾는중 :{' '}
+        {`[${minutes}:${seconds.toString().padStart(2, '0')}]`}
+      </Typography>
+    </Paper>
   )
 }
 
@@ -105,23 +108,21 @@ export const MatchingView = (props: { handleCancel: () => void }) => {
   const socket = useContext(PongSocketContext)
 
   return (
-    <div>
-      <DIV>
-        <Wrapper>
-          <ElapsedTime startedAt={Date.now()} />
-          <LeftPaddle />
-          <Ball />
-          <RightPaddle />
-        </Wrapper>
-        <MatchCancelButton
-          onClick={() => {
-            socket?.emit('cancelMatch')
-            props.handleCancel()
-          }}
-        >
-          매치 취소
-        </MatchCancelButton>
-      </DIV>
-    </div>
+    <DIV>
+      <Wrapper>
+        <ElapsedTime startedAt={Date.now()} />
+        <LeftPaddle />
+        <Ball />
+        <RightPaddle />
+      </Wrapper>
+      <Button sx={{width: '100%', fontSize: '32px'}} color="error"
+        onClick={() => {
+          socket?.emit('cancelMatch')
+          props.handleCancel()
+        }}
+      >
+        매치 취소
+      </Button>
+    </DIV>
   )
 }

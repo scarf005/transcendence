@@ -73,17 +73,15 @@ const remainTimeModalStyle = {
 }
 
 const PongGrid = styled.div`
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -60%);
+  width: 100%;
+  height: 100%;
   display: grid;
 
-  grid-template-columns: 400px 400px;
-  grid-template-rows: 100px 450px;
+  grid-template-columns: 45% 45%;
+  grid-template-rows: 10% 90%;
 
   align-items: center;
-  justify-items: center;
+  justify-content: center;
 `
 
 const PongLeftProfile = styled.div`
@@ -91,15 +89,28 @@ const PongLeftProfile = styled.div`
   grid-row: 1 / 2;
 `
 
-const PongCanvas = styled.canvas`
+// const PongCanvas = styled.canvas`
+//   grid-column: 1 / 3;
+//   grid-row: 2 / 3;
+//   border: 1px solid black;
+// `
+
+const PongCanvasWrapper = styled.div`
   grid-column: 1 / 3;
   grid-row: 2 / 3;
-  border: 1px solid black;
 `
 
 const PongRightProfile = styled.div`
   grid-column: 2 / 3;
   grid-row: 1 / 2;
+`
+
+const PongWrapper = styled.div`
+  display: flex;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
 `
 
 export const PongStartCounter = () => {
@@ -147,18 +158,15 @@ export const PongResult = ({
   )
 }
 
-let lastTs = 0
-
 const Pong = (props: PongProps) => {
   const pongCanvas = useRef<HTMLCanvasElement>(null)
   const [pongBaseCanvas, _] = useState<HTMLCanvasElement>(
     document.createElement('canvas'),
   )
-  const [fps, setFps] = useState(0)
 
   useEffect(() => {
-    pongBaseCanvas.width = 800
-    pongBaseCanvas.height = 450
+    pongBaseCanvas.width = props.window.height * props.window.ratio
+    pongBaseCanvas.height = props.window.height
 
     const ctx = pongBaseCanvas.getContext('2d') as CanvasRenderingContext2D
     ctx.fillStyle = 'black'
@@ -192,13 +200,10 @@ const Pong = (props: PongProps) => {
         rectWidth,
       )
     }
-    lastTs = Date.now()
   }, [props.window, props.leftScore, props.rightScore])
 
   useEffect(() => {
     const req = requestAnimationFrame((ts) => {
-      setFps((v) => Math.round(1000 / (ts - lastTs)))
-      lastTs = ts
       const ctx = (pongCanvas.current as HTMLCanvasElement).getContext(
         '2d',
       ) as CanvasRenderingContext2D
@@ -212,7 +217,7 @@ const Pong = (props: PongProps) => {
   }, [props])
 
   return (
-    <>
+    <PongWrapper>
       {props.isPlaying ? null : <PongStartCounter />}
       <PongGrid>
         <PongLeftProfile>
@@ -221,9 +226,11 @@ const Pong = (props: PongProps) => {
         <PongRightProfile>
           <PongUser uid={props.rightUser} />
         </PongRightProfile>
-        <PongCanvas width={800} height={450} ref={pongCanvas} />
+        <PongCanvasWrapper>
+          <canvas width={props.window.height * props.window.ratio} height={props.window.height} ref={pongCanvas} />
+        </PongCanvasWrapper>
       </PongGrid>
-    </>
+    </PongWrapper>
   )
 }
 

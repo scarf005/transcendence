@@ -4,12 +4,13 @@ import { GameView, FriendView, ChatView, ProfileView } from 'view'
 import { createContext, useState, useReducer } from 'react'
 import { io, Socket } from 'socket.io-client'
 
-import { usePongSocket, useChatSocket } from 'hook'
+import { usePongSocket, useChatSocket, useToggles } from 'hook'
 import { useUserQuery, useUsersQuery } from 'hook'
 
 import { ChatSocket, MessageRecord } from 'data'
 import { Grid, Paper, Chip } from '@mui/material'
-import { styled } from '@mui/material/styles'
+import { styled as muiStyled } from '@mui/material/styles'
+import styled from 'styled-components'
 import axios from 'axios'
 import { MainProfileView, UsersPanel } from 'view/UsersPanel'
 import { Message } from 'data'
@@ -18,16 +19,22 @@ import { GamePannel } from 'view'
 import { useNavigate } from 'react-router-dom'
 import { MainGrid } from 'components'
 import { ChatViewOption } from 'view/ChatView'
-import { useToggle } from 'react-use'
 
-const Item = styled(Paper)(({ theme }) => ({
+const Item = muiStyled(Paper)(({ theme }) => ({
   backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
   ...theme.typography.body2,
-  padding: theme.spacing(1),
   textAlign: 'center',
   color: theme.palette.text.secondary,
-  minHeight: '570px',
+  height: '80vh',
+  padding: '0.5rem'
 }))
+
+const FixedDiv = styled.div`
+  top:5%;
+  left:3%;  
+  position: absolute;
+`
+
 export const PongSocketContext = createContext<Socket | undefined>(undefined)
 export const ChatSocketContext = createContext<ChatSocket | undefined>(
   undefined,
@@ -37,13 +44,12 @@ export const MainRouter = () => {
   const pongData = usePongSocket()
   const chatSocket = useChatSocket()
   const [profileId, setProfileId] = useState<number>(0)
-  const [toGame, toggle] = useToggle(true)
+  const [toGame, { toggle }] = useToggles(true)
 
   return (
-    <PongSocketContext.Provider value={pongData.socket}>
+      <PongSocketContext.Provider value={pongData.socket}>
       <ChatSocketContext.Provider value={chatSocket.socket}>
         <Chip
-          color={toGame ? 'secondary' : 'success'}
           label={toGame ? 'Game' : 'Chat'}
           onClick={() => {
             navigate(toGame ? '/game' : '/chat')

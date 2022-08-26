@@ -13,21 +13,21 @@ import {
   Box,
 } from '@mui/material'
 
-import { createTheme, ThemeProvider } from '@mui/material/styles'
 import { useAvatar } from 'hook/useAvatar'
-
-const theme = createTheme({
-  palette: {
-    primary: {
-      main: '#000000',
-    },
-  },
-})
 
 const Img = styled.img`
   height: 100px;
   width: 100px;
   border-radius: 50%;
+`
+
+const LogWrap = styled.div`
+  width: 100%;
+  height: 100%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
 `
 
 const Log = styled.div`
@@ -99,7 +99,7 @@ export function RegisterUser(props: {
     formdata.append('file', avatar)
 
     const token = window.localStorage.getItem('temp_token')
-    fetch('http://localhost:3000/api/avatar', {
+    fetch('/api/avatar', {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`,
@@ -115,7 +115,7 @@ export function RegisterUser(props: {
         }
       })
       .catch((err) => {
-        console.log(err)
+        console.log(err.status)
       })
   }
 
@@ -175,7 +175,7 @@ export function RegisterUser(props: {
   }
 
   return (
-    <ThemeProvider theme={theme}>
+    <LogWrap>
       <Log>
         <Box
           component="form"
@@ -222,6 +222,6 @@ export function RegisterUser(props: {
           설정 완료
         </Button>
       </Log>
-    </ThemeProvider>
+    </LogWrap>
   )
 }

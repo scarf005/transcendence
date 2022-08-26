@@ -15,17 +15,28 @@ import { ThemeProvider } from '@mui/material'
 import './Login.css'
 import { mainTheme } from 'components'
 
-const CenterAlignedDiv = styled.div`
+const VerticalAlignedDiv = styled.div`
+  position: absolute;
   display: flex;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  flex-direction: column;
+`
+
+const CenterAlignedDiv = styled.div`
+  position: absolute;
+  display: flex;
+  width: 100%;
+  height: 100%;
   justify-content: center;
   align-items: center;
-  min-height: 100vh;
 `
 
 function LoginButton() {
   return (
-    <>
-      <Typography variant="h2" align="center" paddingTop="100px">
+    <VerticalAlignedDiv>
+      <Typography variant="h2" align="center" margin="8%">
         Exciting PONG
       </Typography>
       <CenterAlignedDiv>
@@ -35,7 +46,7 @@ function LoginButton() {
           </Link>
         </Button>
       </CenterAlignedDiv>
-    </>
+    </VerticalAlignedDiv>
   )
 }
 function ProcessLogin(props: { setIsLoggedIn: (value: boolean) => void }) {

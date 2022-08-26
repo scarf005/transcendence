@@ -3,7 +3,7 @@ export const PADDLE_HEIGHT = 0.1
 
 export const BALL_SIZE = 0.017
 
-export const WINDOW_RATIO = 16 / 9
+export const WINDOW_RATIO = 1
 
 export const WINDOW_HEIGHT = 1
 export const WINDOW_WIDTH = WINDOW_HEIGHT * WINDOW_RATIO

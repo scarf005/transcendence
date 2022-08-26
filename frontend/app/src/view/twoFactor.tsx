@@ -5,26 +5,26 @@ import styled from 'styled-components'
 import Box from '@mui/material/Box'
 import TextField from '@mui/material/TextField'
 import Button from '@mui/material/Button'
-import { createTheme, ThemeProvider } from '@mui/material/styles'
 
-const theme = createTheme({
-  palette: {
-    primary: {
-      main: '#000000',
-    },
-  },
-})
+const CenterAlignedDiv = styled.div`
+  position: absolute;
+  width: 100%;
+  height: 100%;
 
-const Log = styled.div`
-  display: grid;
+  display: flex;
+  align-items: center;
   justify-content: center;
-  grid-row-gap: 20px;
-  margin: 2rem;
-  padding: 2rem;
 `
+  
+const WrapDiv = styled.div`
+  display: grid;
+  grid-row-gap: 1rem;
+  width: 272px;
+`
+
 export const GenerateQrcode = (props: { value: string }) => {
   return (
-    <div style={{ background: 'white', padding: '16px' }}>
+    <div style={{ background: 'white', padding:'16px' }}>
       <QRCodeSVG value={props.value} size={240} />
     </div>
   )
@@ -62,21 +62,16 @@ export const InputCode = (props: {
     <>
       <Box
         component="form"
-        sx={{
-          '& .MuiTextField-root': { m: 1, width: '26ch' },
-        }}
         noValidate
         autoComplete="off"
       >
-        <div>
-          <TextField
-            value={token}
-            onChange={(e) => setToken(e.target.value)}
-            id="standard-basic"
-            label={notice}
-            variant="standard"
-          />
-        </div>
+        <TextField
+          value={token}
+          onChange={(e) => setToken(e.target.value)}
+          id="standard-basic"
+          label={notice}
+          variant="standard"
+        />
       </Box>
       <Button variant="outlined" onClick={handleOtpCheck}>
         확인
@@ -110,16 +105,14 @@ const QrPage = (props: { setIsLoggedIn: (value: boolean) => void }) => {
   }, [isQrRegistered])
 
   return (
-    <div>
-      <ThemeProvider theme={theme}>
-        <Log>
+    <CenterAlignedDiv>
+        <WrapDiv>
           {otpRegisterLink !== '' ? (
             <GenerateQrcode value={otpRegisterLink} />
           ) : null}
           <InputCode setIsLoggedIn={props.setIsLoggedIn} />
-        </Log>
-      </ThemeProvider>
-    </div>
+        </WrapDiv>
+    </CenterAlignedDiv>
   )
 }
 export default QrPage

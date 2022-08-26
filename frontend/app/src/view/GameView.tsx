@@ -1,19 +1,12 @@
-import { useState, useEffect, useContext } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import Pong, { PongResult } from './Pong'
-import { createTheme } from '@mui/material/styles'
 import { Typography } from '@mui/material'
 import GameGrid from './GameGrid'
 import { usePongSocket } from 'hook'
 import { MatchingView } from './MatchingView'
 import { MatchHistory } from './MatchHistory'
+import styled from 'styled-components'
 
-const _theme = createTheme({
-  palette: {
-    primary: {
-      main: '#000000',
-    },
-  },
-})
 type PongState =
   | 'selectMode'
   | 'findMatch'
@@ -21,6 +14,13 @@ type PongState =
   | 'play'
   | 'gameEnd'
   | 'history'
+
+const DummyDiv = styled.div`
+  width: 100%;
+  height: 100%;
+  float: left;
+  display: hidden;
+`
 
 export const GamePannel = (props: {
   requestMatch: (matchData: any) => void
@@ -41,6 +41,26 @@ export const GameView = ({
   winner,
 }: ReturnType<typeof usePongSocket>) => {
   const [keyState, setKeyState] = useState({ up: false, down: false })
+  
+  const [height, setHeight] = useState(0)
+
+  const pongRect = useCallback((node: HTMLDivElement | null) => {
+    if (node !== null) {
+      const height = node.getBoundingClientRect().height
+      const width = node.getBoundingClientRect().width
+      if (height < width) {
+        setHeight(height - 300)
+      } else {
+        const remainSpace = 300 - (height - width)
+        if (remainSpace > 0) {
+          setHeight(width - remainSpace)
+        } else {
+          setHeight(width)
+        }
+      }
+    }
+  }, []);
+
 
   useEffect(() => {
     if (socket === undefined || gameState !== 'play') {
@@ -82,6 +102,10 @@ export const GameView = ({
     }
   }, [keyState, socket, gameState])
 
+  useEffect(() => {
+
+  }, [])
+
   switch (gameState) {
     case 'selectMode':
       return (
@@ -91,7 +115,7 @@ export const GameView = ({
         //     setGameState('findMatch')
         //   }}
         // />
-        <Typography marginTop="10%">게임 모드를 선택해주세요</Typography>
+        <Typography>게임 모드를 선택해주세요</Typography>
       )
 
     case 'findMatch':
@@ -109,14 +133,15 @@ export const GameView = ({
     case 'gameInfo':
     case 'play':
       return (
-        <Pong
-          isPlaying={gameState === 'play'}
-          {...gameInfo}
-          {...player}
-          window={{ ratio: 16 / 9, height: 450 }}
-        />
+        <DummyDiv ref={pongRect} >
+          <Pong
+            isPlaying={gameState === 'play'}
+            {...gameInfo}
+            {...player}
+            window={{height, ratio: 1}}
+          />
+        </DummyDiv>
       )
-
     case 'gameEnd':
       return (
         <PongResult

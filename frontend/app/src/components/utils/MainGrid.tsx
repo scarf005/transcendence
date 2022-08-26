@@ -12,18 +12,17 @@ export const MainGrid = ({ left, middle, right }: MainProps) => {
     <Grid
       container
       spacing={3}
-      sx={{
-        marginTop: '5%',
-        Height: '80%',
-      }}
+      alignItems="center"
+      justifyContent="center"
+      height="100%"
     >
-      <Grid item sx={{ height: '110vh', marginLeft: '1rem' }} xs>
+      <Grid item xs={2} >
         {left || <Skeleton variant="rectangular" />}
       </Grid>
-      <Grid item sx={{ height: '110vh' }} xs={7}>
+      <Grid item xs={6}>
         {middle || <Skeleton variant="rectangular" />}
       </Grid>
-      <Grid item sx={{ height: '110vh', marginRight: '1rem' }} xs>
+      <Grid item xs={2}>
         {right || <Skeleton variant="rectangular" />}
       </Grid>
     </Grid>
