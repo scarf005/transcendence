@@ -31,7 +31,15 @@ export const InviteUser = (prop: { roomId: number }) => {
         noValidate
         autoComplete="off"
       >
-        <Input placeholder="유저 닉네임 입력" inputRef={input}></Input>
+        <Input
+          placeholder="유저 닉네임 입력"
+          inputRef={input}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault()
+            }
+          }}
+        ></Input>
 
         {socket ? (
           <Button
