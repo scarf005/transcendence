@@ -227,7 +227,11 @@ const Pong = (props: PongProps) => {
           <PongUser uid={props.rightUser} />
         </PongRightProfile>
         <PongCanvasWrapper>
-          <canvas width={props.window.height * props.window.ratio} height={props.window.height} ref={pongCanvas} />
+          <canvas
+            width={props.window.height * props.window.ratio}
+            height={props.window.height}
+            ref={pongCanvas}
+          />
         </PongCanvasWrapper>
       </PongGrid>
     </PongWrapper>

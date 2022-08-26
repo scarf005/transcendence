@@ -15,8 +15,8 @@ const Wrapper = styled.div`
   align: center;
 `
 const DIV = styled.div`
-  width: 100%;  
-  height: 100%;  
+  width: 100%;
+  height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -115,7 +115,9 @@ export const MatchingView = (props: { handleCancel: () => void }) => {
         <Ball />
         <RightPaddle />
       </Wrapper>
-      <Button sx={{width: '100%', fontSize: '32px'}} color="error"
+      <Button
+        sx={{ width: '100%', fontSize: '32px' }}
+        color="error"
         onClick={() => {
           socket?.emit('cancelMatch')
           props.handleCancel()

@@ -1,10 +1,7 @@
 import styled, { keyframes } from 'styled-components'
 
-
 export const Background = () => {
-  return (
-    <GenStars />
-  )
+  return <GenStars />
 }
 const s = keyframes`
 0% {

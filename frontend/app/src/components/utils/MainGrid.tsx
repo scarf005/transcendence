@@ -16,7 +16,7 @@ export const MainGrid = ({ left, middle, right }: MainProps) => {
       justifyContent="center"
       height="100%"
     >
-      <Grid item xs={2} >
+      <Grid item xs={2}>
         {left || <Skeleton variant="rectangular" />}
       </Grid>
       <Grid item xs={6}>

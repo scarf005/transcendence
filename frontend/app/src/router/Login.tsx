@@ -13,7 +13,6 @@ import styled from 'styled-components'
 import { Typography } from '@mui/material'
 import { ThemeProvider } from '@mui/material'
 import './Login.css'
-import { mainTheme } from 'components'
 
 const VerticalAlignedDiv = styled.div`
   position: absolute;

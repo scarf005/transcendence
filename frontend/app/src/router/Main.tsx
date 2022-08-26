@@ -26,12 +26,12 @@ const Item = muiStyled(Paper)(({ theme }) => ({
   textAlign: 'center',
   color: theme.palette.text.secondary,
   height: '80vh',
-  padding: '0.5rem'
+  padding: '0.5rem',
 }))
 
 const FixedDiv = styled.div`
-  top:5%;
-  left:3%;  
+  top: 5%;
+  left: 3%;
   position: absolute;
 `
 
@@ -47,7 +47,7 @@ export const MainRouter = () => {
   const [toGame, { toggle }] = useToggles(true)
 
   return (
-      <PongSocketContext.Provider value={pongData.socket}>
+    <PongSocketContext.Provider value={pongData.socket}>
       <ChatSocketContext.Provider value={chatSocket.socket}>
         <Chip
           label={toGame ? 'Game' : 'Chat'}

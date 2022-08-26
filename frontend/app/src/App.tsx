@@ -26,8 +26,8 @@ export const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <RecoilRoot>
-          <Background />
-          <Context />
+        <Background />
+        <Context />
         <ReactQueryDevtools initialIsOpen={false} />
       </RecoilRoot>
     </QueryClientProvider>

@@ -41,7 +41,7 @@ export const GameView = ({
   winner,
 }: ReturnType<typeof usePongSocket>) => {
   const [keyState, setKeyState] = useState({ up: false, down: false })
-  
+
   const [height, setHeight] = useState(0)
 
   const pongRect = useCallback((node: HTMLDivElement | null) => {
@@ -59,8 +59,7 @@ export const GameView = ({
         }
       }
     }
-  }, []);
-
+  }, [])
 
   useEffect(() => {
     if (socket === undefined || gameState !== 'play') {
@@ -102,10 +101,6 @@ export const GameView = ({
     }
   }, [keyState, socket, gameState])
 
-  useEffect(() => {
-
-  }, [])
-
   switch (gameState) {
     case 'selectMode':
       return (
@@ -133,12 +128,12 @@ export const GameView = ({
     case 'gameInfo':
     case 'play':
       return (
-        <DummyDiv ref={pongRect} >
+        <DummyDiv ref={pongRect}>
           <Pong
             isPlaying={gameState === 'play'}
             {...gameInfo}
             {...player}
-            window={{height, ratio: 1}}
+            window={{ height, ratio: 1 }}
           />
         </DummyDiv>
       )

@@ -11,8 +11,8 @@ export const theme = createTheme({
     fontFamily: "'Press Start 2P', cursive",
   },
   palette: {
-    mode: 'dark'
-  }
+    mode: 'dark',
+  },
 })
 
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement)

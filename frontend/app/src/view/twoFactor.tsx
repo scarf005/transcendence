@@ -15,7 +15,7 @@ const CenterAlignedDiv = styled.div`
   align-items: center;
   justify-content: center;
 `
-  
+
 const WrapDiv = styled.div`
   display: grid;
   grid-row-gap: 1rem;
@@ -24,7 +24,7 @@ const WrapDiv = styled.div`
 
 export const GenerateQrcode = (props: { value: string }) => {
   return (
-    <div style={{ background: 'white', padding:'16px' }}>
+    <div style={{ background: 'white', padding: '16px' }}>
       <QRCodeSVG value={props.value} size={240} />
     </div>
   )
@@ -60,11 +60,7 @@ export const InputCode = (props: {
 
   return (
     <>
-      <Box
-        component="form"
-        noValidate
-        autoComplete="off"
-      >
+      <Box component="form" noValidate autoComplete="off">
         <TextField
           value={token}
           onChange={(e) => setToken(e.target.value)}
@@ -106,12 +102,12 @@ const QrPage = (props: { setIsLoggedIn: (value: boolean) => void }) => {
 
   return (
     <CenterAlignedDiv>
-        <WrapDiv>
-          {otpRegisterLink !== '' ? (
-            <GenerateQrcode value={otpRegisterLink} />
-          ) : null}
-          <InputCode setIsLoggedIn={props.setIsLoggedIn} />
-        </WrapDiv>
+      <WrapDiv>
+        {otpRegisterLink !== '' ? (
+          <GenerateQrcode value={otpRegisterLink} />
+        ) : null}
+        <InputCode setIsLoggedIn={props.setIsLoggedIn} />
+      </WrapDiv>
     </CenterAlignedDiv>
   )
 }
