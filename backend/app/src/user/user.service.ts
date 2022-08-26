@@ -272,6 +272,12 @@ export class UserService {
     })
   }
 
+  async getUserStatus(uid: number): Promise<Status> {
+    const user = await this.findOneByUid(uid)
+    if (!user) throw new NotFoundException('User not found')
+    return user.status
+  }
+
   async restoreStatusAfterGameEnded(uid: number) {
     const user = await this.findOneByUid(uid)
     if (!user) throw new NotFoundException('User not found')

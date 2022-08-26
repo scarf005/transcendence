@@ -20,6 +20,7 @@ import { ChatRoom } from './chatroom.entity'
 import {
   BadRequestException,
   ForbiddenException,
+  Injectable,
   NotFoundException,
   UsePipes,
 } from '@nestjs/common'
@@ -40,6 +41,7 @@ import { UserStatusDto } from 'dto/userStatus.dto'
 추후 제출 시에는 다음과 같이 변경:
 @WebSocketGateway({ namespace: 'api/chat', transports: ['websocket'] })
 */
+@Injectable()
 @AsyncApiService()
 @UsePipes(new WSValidationPipe())
 @WebSocketGateway({ namespace: 'api/chat', cors: true })
@@ -78,7 +80,7 @@ export class ChatGateway {
       return error
     }
     console.log(`chat: uid ${client.data.uid} connected.`)
-    this.onUserStatusChanged(client.data.uid, Status.ONLINE)
+    this.onUserStatusChanged(client.data.uid)
   }
 
   async handleDisconnect(client: Socket) {
@@ -97,7 +99,7 @@ export class ChatGateway {
       return error
     }
     console.log(`chat: uid ${client.data.uid} disconnected and OFFLINE`)
-    this.onUserStatusChanged(client.data.uid, Status.OFFLINE)
+    this.onUserStatusChanged(client.data.uid)
   }
 
   @AsyncApiSub({
@@ -105,7 +107,8 @@ export class ChatGateway {
     summary: '온,오프라인,게임중 상태변경',
     message: { name: 'uid, status', payload: { type: UserStatusDto } },
   })
-  async onUserStatusChanged(uid: number, status: Status) {
+  async onUserStatusChanged(uid: number) {
+    const status = await this.chatService.getUserStatus(uid)
     this.server.emit(chatEvent.STATUS, { uid, status })
   }
 

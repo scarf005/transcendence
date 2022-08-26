@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common'
+import { ChatGateway } from 'chat/chat.gateway'
 import { Socket } from 'socket.io'
 import { Status } from 'user/status.enum'
 import { User } from 'user/user.entity'
@@ -443,6 +444,7 @@ export class PongService {
   constructor(
     private readonly userService: UserService,
     private readonly matchService: MatchService,
+    private readonly chatGateway: ChatGateway,
   ) {}
 
   private nextId = 0
@@ -472,6 +474,8 @@ export class PongService {
 
     this.userService.changeStatus(leftUser.uid, Status.GAME)
     this.userService.changeStatus(rightUser.uid, Status.GAME)
+    this.chatGateway.onUserStatusChanged(leftUser.uid)
+    this.chatGateway.onUserStatusChanged(rightUser.uid)
 
     gameManager.startGame()
   }
@@ -517,6 +521,8 @@ export class PongService {
 
       this.userService.restoreStatusAfterGameEnded(gameManager.leftUser.uid)
       this.userService.restoreStatusAfterGameEnded(gameManager.rightUser.uid)
+      this.chatGateway.onUserStatusChanged(gameManager.leftUser.uid)
+      this.chatGateway.onUserStatusChanged(gameManager.rightUser.uid)
     }
   }
 

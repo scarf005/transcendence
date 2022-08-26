@@ -15,5 +15,6 @@ import { BanUser } from './banuser.entity'
   ],
   providers: [ChatGateway, ChatService],
   controllers: [RoomsController],
+  exports: [ChatGateway],
 })
 export class ChatModule {}

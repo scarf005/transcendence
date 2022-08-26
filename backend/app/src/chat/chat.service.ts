@@ -430,6 +430,10 @@ export class ChatService {
     return await this.userService.changeStatus(uid, status)
   }
 
+  async getUserStatus(uid: number) {
+    return await this.userService.getUserStatus(uid)
+  }
+
   async getSocketByUid(server: Server, uid: number) {
     const clients = await server.fetchSockets()
     return clients.filter(
