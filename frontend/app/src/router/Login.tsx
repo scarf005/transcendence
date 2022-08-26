@@ -25,13 +25,8 @@ const CenterAlignedDiv = styled.div`
 function LoginButton() {
   return (
     <>
-      <Typography
-        variant="h2"
-        align="center"
-        paddingTop="100px"
-        color="#ffffff"
-      >
-        Exciting Pong
+      <Typography variant="h2" align="center" paddingTop="100px">
+        Exciting PONG
       </Typography>
       <CenterAlignedDiv>
         <Button variant="outlined" color="error">

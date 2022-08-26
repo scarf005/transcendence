@@ -2,13 +2,8 @@ FROM node:lts-alpine3.15
 
 WORKDIR /app
 
-COPY app/*.yml /app/
-COPY app/*.json /app/
+COPY app /app
 
 RUN npm ci
 
-COPY app/public /app/public/
-
-COPY app/src /app/src/
-
-ENTRYPOINT [ "npm", "run", "start" ]
+ENTRYPOINT [ "npm", "run", "dev" ]
