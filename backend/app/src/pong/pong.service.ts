@@ -519,10 +519,8 @@ export class PongService {
       this.gamesByUser.delete(gameManager.leftUser.uid)
       this.gamesByUser.delete(gameManager.rightUser.uid)
 
-      this.userService.restoreStatusAfterGameEnded(gameManager.leftUser.uid)
-      this.userService.restoreStatusAfterGameEnded(gameManager.rightUser.uid)
-      this.chatGateway.onUserStatusChanged(gameManager.leftUser.uid)
-      this.chatGateway.onUserStatusChanged(gameManager.rightUser.uid)
+      this.chatGateway.gameEnded(gameManager.leftUser.uid)
+      this.chatGateway.gameEnded(gameManager.rightUser.uid)
     }
   }
 

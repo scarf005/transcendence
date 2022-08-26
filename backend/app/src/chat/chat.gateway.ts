@@ -648,4 +648,14 @@ export class ChatGateway {
     }
     this.server.to(roomId.toString()).emit(chatEvent.CHATUSER_STATUS, data)
   }
+
+  async gameEnded(uid: number) {
+    const sockets = await this.chatService.getSocketByUid(this.server, uid)
+    if (sockets.length > 0) {
+      await this.chatService.changeStatus(uid, Status.ONLINE)
+    } else {
+      await this.chatService.changeStatus(uid, Status.OFFLINE)
+    }
+    this.onUserStatusChanged(uid)
+  }
 }
