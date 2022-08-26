@@ -5,7 +5,7 @@ import { createContext, useState, useReducer } from 'react'
 import { io, Socket } from 'socket.io-client'
 
 import { usePongSocket, useChatSocket, useToggles } from 'hook'
-import { useUserQuery, useUsersQuery } from 'hook'
+import { useUserQuery, useUsersQuery, queryClient } from 'hook'
 
 import { ChatSocket, MessageRecord } from 'data'
 import { Grid, Paper, Chip } from '@mui/material'
@@ -91,7 +91,12 @@ export const MainRouter = () => {
             </Item>
           }
           right={
-            <Item onClick={() => navigate('/friend')}>
+            <Item
+              onClick={() => {
+                queryClient.invalidateQueries(['user', 'me'])
+                navigate('/friend')
+              }}
+            >
               <FriendView setProfileId={setProfileId} />
             </Item>
           }
